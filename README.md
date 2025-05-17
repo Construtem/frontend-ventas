@@ -12,15 +12,27 @@ Este repositorio contiene el frontend del módulo de **ventas** para el sistema 
 - Interacción con backend-ventas a través de API Gateway.
 
 ## 📂 Estructura principal
-- `/src/components`: Componentes reutilizables.
-- `/src/pages`: Páginas del sistema.
-- `/src/services`: Lógica para consumo de APIs.
+- Por definir
 
-## 📦 Instalación
+## Contribución
+
+1. Crea una rama para tu funcionalidad/tarea:
+
 ```bash
-npm install
-npm run dev
+git switch -c feature/<nombre-funcionalidad>
 ```
 
-## 📌 Notas
-- Este frontend se comunica con el API Gateway para acceder a los microservicios.
+2. Realiza cambios y haz commit:
+
+```bash
+git add <archivos-cambiados>
+git commit -m "<descripcion pequeña del cambio>"
+```
+
+3. Pushea tus cambios de la rama:
+
+```bash
+git push origin feature/<nombre-funcionalidad> 
+```
+
+4. Crea un Pull Request (PR) a la rama ´develop´ desde GitHub para que sea revisado por otro desarrollador
