@@ -14,6 +14,11 @@ Este repositorio contiene el frontend del módulo de **ventas** para el sistema 
 ## 📂 Estructura principal
 - Por definir
 
+## Requisitos
+
+- Docker Desktop instalado
+- Git instalado  
+
   ## Instalación (entorno de desarrollo)
 
 1. Clonar el repositorio en el directorio deseado:
