@@ -42,17 +42,10 @@ cd .\Desktop\
 git clone https://github.com/Construtem/frontend-ventas
 cd frontend-ventas
 ```
-2. Construir imagen desde el directorio creado (ej "C:\Users\Admin\Desktop\frontend-ventas"), debe ejecutar el siguiente comando:
-
+2. Correr aplicación desde directorio creado (ej "C:\Users\Admin\Desktop\frontend-ventas"),
+ejecutando el siguiente comando:
 ```bash
-docker build -t front-ventas .
-```
-*Esto creará una imagen que contiene todas las dependencias y lo necesario para correr su app en forma local*
-
-3. Correr la imagen creada:
-
-```bash
-docker run -p 3000:3000 front-ventas
+docker compose up
 ```
 *Luego de ejecutar este comando, su app se encontrará corriendo en el puerto 3000 en "http://localhost:3000"*
 
