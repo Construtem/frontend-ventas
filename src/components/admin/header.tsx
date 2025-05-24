@@ -1,33 +1,50 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import Image from "next/image";
 import logo from "@/styles/images/contrutem_png.png"; // Usa alias @ si está configurado en tsconfig.json
 import exit from "@/styles/images/exit.png";
+import { usePathname } from "next/navigation";
 
-const Header = () => (
-  <header style={styles.header}>
-    <div style={styles.left}>
-      <Image src={logo} alt="ConstrUTEM Logo" style={styles.logoImg as React.CSSProperties} />
-    </div>
-    <div style={styles.right}>
-      <span style={styles.userInfo}>
-        <span style={styles.userIcon}>👤</span>
-        <span style={styles.userText}>
-          <span style={styles.userName}>Usuario</span>
-          <span style={styles.userEmail}>correo@example.com</span>
+const Header = () => {
+  const pathname = usePathname();
+
+  // Obtener el rol desde la URL
+  const getRoleFromPath = () => {
+  if (pathname.includes("/vendedor")) return "Vendedor";
+  if (pathname.includes("/admin")) return "Administrador";
+  return "Invitado";
+  };
+
+  const roleName = getRoleFromPath();
+
+  return (
+    <header style={styles.header}>
+      <div style={styles.left}>
+        <Image src={logo} alt="ConstrUTEM Logo" style={styles.logoImg as React.CSSProperties} />
+      </div>
+      <div style={styles.right}>
+        <span style={styles.userInfo}>
+          <span style={styles.userIcon}>👤</span>
+          <span style={styles.userText}>
+            <span style={styles.userName}>{roleName}</span>
+            <span style={styles.userEmail}>correo@example.com</span>
+          </span>
         </span>
-      </span>
-      <Image
-        src={exit}
-        alt="Cerrar sesión"
-        style={styles.logout as React.CSSProperties}
-        width={32}
-        height={32}
-      />
-    </div>
-  </header>
-);
+        <Link href="/">
+          <Image
+          src={exit}
+          alt="Cerrar sesión"
+          style={styles.logout as React.CSSProperties}
+          width={32}
+          height={32}
+          />
+        </Link>
+      </div>
+    </header>
+  );
+};
 
 const styles: { [key: string]: React.CSSProperties } = {
   header: {
