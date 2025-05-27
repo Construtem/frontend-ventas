@@ -13,6 +13,6 @@ export default function AdministradorPage() {
 const cardStyle: React.CSSProperties = {
   backgroundColor: "white",
   borderRadius: "12px",
-  padding: "2rem",
+  padding: "3rem",
   boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
 };

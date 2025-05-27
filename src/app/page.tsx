@@ -1,4 +1,3 @@
-// src/app/page.tsx
 "use client";
 
 import logo from '@/styles/images/contrutem.png';
@@ -6,124 +5,144 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-//Esto sirve a modo de prueba, para alternar entre el login del administrador y de vendedor y que te redireccione a la respectiva pestaña.
 export default function Login() {
   const [rol, setRol] = useState("vendedor");
   const router = useRouter();
 
   const alternarRol = () => {
-    setRol(rol == "vendedor" ? "administrador" : "vendedor");
+    setRol(rol === "vendedor" ? "administrador" : "vendedor");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
 
-    if (rol === "vendedor") {
-      router.push("/navegacion/vendedor");
-    } else {
-      router.push("/navegacion/administrador");
-    }
-  };
-  
+  // Guardar rol en localStorage
+  localStorage.setItem("rol", rol);
+
+  if (rol === "vendedor") {
+    router.push("/navegacion/vendedor");
+  } else {
+    router.push("/navegacion/administrador");
+  }
+};
+
   return (
-    <div className= "ml-[180px] mt-[70px] p-8 min-h-[calc(100vh-70px)] bg-gray-100">
+    <div style={containerStyle}>
       <div style={cardStyle}>
-        {/* Botón de alternar */}
-        <div className="flex justify-end">
+        {/* Alternar rol */}
+        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
           <button
             onClick={alternarRol}
-            className="text-sm text-blue-600 hover:underline"
+            style={{ fontSize: '0.775rem', color: '#2563eb', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
           >
             Cambiar a {rol === "vendedor" ? "Administrador" : "Vendedor"}
           </button>
         </div>
 
-        {/* Título */}
-        <h2 className="text-center text-2xl font-bold text-gray-900">
+        <h2 style={titleStyle}>
           INICIAR SESIÓN ({rol.toUpperCase()})
         </h2>
 
-        {/* Imagen */}
-        <div className="flex justify-center">
-          <Image
-            src={logo}
-            alt="Logo"
-            width={120}
-            height={120}
-            className="object-contain"
-          />
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
+          <Image src={logo} alt="Logo" width={200} height={120} style={{ objectFit: 'contain' }} />
         </div>
 
-        {/* Formulario */}
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form style={formStyle} onSubmit={handleSubmit}>
           <div>
-            <label className="text-sm font-medium text-gray-900">Email</label>
+            <label style={labelStyle}>Email</label>
             <input
               type="email"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
               placeholder="..."
+              style={inputStyle}
             />
           </div>
 
           <div>
-            <label className="text-sm font-medium text-gray-900">Contraseña</label>
+            <label style={labelStyle}>Contraseña</label>
             <input
               type="password"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
               placeholder="..."
+              style={inputStyle}
             />
           </div>
 
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded-md font-semibold hover:bg-indigo-700 transition"
-          >
+          <button type="submit" style={submitButtonStyle}>
             Ingresar
           </button>
         </form>
 
-        {/* Enlace para recuperar contraseña */}
-        <div className="text-center">
-          <a href="#" className="text-sm text-blue-600 hover:underline">
-            ¿Olvidaste la contraseña?
-          </a>
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <a href="#" style={linkStyle}>¿Olvidaste la contraseña?</a>
         </div>
       </div>
     </div>
   );
 }
 
-const cardStyle: React.CSSProperties = {
-  backgroundColor: "white",
-  borderRadius: "12px",
-  padding: "2rem",
-  boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+// Estilos en línea
+const containerStyle: React.CSSProperties = {
+  minHeight: '100vh',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: '#f3f4f6',
+  padding: '1rem',
 };
 
+const cardStyle: React.CSSProperties = {
+  backgroundColor: 'white',
+  borderRadius: '10px',
+  padding: '2rem',
+  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+  width: '100%',
+  maxWidth: '380px',
+};
 
+const titleStyle: React.CSSProperties = {
+  textAlign: 'center',
+  fontSize: '1.5rem',
+  fontWeight: 700,
+  color: '#111827',
+  marginBottom: '1.5rem',
+};
 
+const formStyle: React.CSSProperties = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '1rem',
+};
 
-/* src/app/page.tsx
+const labelStyle: React.CSSProperties = {
+  fontSize: '0.875rem',
+  fontWeight: 500,
+  color: '#111827',
+  marginBottom: '0.25rem',
+  display: 'block',
+};
 
-import Link from 'next/link';
+const inputStyle: React.CSSProperties = {
+  width: '100%',
+  padding: '0.5rem 0.75rem',
+  borderRadius: '8px',
+  border: '1px solid #d1d5db',
+  outline: 'none',
+  fontSize: '1rem',
+};
 
-export default function Home() {
-  return (
-    <main className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-6">
-      <h1 className="text-4xl font-bold mb-10">Bienvenido al sistema</h1>
-      <div className="space-y-4">
-        <Link href="/navegacion/vendedor">
-          <button className="px-6 py-3 bg-green-600 text-white rounded-lg shadow hover:bg-green-700 transition">
-            Ingresar como Vendedor
-          </button>
-        </Link>
-        <Link href="/navegacion/administrador">
-          <button className="px-6 py-3 bg-red-600 text-white rounded-lg shadow hover:bg-red-700 transition">
-            Ingresar como Administrador
-          </button>
-        </Link>
-      </div>
-    </main>
-  );
-}
-*/
+const submitButtonStyle: React.CSSProperties = {
+  width: '100%',
+  backgroundColor: '#4f46e5',
+  color: 'white',
+  padding: '0.5rem',
+  borderRadius: '8px',
+  fontWeight: 600,
+  border: 'none',
+  cursor: 'pointer',
+  transition: 'background 0.3s ease',
+};
+
+const linkStyle: React.CSSProperties = {
+  fontSize: '0.875rem',
+  color: '#2563eb',
+  textDecoration: 'underline',
+};
