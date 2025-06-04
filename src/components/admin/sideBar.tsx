@@ -1,130 +1,119 @@
 'use client';
 
-import React, { FC, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import {
-  FaHome,
-  FaBoxes,
-  FaWarehouse,
-  FaTruck,
-  FaStore,
-  FaCog,
-  FaChevronDown,
-  FaChevronUp, 
-} from 'react-icons/fa';
+import { usePathname } from 'next/navigation';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import type { NavItem } from '@/config/nav';   // mismo contrato que antes
 
-const Sidebar: FC = () => {
-  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<string>('Sucursal 1');
-  const [inventarioAbierto, setInventarioAbierto] = useState<boolean>(false);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
 
-  const toggleInventario = () => {
-    setInventarioAbierto(!inventarioAbierto);
+/* ----------  componente ---------- */
+type Props = { nav: NavItem[] };
+
+export default function Sidebar({ nav }: Props) {
+  const pathname = usePathname();
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const [hover, setHover] = useState<string | null>(null);
+
+  const toggle = (id: string) =>
+      setOpen((s) => ({ ...s, [id]: !s[id] }));
+
+  /* ---------- ITEM DE PRIMER NIVEL ---------- */
+  const baseItemStyle = (id: string, active: boolean) => {
+    // 1. copia base + variante activa
+    const style: React.CSSProperties = {
+      ...styles.menuItem,
+      ...(active ? styles.menuItemActive : {}),
+    };
+
+    // 2. overrides según hover / activo
+    if (hover === id) {
+      style.backgroundColor = '#444';
+      style.color = '#00FF99';
+    }
+
+    return style;
   };
 
-  const handleMouseEnter = (id: string) => setHoveredItem(id);
-  const handleMouseLeave = () => setHoveredItem(null);
+  /* ---------- SUBITEM ---------- */
+  const baseSubItemStyle = (id: string, active: boolean) => {
+    const style: React.CSSProperties = {
+      ...styles.subMenuItem,
+      ...(active ? styles.subMenuItemActive : {}),
+    };
 
-  const getMenuItemStyle = (id: string) => ({
-    ...styles.menuItem,
-    backgroundColor: hoveredItem === id ? '#444' : 'transparent',
-    color: hoveredItem === id ? '#00ff99' : 'inherit',
-  });
+    if (hover === id) {
+      style.backgroundColor = '#444';
+      style.color = '#00FF99';
+    } else if (active) {
+      style.backgroundColor =
+          styles.subMenuItemActive?.backgroundColor ?? 'rgba(0,168,89,0.15)';
+      style.color = styles.subMenuItemActive?.color ?? '#00A859';
+    } else {
+      style.backgroundColor = 'transparent';
+      style.color = styles.subMenuItem.color;
+    }
 
-  const getSubMenuItemStyle = (id: string, isActive: boolean) => ({
-    ...styles.subMenuItem,
-    ...(isActive ? styles.subMenuItemActive : {}),
-    backgroundColor: hoveredItem === id ? '#444' : 'transparent',
-    color: hoveredItem === id
-      ? '#00ff99'
-      : isActive
-      ? '#00a859'
-      : '#bdbdbd',
-  });
+    return style;
+  };
 
-  return (
-    <aside style={styles.sidebar}>
-      <Link
-        href="/admin/inicio"
-        style={getMenuItemStyle('inicio')}
-        onMouseEnter={() => handleMouseEnter('inicio')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaHome />
-        <span>Inicio</span>
-      </Link>
 
-      <div
-        style={getMenuItemStyle('inventario')}
-        onClick={toggleInventario}
-        onMouseEnter={() => handleMouseEnter('inventario')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaBoxes />
-        <span style={{ flex: 1 }}>Inventario</span>
-        {inventarioAbierto ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
-      </div>
+  const renderItem = (item: NavItem) => {
+    const active = item.href ? pathname.startsWith(item.href) : false;
+    const hasChildren = !!item.children?.length;
 
-      {inventarioAbierto && (
-        <div style={styles.subMenu}>
-          {['Sucursal 1', 'Sucursal 2', 'Sucursal 3'].map((sucursal, i) => {
-            const slug = `sucursal-${i + 1}`;
-            const isActive = sucursal === sucursalSeleccionada;
-            return (
+    return (
+        <div key={item.id}>
+          {item.href ? (
               <Link
-                key={sucursal}
-                href={`/admin/inventario/${slug}`}
-                style={getSubMenuItemStyle(slug, isActive)}
-                onClick={() => setSucursalSeleccionada(sucursal)}
-                onMouseEnter={() => handleMouseEnter(slug)}
-                onMouseLeave={handleMouseLeave}
+                  href={item.href}
+                  style={baseItemStyle(item.id, active)}
+                  onMouseEnter={() => setHover(item.id)}
+                  onMouseLeave={() => setHover(null)}
               >
-                {sucursal}
+                {item.icon}
+                {item.label}
               </Link>
-            );
-          })}
-        </div>
-      )}
+          ) : (
+              <div
+                  style={baseItemStyle(item.id, false)}
+                  onClick={() => toggle(item.id)}
+                  onMouseEnter={() => setHover(item.id)}
+                  onMouseLeave={() => setHover(null)}
+              >
+                {item.icon}
+                <span style={{ flex: 1 }}>{item.label}</span>
+                {open[item.id] ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
+              </div>
+          )}
 
-      <Link
-        href="/admin/bodega"
-        style={getMenuItemStyle('bodega')}
-        onMouseEnter={() => handleMouseEnter('bodega')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaWarehouse />
-        <span>Bodega</span>
-      </Link>
-      <Link
-        href="/admin/proveedores"
-        style={getMenuItemStyle('proveedores')}
-        onMouseEnter={() => handleMouseEnter('proveedores')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaTruck />
-        <span>Proveedores</span>
-      </Link>
-      <Link
-        href="/admin/sucursales"
-        style={getMenuItemStyle('sucursales')}
-        onMouseEnter={() => handleMouseEnter('sucursales')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaStore />
-        <span>Sucursales</span>
-      </Link>
-      <Link
-        href="/admin/configuracion"
-        style={getMenuItemStyle('config')}
-        onMouseEnter={() => handleMouseEnter('config')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaCog />
-        <span>Configuración</span>
-      </Link>
-    </aside>
-  );
-};
+          {hasChildren && open[item.id] && (
+              <div style={styles.subMenu}>
+                {item.children!.map((child) => {
+                  const childActive =
+                      child.href ? pathname.startsWith(child.href) : false;
+                  return (
+                      <Link
+                          key={child.id}
+                          href={child.href!}
+                          style={baseSubItemStyle(child.id, childActive)}
+                          onMouseEnter={() => setHover(child.id)}
+                          onMouseLeave={() => setHover(null)}
+                      >
+                        {child.label}
+                      </Link>
+                  );
+                })}
+              </div>
+          )}
+        </div>
+    );
+  };
+
+  return <aside style={styles.sidebar}>{nav.map(renderItem)}</aside>;
+}
+
+
 
 const styles: {
   sidebar: React.CSSProperties;
@@ -177,5 +166,3 @@ const styles: {
     color: '#00a859',
   },
 };
-
-export default Sidebar;
