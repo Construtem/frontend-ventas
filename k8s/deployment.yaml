@@ -16,6 +16,7 @@ spec:
     spec:
       containers:
         - name: frontend-ventas
-          image: gcr.io/construtem/frontend-ventas:latest
+          image: southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/frontend-ventas:latest
+          ports:
           ports:
             - containerPort: 3000
