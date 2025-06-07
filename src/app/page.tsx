@@ -1,3 +1,11 @@
+/* LOGIN
+  
+  ADMIN: email: admin@admin.cl || contraseña: administrador
+  VENDEDOR: email:vendedor@vendedor.cl || contraseña: vendedor
+  
+*/
+
+
 "use client";
 
 import logo from '@/styles/images/contrutem.png';
