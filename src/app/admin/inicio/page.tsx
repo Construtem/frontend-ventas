@@ -1,6 +1,6 @@
 "use client";
 
-export default function InicioPage() {
+export default function Inicio() {
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>

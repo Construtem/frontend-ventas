@@ -1,130 +1,122 @@
 'use client';
-
-import React, { FC, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
-import {
-  FaHome,
-  FaBoxes,
-  FaWarehouse,
-  FaTruck,
-  FaStore,
-  FaCog,
-  FaChevronDown,
-  FaChevronUp, 
-} from 'react-icons/fa';
+import { usePathname } from 'next/navigation';
+import { FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { useLogin } from '@/context/LoginContext'; // Asegúrate de que sea la ruta correcta
+import { ADMIN_SideBar, VENDEDOR_SideBar } from '@/config/sideBar'; // Asegúrate de que sea la ruta correcta
+import type { NavItem } from '@/config/sideBar';
+type Props = {
+  open?: boolean; // viene del Header
+  // renderItem?: (item: NavItem) => React.ReactNode; // opcional para personalizar el renderizado
+};
 
-const Sidebar: FC = () => {
-  const [sucursalSeleccionada, setSucursalSeleccionada] = useState<string>('Sucursal 1');
-  const [inventarioAbierto, setInventarioAbierto] = useState<boolean>(false);
-  const [hoveredItem, setHoveredItem] = useState<string | null>(null);
+export default function Sidebar({open = true }: Props) {
+  const pathname = usePathname();
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [hover, setHover] = useState<string | null>(null);
 
-  const toggleInventario = () => {
-    setInventarioAbierto(!inventarioAbierto);
+  const toggle = (id: string) =>
+      setExpanded((prev) => ({ ...prev, [id]: !prev[id] }));
+
+  const baseItemStyle = (id: string) => {
+    const style: React.CSSProperties = {
+      ...styles.menuItem,
+    };
+    if (hover === id) {
+      style.backgroundColor = '#444';
+      style.color = '#00FF99';
+    }
+    return style;
   };
 
-  const handleMouseEnter = (id: string) => setHoveredItem(id);
-  const handleMouseLeave = () => setHoveredItem(null);
+  const baseSubItemStyle = (id: string, active: boolean) => {
+    const style: React.CSSProperties = {
+      ...styles.subMenuItem,
+      ...(active ? styles.subMenuItemActive : {}),
+    };
 
-  const getMenuItemStyle = (id: string) => ({
-    ...styles.menuItem,
-    backgroundColor: hoveredItem === id ? '#444' : 'transparent',
-    color: hoveredItem === id ? '#00ff99' : 'inherit',
-  });
+    if (hover === id) {
+      style.backgroundColor = '#444';
+      style.color = '#00FF99';
+    } else if (active) {
+      style.backgroundColor = 'rgba(0,168,89,0.15)';
+      style.color = '#00A859';
+    } else {
+      style.backgroundColor = 'transparent';
+      style.color = '#bdbdbd';
+    }
 
-  const getSubMenuItemStyle = (id: string, isActive: boolean) => ({
-    ...styles.subMenuItem,
-    ...(isActive ? styles.subMenuItemActive : {}),
-    backgroundColor: hoveredItem === id ? '#444' : 'transparent',
-    color: hoveredItem === id
-      ? '#00ff99'
-      : isActive
-      ? '#00a859'
-      : '#bdbdbd',
-  });
+    return style;
+  };
 
-  return (
-    <aside style={styles.sidebar}>
-      <Link
-        href="/admin/inicio"
-        style={getMenuItemStyle('inicio')}
-        onMouseEnter={() => handleMouseEnter('inicio')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaHome />
-        <span>Inicio</span>
-      </Link>
-
-      <div
-        style={getMenuItemStyle('inventario')}
-        onClick={toggleInventario}
-        onMouseEnter={() => handleMouseEnter('inventario')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaBoxes />
-        <span style={{ flex: 1 }}>Inventario</span>
-        {inventarioAbierto ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
-      </div>
-
-      {inventarioAbierto && (
-        <div style={styles.subMenu}>
-          {['Sucursal 1', 'Sucursal 2', 'Sucursal 3'].map((sucursal, i) => {
-            const slug = `sucursal-${i + 1}`;
-            const isActive = sucursal === sucursalSeleccionada;
-            return (
+  const renderItem = (item: NavItem) => {
+    const hasChildren = !!item.children?.length;
+      return (
+        <div key={item.id}>
+          {item.href ? (
               <Link
-                key={sucursal}
-                href={`/admin/inventario/${slug}`}
-                style={getSubMenuItemStyle(slug, isActive)}
-                onClick={() => setSucursalSeleccionada(sucursal)}
-                onMouseEnter={() => handleMouseEnter(slug)}
-                onMouseLeave={handleMouseLeave}
+                  href={item.href}
+                  style={baseItemStyle(item.id)}
+                  onMouseEnter={() => setHover(item.id)}
+                  onMouseLeave={() => setHover(null)}
               >
-                {sucursal}
+                {item.icon}
+                {open && item.label}
               </Link>
-            );
-          })}
-        </div>
-      )}
+          ) : (
+              <div
+                  style={baseItemStyle(item.id)}
+                  onClick={() => toggle(item.id)}
+                  onMouseEnter={() => setHover(item.id)}
+                  onMouseLeave={() => setHover(null)}
+              >
+                {item.icon}
+                {open && <span style={{ flex: 1 }}>{item.label}</span>}
+                {open && (expanded[item.id] ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />)}
+              </div>
+          )}
 
-      <Link
-        href="/admin/bodega"
-        style={getMenuItemStyle('bodega')}
-        onMouseEnter={() => handleMouseEnter('bodega')}
-        onMouseLeave={handleMouseLeave}
+          {hasChildren && expanded[item.id] && open && (
+              <div style={styles.subMenu}>
+                {item.children!.map((child:NavItem) => {
+                  const active = child.href ? pathname.startsWith(child.href) : false;
+                  return (
+                      <Link
+                          key={child.id}
+                          href={child.href!}
+                          style={baseSubItemStyle(child.id, active)}
+                          onMouseEnter={() => setHover(child.id)}
+                          onMouseLeave={() => setHover(null)}
+                      >
+                        {child.label}
+                      </Link>
+                  );
+                })}
+              </div>
+          )}
+        </div>
+    );
+  };
+
+    const { usuario } = useLogin();
+
+    if (!usuario) return null;
+    const nav = usuario.rol === 'vendedor' ? VENDEDOR_SideBar : ADMIN_SideBar;
+    console.log(usuario)
+  return (
+      <aside
+          style={{
+            ...styles.sidebar,
+            width: open ? '180px' : '60px',
+            transition: 'width 0.3s',
+            overflowX: 'hidden',
+          }}
       >
-        <FaWarehouse />
-        <span>Bodega</span>
-      </Link>
-      <Link
-        href="/admin/proveedores"
-        style={getMenuItemStyle('proveedores')}
-        onMouseEnter={() => handleMouseEnter('proveedores')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaTruck />
-        <span>Proveedores</span>
-      </Link>
-      <Link
-        href="/admin/sucursales"
-        style={getMenuItemStyle('sucursales')}
-        onMouseEnter={() => handleMouseEnter('sucursales')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaStore />
-        <span>Sucursales</span>
-      </Link>
-      <Link
-        href="/admin/configuracion"
-        style={getMenuItemStyle('config')}
-        onMouseEnter={() => handleMouseEnter('config')}
-        onMouseLeave={handleMouseLeave}
-      >
-        <FaCog />
-        <span>Configuración</span>
-      </Link>
-    </aside>
+        {nav.map(renderItem)}
+      </aside>
   );
-};
+}
 
 const styles: {
   sidebar: React.CSSProperties;
@@ -134,7 +126,6 @@ const styles: {
   subMenuItemActive: React.CSSProperties;
 } = {
   sidebar: {
-    width: '180px',
     height: '100vh',
     backgroundColor: '#2f2f2f',
     color: 'white',
@@ -177,5 +168,3 @@ const styles: {
     color: '#00a859',
   },
 };
-
-export default Sidebar;

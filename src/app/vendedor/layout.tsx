@@ -1,11 +1,9 @@
 'use client';
-
 import { useState } from "react";
 import Sidebar from "@/components/admin/sideBar";
 import Header from "@/components/admin/header";
 
-export default function AdminLayout({ children }: { children: React.ReactNode }) {
-
+export default function VendedorLayout({ children }: { children: React.ReactNode }) {
     const [sidebarOpen, setSidebarOpen] = useState(false);
     return (
         <div className="flex h-screen">
