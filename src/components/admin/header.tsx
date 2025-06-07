@@ -4,9 +4,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import logo from '@/styles/images/contrutem_png.png';
 import cartIc from '@/styles/images/cart.png';
-import notImage from '@/styles/images/notImage.png';
+import {FaShoppingCart} from "react-icons/fa";
 import { useCart } from '@/context/CartContext';
 import { useLogin } from '@/context/LoginContext';
+import productoImg from '@/styles/images/producto.png';
+import Link from "next/link";
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -29,10 +31,10 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   }, []);
 
   return (
-      <header style={styles.header}>
-        <div style={styles.left}>
+      <header className="fixed top-0 left-0 w-full h-[58px] bg-[#2D2D2D] text-white flex items-center justify-between px-8 shadow-md z-50">
+        <div className="flex items-center h-full">
           {onToggleSidebar && (
-              <button onClick={onToggleSidebar}>
+              <button onClick={onToggleSidebar} className={'cursor-pointer'}>
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width={24}
@@ -44,58 +46,67 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                     strokeLinecap="round"
                     strokeLinejoin="round"
                 >
-                  <path d="M6 21a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3zm12 -16h-8v14h8a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1"/>
+                  <path d="M6 21a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3zm12 -16h-8v14h8a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1" />
                 </svg>
               </button>
           )}
-          <Image src={logo} alt="ConstrUTEM Logo" style={styles.logoImg} />
+          <Image src={logo} alt="ConstrUTEM Logo" className="max-h-20 pl-4 w-auto object-contain" />
         </div>
 
-        <div style={styles.right}>
+        <div className="flex items-center gap-6 relative">
           {usuario && (
-              <span style={styles.userInfo}>
-            <span style={styles.userIcon}>👤</span>
-            <span style={styles.userText}>
-              <span style={styles.userName}>{usuario.rol}</span>
-              <span style={styles.userEmail}>{usuario.email}</span>
+              <span className="flex items-center gap-3 px-4">
+            <span className="bg-white text-gray-800 rounded-full p-1 text-base flex items-center justify-center">👤</span>
+            <span className="flex flex-col leading-tight font-montserrat text-orange-500 text-xl font-semibold">
+              <span className="text-base">{usuario.rol}</span>
+              <span className="text-sm text-orange-300">{usuario.email}</span>
             </span>
           </span>
           )}
 
           {/* Carrito */}
-          <div style={{ position: 'relative', marginRight: '1rem' }}>
-            <Image
-                src={cartIc}
-                alt="Carrito"
-                width={28}
-                height={28}
-                style={{ cursor: 'pointer' }}
-                onClick={() => setOpen(!open)}
-            />
-            {itemCount > 0 && <span style={styles.badge}>{itemCount}</span>}
+          <div className="relative mr-4">
+            <div className="relative mr-4">
+              <FaShoppingCart
+                  size={24}
+                  className="text-white cursor-pointer hover:text-orange-400 transition"
+                  onClick={() => setOpen(!open)}
+              />
+              {itemCount > 0 && (
+                  <span
+                      className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-full">
+      {itemCount}
+    </span>
+              )}
+            </div>
 
             {open && (
-                <div ref={dropdownRef} style={styles.dropdown}>
-                  <p style={styles.dropTitle}>Tus productos ({itemCount})</p>
-
-                  <div style={styles.dropItemsWrapper}>
+                <div
+                    ref={dropdownRef}
+                    className="absolute right-0 mt-2 w-80 bg-white border border-gray-200 rounded-lg shadow-lg p-4 z-50"
+                >
+                  <p className="font-semibold text-black mb-3">
+                    Tus productos ({itemCount})
+                  </p>
+                  <div className="max-h-56 overflow-y-auto">
                     {cart.length === 0 ? (
-                        <p style={{ color: '#666', fontSize: '0.85rem' }}>
-                          El carrito está vacío.
-                        </p>
+                        <p className="text-sm text-gray-600">El carrito está vacío.</p>
                     ) : (
-                        cart.map(item => (
-                            <div key={item.sku} style={styles.dropItem}>
+                        cart.map((item) => (
+                            <div
+                                key={item.sku}
+                                className="flex justify-between items-center text-sm border-b border-gray-100 pb-2 mb-2 gap-2"
+                            >
                               <Image
-                                  src={notImage}
+                                  src={productoImg}
                                   alt={item.nombre}
                                   width={50}
                                   height={50}
-                                  style={{ borderRadius: 8 }}
+                                  className="rounded-md"
                               />
-                              <p style={styles.itemName}>{item.nombre}</p>
-                              <p style={styles.itemQty}>x{item.cantidad}</p>
-                              <p style={styles.itemSubtotal}>
+                              <p className="font-medium truncate flex-1 text-black">{item.nombre}</p>
+                              <p className="text-black">x{item.cantidad}</p>
+                              <p className="font-semibold text-right text-black">
                                 ${(item.precio * item.cantidad).toLocaleString()}
                               </p>
                             </div>
@@ -105,12 +116,20 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
 
                   {cart.length > 0 && (
                       <>
-                        <div style={styles.dropTotalRow}>
+                        <div className="flex justify-between font-semibold mt-3 mb-2 text-black">
                           <span>Total:</span>
                           <span>${total.toLocaleString()}</span>
                         </div>
-                        <button style={styles.btnToCart}>Ir al carrito</button>
-                        <button style={styles.btnCheckout}>Continuar con el pago</button>
+                        <Link
+                            href="/vendedor/carrito"
+                            className="block text-center w-full py-2 bg-white text-blue-600 border border-blue-600 rounded-md mb-2 hover:bg-blue-50"
+                        >
+                          Ir al carrito
+                        </Link>
+
+                        <button className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                          Continuar con el pago
+                        </button>
                       </>
                   )}
                 </div>
@@ -118,7 +137,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
           </div>
 
           {/* Logout */}
-          <button onClick={logout} style={styles.logout} title="Cerrar sesión">
+          <button onClick={logout} title="Cerrar sesión" className="text-orange-500 hover:text-orange-600">
             <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width={32}
@@ -138,160 +157,6 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
         </div>
       </header>
   );
-};
-const styles: { [key: string]: React.CSSProperties } = {
-  header: {
-    width: '100%',
-    height: '58px',
-    background: '#2D2D2D',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 2rem',
-    boxSizing: 'border-box',
-    position: 'fixed',
-    top: 0,
-    left: 0,
-    zIndex: 100,
-    boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
-  },
-  left: {
-    display: 'flex',
-    alignItems: 'center',
-    height: '100%',
-  },
-  logoImg: {
-    height: 'auto',
-    paddingLeft: '1rem',
-    maxHeight: '80px',
-    objectFit: 'contain',
-    width: 'auto',
-  },
-  right: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '1.5rem',
-  },
-  userInfo: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '0.75rem',
-    padding: '0.25rem 1rem',
-  },
-  userIcon: {
-    background: 'white',
-    color: '#1f2937',
-    borderRadius: '50%',
-    padding: '0.25rem',
-    fontSize: '1.1rem',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  userText: {
-    display: 'flex',
-    flexDirection: 'column',
-    lineHeight: '1.4',
-    fontFamily: 'Montserrat, sans-serif',
-    fontSize: '2.4rem',
-    fontWeight: 'semibold' as any, // evitar error: no todos los valores son válidos para fontWeight
-    color: '#FF7300',
-  },
-  userName: {
-    fontSize: '1rem',
-  },
-  userEmail: {
-    fontSize: '0.85rem',
-  },
-  logout: {
-    fontSize: '1.5rem',
-    cursor: 'pointer',
-    userSelect: 'none',
-  },
-
-  // Carrito añadido
-  badge: {
-    position: 'absolute',
-    top: -6,
-    right: -6,
-    backgroundColor: '#e63946',
-    color: '#fff',
-    borderRadius: '50%',
-    fontSize: '0.65rem',
-    padding: '2px 6px',
-    lineHeight: 1,
-  },
-  dropdown: {
-    position: 'absolute',
-    right: 0,
-    marginTop: '0.5rem',
-    width: 320,
-    background: '#fff',
-    border: '1px solid #ddd',
-    borderRadius: 8,
-    boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-    zIndex: 1000,
-    padding: '1rem',
-  },
-  dropTitle: {
-    fontWeight: 600,
-    marginBottom: '0.75rem',
-    color: 'black',
-  },
-  dropItemsWrapper: {
-    maxHeight: 220,
-    overflowY: 'auto',
-  },
-  dropItem: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    columnGap: '0.5rem',
-    alignItems: 'center',
-    fontSize: '0.85rem',
-    paddingBottom: '0.5rem',
-    borderBottom: '1px solid #f0f0f0',
-    marginBottom: '0.5rem',
-  },
-  itemName: {
-    fontWeight: 500,
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    color: 'black',
-  },
-  itemQty: {
-    color: 'black',
-  },
-  itemSubtotal: {
-    fontWeight: 600,
-    textAlign: 'right',
-    color: 'black',
-  },
-  dropTotalRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    fontWeight: 600,
-    margin: '0.75rem 0',
-  },
-  btnToCart: {
-    width: '100%',
-    padding: '0.6rem',
-    background: '#fff',
-    color: '#007bff',
-    border: '1px solid #007bff',
-    borderRadius: 6,
-    cursor: 'pointer',
-    marginBottom: '0.5rem',
-  },
-  btnCheckout: {
-    width: '100%',
-    padding: '0.6rem',
-    background: '#007bff',
-    color: '#fff',
-    border: 'none',
-    borderRadius: 6,
-    cursor: 'pointer',
-  },
 };
 
 export default Header;
