@@ -15,7 +15,11 @@ import {
   FaCashRegister,
 } from 'react-icons/fa';
 
-const Sidebar: FC = () => {
+interface SidebarProps {
+  open?: boolean;
+}
+
+const Sidebar: FC<SidebarProps> = ({ open }) => {
   const [rol, setRol] = useState<'administrador' | 'vendedor' | null>(null);
 
   const [sucursalSeleccionada, setSucursalSeleccionada] = useState<string>('Sucursal 1');
@@ -54,7 +58,12 @@ const Sidebar: FC = () => {
   if (!rol) return null;
 
   return (
-    <aside style={styles.sidebar}>
+    <aside style={{
+      ...styles.sidebar,
+      width: open ? '180px' : '0px', 
+      transition: 'width 0.3s', 
+      overflowX: 'hidden',
+    }}>
       {/* Menú común */}
       <Link
         href="/admin/inicio"
@@ -193,6 +202,7 @@ const styles = {
     gap: '10px',
     padding: '15px 20px',
     cursor: 'pointer',
+    fontFamily: 'Montserrat, sans-serif',
     fontSize: '15px',
     userSelect: 'none',
     textDecoration: 'none',

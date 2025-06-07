@@ -4,48 +4,79 @@ import logo from '@/styles/images/contrutem.png';
 import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { supabase } from '../../lib/supabase/supabaseClient'; // Ajusta la ruta según tu estructura
 
 export default function Login() {
   const [rol, setRol] = useState("vendedor");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const alternarRol = () => {
     setRol(rol === "vendedor" ? "administrador" : "vendedor");
   };
 
-const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
-  // Guardar rol en localStorage
-  localStorage.setItem("rol", rol);
+    try {
+      // Autenticar con Supabase
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-  if (rol === "vendedor") {
-    router.push("/navegacion/vendedor");
-  } else {
-    router.push("/navegacion/administrador");
-  }
-};
+      console.log("User ID:", data.user?.id);
+
+      if (authError) {
+        throw authError;
+      }
+
+      // Obtener el rol real desde la base de datos
+      const { data: profileData, error: profileError } = await supabase
+        .from('profiles')
+        .select('rol')
+        .eq('id', data.user?.id)
+        .single();
+
+      if (profileError || !profileData) {
+        throw new Error("No se pudo obtener el perfil del usuario");
+      }
+
+      // Guardar rol en localStorage y redirigir segun el rol
+      localStorage.setItem("rol", profileData.rol);
+      if (profileData.rol === "vendedor") {
+        router.push("/navegacion/vendedor");
+      } else {
+        router.push("/navegacion/administrador");
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Error desconocido");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div style={containerStyle}>
       <div style={cardStyle}>
-        {/* Alternar rol */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
-          <button
-            onClick={alternarRol}
-            style={{ fontSize: '0.775rem', color: '#2563eb', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            Cambiar a {rol === "vendedor" ? "Administrador" : "Vendedor"}
-          </button>
-        </div>
-
         <h2 style={titleStyle}>
-          INICIAR SESIÓN ({rol.toUpperCase()})
+          INICIAR SESIÓN
         </h2>
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1rem' }}>
           <Image src={logo} alt="Logo" width={200} height={120} style={{ objectFit: 'contain' }} />
         </div>
+
+        {error && (
+          <div style={{ color: 'red', marginBottom: '1rem', textAlign: 'center' }}>
+            {error}
+          </div>
+        )}
 
         <form style={formStyle} onSubmit={handleSubmit}>
           <div>
@@ -54,6 +85,9 @@ const handleSubmit = (e: React.FormEvent) => {
               type="email"
               placeholder="..."
               style={inputStyle}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
             />
           </div>
 
@@ -63,11 +97,18 @@ const handleSubmit = (e: React.FormEvent) => {
               type="password"
               placeholder="..."
               style={inputStyle}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
             />
           </div>
 
-          <button type="submit" style={submitButtonStyle}>
-            Ingresar
+          <button 
+            type="submit" 
+            style={submitButtonStyle}
+            disabled={loading}
+          >
+            {loading ? "Cargando..." : "Ingresar"}
           </button>
         </form>
 
@@ -79,13 +120,13 @@ const handleSubmit = (e: React.FormEvent) => {
   );
 }
 
-// Estilos en línea
+// Estilos en línea (se mantienen igual)
 const containerStyle: React.CSSProperties = {
   minHeight: '100vh',
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
-  backgroundColor: '#f3f4f6',
+  backgroundColor: '#F7F7F7',
   padding: '1rem',
 };
 
@@ -102,7 +143,8 @@ const titleStyle: React.CSSProperties = {
   textAlign: 'center',
   fontSize: '1.5rem',
   fontWeight: 700,
-  color: '#111827',
+  fontFamily: 'Montserrat, sans-serif',
+  color: '#222222',
   marginBottom: '1.5rem',
 };
 
@@ -131,7 +173,7 @@ const inputStyle: React.CSSProperties = {
 
 const submitButtonStyle: React.CSSProperties = {
   width: '100%',
-  backgroundColor: '#4f46e5',
+  backgroundColor: '#FF7300',
   color: 'white',
   padding: '0.5rem',
   borderRadius: '8px',

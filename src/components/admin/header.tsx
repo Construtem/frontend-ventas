@@ -4,10 +4,14 @@ import React from "react";
 import Link from "next/link";
 import Image from "next/image";
 import logo from "@/styles/images/contrutem_png.png"; // Usa alias @ si está configurado en tsconfig.json
-import exit from "@/styles/images/exit.png";
+//import exit from "@/styles/images/exit.png";
 import { usePathname } from "next/navigation";
 
-const Header = () => {
+interface HeaderProps {
+  onToggleSidebar?: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({onToggleSidebar}) => {
   const pathname = usePathname();
 
   // Obtener el rol desde la URL
@@ -22,6 +26,23 @@ const Header = () => {
   return (
     <header style={styles.header}>
       <div style={styles.left}>
+        {onToggleSidebar && (
+          <button onClick={onToggleSidebar}>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"  
+              width={24}  
+              height={24}  
+              viewBox="0 0 24 24"  
+              fill="none"  
+              stroke="#FF7300"  
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"  
+              className="icon icon-tabler icons-tabler-filled icon-tabler-layout-sidebar">
+                <path d="M6 21a3 3 0 0 1 -3 -3v-12a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v12a3 3 0 0 1 -3 3zm12 -16h-8v14h8a1 1 0 0 0 1 -1v-12a1 1 0 0 0 -1 -1"/>
+            </svg>
+          </button>
+        )}
         <Image src={logo} alt="ConstrUTEM Logo" style={styles.logoImg as React.CSSProperties} />
       </div>
       <div style={styles.right}>
@@ -33,13 +54,24 @@ const Header = () => {
           </span>
         </span>
         <Link href="/">
-          <Image
-          src={exit}
-          alt="Cerrar sesión"
-          style={styles.logout as React.CSSProperties}
-          width={32}
-          height={32}
-          />
+        <button style={styles.logout as React.CSSProperties}>
+            <svg  
+              xmlns="http://www.w3.org/2000/svg"  
+              alt="Cerrar sesión"
+              width={32}  
+              height={32}  
+              viewBox="0 0 24 24"  
+              fill="none"  
+              stroke="#FF7300"  
+              strokeWidth={2}
+              strokeLinecap="round"
+              strokeLinejoin="round"  
+              className="icon icon-tabler icons-tabler-outline icon-tabler-logout">
+                <path d="M14 8v-2a2 2 0 0 0 -2 -2h-7a2 2 0 0 0 -2 2v12a2 2 0 0 0 2 2h7a2 2 0 0 0 2 -2v-2" />
+                <path d="M9 12h12l-3 -3" />
+                <path d="M18 15l3 -3" />
+            </svg>
+          </button>
         </Link>
       </div>
     </header>
@@ -50,8 +82,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   header: {
     width: '100%',
     height: '58px',
-    background: 'linear-gradient(90deg, #003366 0%, #00A859 60%, #00A859 100%)',
-    color: 'white',
+    background: '#2D2D2D',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -70,6 +101,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   logoImg: {
     height: 'auto',
+    paddingLeft: '1rem',
     maxHeight: '80px',
     objectFit: 'contain',
     width: 'auto',
@@ -98,15 +130,17 @@ const styles: { [key: string]: React.CSSProperties } = {
   userText: {
     display: 'flex',
     flexDirection: 'column',
-    lineHeight: '1.2',
+    lineHeight: '1.4',
+    fontFamily: 'Montserrat, sans-serif',
+    fontSize: '2.4rem',
+    fontWeight: 'semibold',
+    color: '#FF7300',
   },
   userName: {
     fontSize: '1rem',
-    color: 'white',
   },
   userEmail: {
     fontSize: '0.85rem',
-    color: '#a5b4fc',
   },
   logout: {
     fontSize: '1.5rem',
