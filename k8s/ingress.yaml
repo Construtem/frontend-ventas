@@ -8,10 +8,10 @@ metadata:
 spec:
 #OJO: falta configurar DNS y el TSL para https (luego de configurar este, se agrega abajo)
   rules:
-    - host: tssw.cl
+    - host: ventas.tssw.cl
       http:
         paths:
-          - path: /ventas # OJO: este path debe ser modificado luego de configurar el DNS
+          - path: / # OJO: este path debe ser modificado luego de configurar el DNS
             pathType: Prefix
             backend:
               service:
