@@ -27,6 +27,9 @@ jobs:
 
       - name: Ejecutar linter
         run: npm run lint
+      
+      - name: Validar Dockerfile (build local)
+        run: docker build -t test/front-ventas .
 
   ci-imagen:
     name: Construccion y push de imagen docker
@@ -74,3 +77,6 @@ jobs:
 
       - name: Aplicar manifiestos de Kubernetes
         run: kubectl apply -f k8s/
+
+      - name: Verificar estado de pods
+        run: kubectl get pods -n default 
