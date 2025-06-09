@@ -1,0 +1,78 @@
+#En primer lugar se contruye la imagen y se pushea al Artifac Registry
+#Se aplican los manifiestos
+
+name: CI/CD Frontend
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  ci-validacion:
+    name: Validacion del codigo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar build
+        run: npm run build
+
+      - name: Ejecutar linter
+        run: npm run lint
+
+      - name: Ejecutar pruebas
+        run: npm test
+  ci-imagen:
+    name: Construccion y push de imagen docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Autenticarse en Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar Docker para usar Artifact Registry
+        run: gcloud auth configure-docker southamerica-east1-docker.pkg.dev
+
+      - name: Construir imagen Docker
+        run: docker build -t southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-ventas:latest .
+
+      - name: Subir imagen a Artifact Registry
+        run: docker push southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-ventas:latest
+
+  cd:
+    name: Despliegue Continuo
+    needs: ci-imagen  #Este bloquea el job hasta que CI termine exitosamente
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Autenticarse en GCP
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar kubectl
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: construtem
+          export_default_credentials: true
+
+      - name: Aplicar manifiestos de Kubernetes
+        run: kubectl apply -f k8s/

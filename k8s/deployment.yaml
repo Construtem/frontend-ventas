@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: front-ventas
+  labels:
+    app: front-ventas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: front-ventas
+  template:
+    metadata:
+      labels:
+        app: front-ventas
+    spec:
+      containers:
+        - name: front-ventas
+          # Pendiente: utilizar forma de no hardcodear la imagen y actualizar versiones
+          image: southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-ventas:latest
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "50m"
+            limits:
+              memory: "128Mi"
+              cpu: "100m"
+          #Descomentar si se necesita configurar el backend URL para ser usado por el frontend como variable de entorno
+          #env:
+            #- name: BACKEND_URL
+              #value: "https://api-ventas.tssw.cl"  # URL del backend de ventas
