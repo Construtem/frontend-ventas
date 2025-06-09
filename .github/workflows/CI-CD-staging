@@ -1,33 +1,57 @@
 #En primer lugar se contruye la imagen y se pushea al Artifac Registry
 #Se aplican los manifiestos
 
-name: CI - Build and Push Docker Image
+name: CI/CD Frontend
 
 on:
   push:
     branches: [develop]
 
 jobs:
-  docker-build-push:
+  ci:
+    name: Integración Continua
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout del código
         uses: actions/checkout@v3
 
-      - name: Autenticarse en Google Cloud
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Instalar dependencias
+        run: npm install
+
+      - name: Ejecutar build
+        run: npm run build
+
+      - name: Ejecutar linter
+        run: npm run lint
+
+      - name: Ejecutar pruebas
+        run: npm test
+
+  cd:
+    name: Despliegue Continuo
+    needs: ci  # 🧠 Este bloquea el job hasta que CI termine exitosamente
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Autenticarse en GCP
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-      - name: Configurar Docker para usar Artifact Registry
-        run: |
-          gcloud auth configure-docker southamerica-east1-docker.pkg.dev
+      - name: Configurar kubectl
+        uses: google-github-actions/setup-gcloud@v1
+        with:
+          project_id: construtem
+          export_default_credentials: true
 
-      - name: Construir imagen Docker
-        run: |
-          docker build -t southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/frontend-ventas:latest .
-
-      - name: Subir imagen a Artifact Registry
-        run: |
-          docker push southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/frontend-ventas:latest
+      - name: Aplicar manifiestos de Kubernetes
+        run: kubectl apply -f k8s/
