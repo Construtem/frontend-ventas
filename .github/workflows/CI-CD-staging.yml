@@ -50,7 +50,7 @@ jobs:
       - name: Subir imagen a Artifact Registry
         run: docker push southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/front-ventas:latest
 
-   cd:
+  cd:
     name: Despliegue Continuo
     needs: ci-imagen
     runs-on: ubuntu-latest
