@@ -1,0 +1,33 @@
+#En primer lugar se contruye la imagen y se pushea al Artifac Registry
+#Se aplican los manifiestos
+
+name: CI - Build and Push Docker Image
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  docker-build-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v3
+
+      - name: Autenticarse en Google Cloud
+        uses: google-github-actions/auth@v1
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar Docker para usar Artifact Registry
+        run: |
+          gcloud auth configure-docker southamerica-east1-docker.pkg.dev
+
+      - name: Construir imagen Docker
+        run: |
+          docker build -t southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/frontend-ventas:latest .
+
+      - name: Subir imagen a Artifact Registry
+        run: |
+          docker push southamerica-east1-docker.pkg.dev/construtem/microservicios-construtem/frontend-ventas:latest
