@@ -36,7 +36,7 @@ export const ADMIN_SideBar: NavItem[] = [
 ];
 
 export const VENDEDOR_SideBar: NavItem[] = [
-    { id: 'dashboard',    label: 'Dashboard',    href: '/vendedor/dashboard',                icon: <FaHome /> },
+    { id: 'inicio',    label: 'Inicio',    href: '/vendedor',                icon: <FaHome /> },
     { id: 'cot',          label: 'Cotizaciones', href: '/vendedor/cotizaciones',             icon: <FaClipboardList /> },
     { id: 'ventas',       label: 'Ventas',       href: '/vendedor/ventas',                   icon: <FaShoppingCart /> },
     { id: 'clientes',     label: 'Clientes',     href: '/vendedor/clientes',                 icon: <FaUsers /> },

@@ -125,7 +125,7 @@ export default function VendedorPage() {
                             Continúa sin registrar datos y genera una cotización rápida.
                         </p>
                         <Link
-                            href="/cotizaciones/nueva?invitado=1"
+                            href="/vendedor/productos"
                             className="mt-auto inline-block text-center bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded-md shadow-inner"
                         >
                             Continuar rápido

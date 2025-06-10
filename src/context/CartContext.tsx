@@ -16,6 +16,7 @@ export interface Product {
   precio: number;
   cantidad: number;      // cantidad que habrá en el carrito
   imagen?: string;
+  descuento:number;
 }
 
 interface CartContextType {

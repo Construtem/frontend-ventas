@@ -29,11 +29,11 @@ const ProductCard: React.FC<Props> = ({ product }) => {
                 </div>
             </div>
 
-            <p className="text-orange-500 font-bold text-lg">
+            <p className="text-orange-500 font-bold text-lg line-through">
                 ${product.precio.toLocaleString()} <span className="text-sm">c/u</span>
             </p>
-            <span className="text-xs text-red-500 bg-red-100 rounded px-2 py-0.5 w-fit mt-1">
-        Pocas unidades
+            <span className="text-xs bg-[#B4FFA9] rounded px-2 py-0.5 w-fit mt-1">
+        {(product.precio-product.precio*product.descuento/100).toLocaleString()} C/U    {product.descuento}% OFF
       </span>
 
             {/* Selector de cantidad */}

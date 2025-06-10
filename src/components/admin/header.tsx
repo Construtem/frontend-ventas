@@ -128,7 +128,7 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                         >
                           Ir al carrito
                         </Link>
-                        <Link href={"/"} className="block text-center w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cusor-pointer">
+                        <Link href={"/vendedor/checkout"} className="block text-center w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cusor-pointer">
                           Continuar con el pago
                         </Link>
                         <button
