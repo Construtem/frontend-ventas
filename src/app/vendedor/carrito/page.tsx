@@ -151,7 +151,7 @@ export default function CarritoPage() {
                         </Link>
 
                         <Link
-                            href="/checkout"
+                            href="/vendedor/checkout"
                             className="w-full bg-orange-500 hover:bg-orange-700 text-white py-2 rounded-md text-center font-semibold"
                         >
                             Confirmar Cotización
