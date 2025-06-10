@@ -3,11 +3,11 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import logo from '@/styles/images/contrutem_png.png';
-import cartIc from '@/styles/images/cart.png';
 import {FaShoppingCart} from "react-icons/fa";
 import { useCart } from '@/context/CartContext';
 import { useLogin } from '@/context/LoginContext';
 import productoImg from '@/styles/images/producto.png';
+
 import Link from "next/link";
 
 interface HeaderProps {
@@ -16,7 +16,7 @@ interface HeaderProps {
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
   const { usuario, logout } = useLogin();
-  const { cart, total } = useCart();
+  const { cart, total, clearCart } = useCart();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -126,10 +126,14 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                         >
                           Ir al carrito
                         </Link>
-
-                        <button className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
+                        <Link href={"/"} className="block text-center w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cusor-pointer">
                           Continuar con el pago
-                        </button>
+                        </Link>
+                        <button
+                             className="w-full mb-2 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 mt-2 cursor-pointer"
+                             onClick={() => clearCart()}>
+                              Vaciar carrito
+                            </button>
                       </>
                   )}
                 </div>

@@ -35,13 +35,13 @@ export const LoginProvider = ({ children }: { children: ReactNode }) => {
 
     const login = async (email: string, password: string) => {
         if (
-            email === 'admin@admin.cl' && password === 'administrador'
+            email === 'admin@utem.cl' && password === 'administrador'
         ) {
             const user:Usuario = { id: '1', nombre: 'Admin', email, rol: 'administrador' };
             setUsuario(user);
             router.push('/admin/inicio');
         } else if (
-            email === 'vendedor@vendedor.cl' && password === 'vendedor'
+            email === 'vendedor@utem.cl' && password === 'vendedor'
         ) {
             const user:Usuario = { id: '2', nombre: 'Vendedor', email, rol: 'vendedor' };
             setUsuario(user);

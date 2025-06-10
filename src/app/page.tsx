@@ -1,7 +1,7 @@
 /* LOGIN
   
-  ADMIN: email: admin@admin.cl || contraseña: administrador
-  VENDEDOR: email:vendedor@vendedor.cl || contraseña: vendedor
+  ADMIN: email: admin@utem.cl || contraseña: administrador
+  VENDEDOR: email:vendedor@utem.cl || contraseña: vendedor
   
 */
 "use client";
