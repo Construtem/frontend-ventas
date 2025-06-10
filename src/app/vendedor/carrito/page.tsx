@@ -144,7 +144,7 @@ export default function CarritoPage() {
 
                     <div className="mt-6 flex flex-col gap-2">
                         <Link
-                            href="/productos"
+                            href="/vendedor/productos"
                             className="w-full bg-orange-500 hover:bg-orange-600 text-white py-2 rounded-md text-center font-semibold"
                         >
                             Seguir comprando
