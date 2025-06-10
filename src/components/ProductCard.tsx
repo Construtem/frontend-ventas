@@ -19,7 +19,7 @@ const ProductCard: React.FC<Props> = ({ product }) => {
     const increase = () => setQty(q => q + 1);
 
     return (
-        <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col max-w-[400px] gap-1">
+        <div className="bg-white rounded-xl shadow-sm p-4 flex flex-col max-w-[400px] gap-2">
             <div className="flex">
                 <Image src={productoImg} alt={product.nombre} width={80} height={80}
                        className="w-16 h-16 mb-2 self-center"/>
@@ -35,7 +35,6 @@ const ProductCard: React.FC<Props> = ({ product }) => {
             <span className="text-xs text-red-500 bg-red-100 rounded px-2 py-0.5 w-fit mt-1">
         Pocas unidades
       </span>
-            <p className="text-sm text-gray-600 mt-1">🚚 Envío en 2 - 3 días</p>
 
             {/* Selector de cantidad */}
             <div className="grid w-full grid-cols-[48px_1fr_48px] border border-gray-300 rounded-md overflow-hidden">

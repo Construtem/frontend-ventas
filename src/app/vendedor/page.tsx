@@ -104,7 +104,7 @@ export default function VendedorPage() {
                         </p>
                         <button
                             onClick={() => setOpenModal(true)}
-                            className="cursoir-pointer mt-auto inline-block text-center bg-[#FF7300] hover:bg-[#FF7500] text-white font-medium py-2 px-4 rounded-md shadow"
+                            className="cursor-pointer mt-auto inline-block text-center bg-[#FF7300] hover:bg-[#FF7500] text-white font-medium py-2 px-4 rounded-md shadow"
                         >
                             Abrir formulario
                         </button>
