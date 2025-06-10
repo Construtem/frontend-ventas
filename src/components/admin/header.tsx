@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import logo from '@/styles/images/contrutem_png.png';
+import logo from '@/styles/images/contrutem.png';
 import {FaShoppingCart} from "react-icons/fa";
 import { useCart } from '@/context/CartContext';
 import { useLogin } from '@/context/LoginContext';
@@ -50,7 +50,9 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 </svg>
               </button>
           )}
-          <Image src={logo} alt="ConstrUTEM Logo" className="max-h-20 pl-4 w-auto object-contain" />
+          <div className="flex items-center w-[140px] ml-4">
+          <Image src={logo} alt="ConstrUTEM Logo" className="max-h-20 pl-4 object-contain" />
+          </div>
         </div>
 
         <div className="flex items-center gap-6 relative">
