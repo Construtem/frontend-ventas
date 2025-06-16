@@ -12,6 +12,7 @@ export interface ClienteForm {
     email: string;
     telefono: string;
     direccion: string;
+    rut:string;
 }
 
 interface Props {
@@ -25,6 +26,7 @@ const initialForm: ClienteForm = {
     email: '',
     telefono: '',
     direccion: '',
+    rut: ''
 };
 
 const ModalNuevoCliente: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
@@ -86,6 +88,24 @@ const ModalNuevoCliente: React.FC<Props> = ({ isOpen, onClose, onSave }) => {
                     />
                     {touched && !form.nombre.trim() && (
                         <p className="text-xs text-red-500 mt-1">El nombre es obligatorio.</p>
+                    )}
+                </div>
+
+                {/* RUT */}
+                <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                        RUT <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        type="text"
+                        className={`${inputBase} ${
+                            touched && !form.rut.trim() ? 'border-red-500' : 'border-gray-300'
+                        }`}
+                        value={form.rut}
+                        onChange={change('rut')}
+                    />
+                    {touched && !form.rut.trim() && (
+                        <p className="text-xs text-red-500 mt-1">El RUT es obligatorio.</p>
                     )}
                 </div>
 
