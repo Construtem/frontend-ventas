@@ -16,7 +16,7 @@
 - Docker Desktop instalado
 - Git instalado  
 
-  ## Instalación (entorno de desarrollo)
+## Instalación (entorno de desarrollo)
 
 1. Clonar el repositorio en el directorio deseado:
 
