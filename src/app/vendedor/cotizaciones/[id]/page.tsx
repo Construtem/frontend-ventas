@@ -3,6 +3,7 @@
 import Image from 'next/image';
 import logo from '@/styles/images/contrutem.png';
 import productoImg from '@/styles/images/producto.png';
+import { FaCheck, FaClock, FaTimes } from 'react-icons/fa';
 
 interface Producto {
   id: string;
@@ -34,14 +35,35 @@ const cotizacionDemo = {
   ] as Producto[],
 };
 
+const historialDemo = [
+  { estado: 'Creada', fecha: '01/05/2025', usuario: 'Juan P\u00e9rez' },
+  { estado: 'Pendiente', fecha: '05/05/2025', usuario: 'Juan P\u00e9rez' },
+  { estado: 'Aprobada', fecha: '06/05/2025', usuario: 'Administrador' },
+];
+
 const EstadoBadge = ({ estado }: { estado: typeof cotizacionDemo.estado }) => {
-  const classes = {
-    Aprobada: 'bg-green-100 text-green-700',
-    Pendiente: 'bg-yellow-100 text-yellow-700',
-    Rechazada: 'bg-red-100 text-red-700',
+  const variant = {
+    Aprobada: {
+      classes: 'bg-green-100 text-green-700',
+      icon: <FaCheck />,
+    },
+    Pendiente: {
+      classes: 'bg-yellow-100 text-yellow-700',
+      icon: <FaClock />,
+    },
+    Rechazada: {
+      classes: 'bg-red-100 text-red-700',
+      icon: <FaTimes />,
+    },
   }[estado];
+
   return (
-    <span className={`px-3 py-1 rounded-md text-xs font-semibold ${classes}`}>{estado}</span>
+    <span
+      className={`inline-flex items-center gap-1 px-4 py-2 rounded-md text-sm font-semibold ${variant.classes}`}
+    >
+      {variant.icon}
+      {estado}
+    </span>
   );
 };
 
@@ -145,13 +167,27 @@ export default function CotizacionDetalle() {
           </div>
         </div>
 
+        {/* Historial */}
+        <div className="border border-gray-200 rounded-lg p-4 space-y-2">
+          <h2 className="font-semibold mb-2">Historial</h2>
+          <ol className="relative border-l border-gray-200 ml-2">
+            {historialDemo.map((h, idx) => (
+              <li key={idx} className="mb-4 ml-4">
+                <div className="absolute w-3 h-3 bg-gray-200 rounded-full -left-1.5 border border-white"></div>
+                <p className="text-sm font-medium">{h.estado}</p>
+                <p className="text-xs text-gray-500">{h.fecha} - {h.usuario}</p>
+              </li>
+            ))}
+          </ol>
+        </div>
+
         {/* Botones de acción */}
         <div className="flex gap-4 justify-end print:hidden">
           {cotizacionDemo.estado === 'Aprobada' && (
             <button className="bg-[#FF7300] hover:bg-orange-600 text-white px-4 py-2 rounded-md">Pagar ahora</button>
           )}
           {cotizacionDemo.estado === 'Pendiente' && (
-            <button className="bg-red-100 text-red-700 hover:bg-red-200 px-4 py-2 rounded-md">Cancelar</button>
+            <button className="bg-red-50 text-red-700 border border-red-200 hover:bg-red-100 px-4 py-2 rounded-md">Cancelar</button>
           )}
           <button onClick={handlePrint} className="border border-gray-300 px-4 py-2 rounded-md">Descargar PDF</button>
         </div>
