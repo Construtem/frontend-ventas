@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import productoImg from '@/styles/images/producto.png';
 
@@ -10,7 +9,7 @@ export default function CheckoutPage() {
     /* ------------------------------------------------------------------ */
     /*  CONTEXTOS Y ESTADOS                                               */
     /* ------------------------------------------------------------------ */
-    const { cart, updateQuantity } = useCart();
+    const { cart } = useCart();
 
     // Cliente (RUT) editable
     const [rut, setRut] = useState('11.111.111-1');
