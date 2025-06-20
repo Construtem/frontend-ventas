@@ -268,9 +268,12 @@ export default function CheckoutPage() {
                             <span>${totalFinal.toLocaleString()}</span>
                         </div>
 
-                        <button className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-md font-semibold cursor-pointer">
+                        <Link
+                            href="/vendedor/pago"
+                            className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-md font-semibold cursor-pointer text-center block"
+                        >
                             Ir a pagar
-                        </button>
+                        </Link>
                     </div>
                 </div>
             )}
