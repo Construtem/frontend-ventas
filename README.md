@@ -1,6 +1,7 @@
 # Frontend - Ventas
 
-Este repositorio contiene el frontend del módulo de **ventas** para el sistema digital de la ferretería Construtem.
+- Este repositorio contiene el frontend del módulo de **ventas** para el sistema digital de la ferretería Construtem.
+- Este microservicio será desplegado en la siguiente URL: https://ventas.tssw.cl
 
 ## 🛠️ Tecnologías
 - Next.js
@@ -9,17 +10,13 @@ Este repositorio contiene el frontend del módulo de **ventas** para el sistema 
 - Gestión de productos disponibles para la venta.
 - Creación de nuevas órdenes de compra.
 - Consulta de historial de ventas.
-- Interacción con backend-ventas a través de API Gateway.
-
-## 📂 Estructura principal
-- Por definir
 
 ## Requisitos
 
 - Docker Desktop instalado
 - Git instalado  
 
-  ## Instalación (entorno de desarrollo)
+## Instalación (entorno de desarrollo)
 
 1. Clonar el repositorio en el directorio deseado:
 
