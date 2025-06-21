@@ -25,10 +25,6 @@ interface PaginationProps {
   onChange: (page: number) => void;
 }
 
-interface Props {
-    cotizaciones: Cotizacion[];
-    onRowClick?: (id: number) => void;
-}
 
 const data: Cotizacion[] = [
     { id: 1, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
@@ -72,22 +68,6 @@ const Chip = ({
     </div>
 );
 
-/* ---------------------------------- */
-/*  Badge según estado */
-/* ---------------------------------- */
-const EstadoBadge = ({ estado }: { estado: Cotizacion['estado'] }) => {
-    const variant = {
-        Aprobada:  'bg-green-100 text-green-700',
-        Pendiente: 'bg-yellow-100 text-yellow-700',
-        Rechazada: 'bg-red-100 text-red-700',
-    }[estado];
-
-    return (
-        <span className={`px-3 py-1 rounded-md text-xs font-semibold ${variant}`}>
-      {estado}
-    </span>
-    );
-};
 
 const Pagination: React.FC<PaginationProps> = ({ page, totalPages, onChange }) => {
   if (totalPages <= 1) return null;
