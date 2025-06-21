@@ -1,6 +1,7 @@
 'use client';
 
 import { FaCheck, FaClock, FaTimes } from 'react-icons/fa';
+import Link from 'next/link';
 
 /* ---------------------------------- */
 /*  Dummy data */
@@ -84,6 +85,7 @@ export default function HistorialCotizaciones() {
                             <th className="px-6 py-3 text-left">Cliente</th>
                             <th className="px-6 py-3 text-left">Estado</th>
                             <th className="px-6 py-3 text-left">Total</th>
+                            <th className="px-6 py-3 text-left">&nbsp;</th>
                         </tr>
                         </thead>
 
@@ -96,6 +98,9 @@ export default function HistorialCotizaciones() {
                                     <EstadoBadge estado={c.estado} />
                                 </td>
                                 <td className="px-6 py-4 border-b border-b-[1px] border-b-[#EDEFEE]">{c.total}</td>
+                                <td className="px-6 py-4 border-b border-b-[1px] border-b-[#EDEFEE]">
+                                    <Link href={`/vendedor/cotizaciones/${c.id}`} className="text-blue-600 hover:underline">Ver</Link>
+                                </td>
                             </tr>
                         ))}
                         </tbody>
