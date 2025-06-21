@@ -1,23 +1,54 @@
 'use client';
 
+import React, { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { FaCheck, FaClock, FaTimes } from 'react-icons/fa';
 
 /* ---------------------------------- */
-/*  Dummy data */
+/*  Datos del cliente */
 /* ---------------------------------- */
 interface Cotizacion {
     id: number;
     fecha: string;
     cliente: string;
+    rut: string;
     estado: 'Aprobada' | 'Pendiente' | 'Rechazada';
     total: string;
 }
 
+/* ---------------------------------- */
+/*  Componente de la paginación       */
+/* ---------------------------------- */
+interface PaginationProps {
+  page: number;
+  totalPages: number;
+  onChange: (page: number) => void;
+}
+
+interface Props {
+    cotizaciones: Cotizacion[];
+    onRowClick?: (id: number) => void;
+}
+
 const data: Cotizacion[] = [
-    { id: 1, fecha: '05/05/2025', cliente: 'Cliente A', estado: 'Aprobada',  total: '26.500 $' },
-    { id: 2, fecha: '05/05/2025', cliente: 'Cliente A', estado: 'Pendiente', total: '26.500 $' },
-    { id: 3, fecha: '05/05/2025', cliente: 'Cliente A', estado: 'Rechazada', total: '26.500 $' },
-    { id: 4, fecha: '05/05/2025', cliente: 'Cliente A', estado: 'Aprobada',  total: '26.500 $' },
+    { id: 1, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
+    { id: 2, fecha: '05/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Pendiente', total: '26.500 $' },
+    { id: 3, fecha: '05/03/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Rechazada', total: '26.500 $' },
+    { id: 4, fecha: '05/05/2019', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '10.500 $' },
+    { id: 5, fecha: '07/05/2019', cliente: 'Cliente B', rut: "00000000-0", estado: 'Rechazada',  total: '2.500 $' },
+    { id: 6, fecha: '05/05/2018', cliente: 'Cliente C', rut: "00000000-0", estado: 'Rechazada',  total: '200.500 $' },
+    { id: 7, fecha: '05/07/2023', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '9.800 $' },
+    { id: 8, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
+    { id: 9, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
+    { id: 10, fecha: '05/05/2018', cliente: 'Cliente C', rut: "00000000-0", estado: 'Rechazada',  total: '200.500 $' },
+    { id: 11, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
+    { id: 12, fecha: '05/03/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Rechazada', total: '26.500 $' },    
+    { id: 13, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
+    { id: 14, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
+    { id: 15, fecha: '05/07/2023', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '9.800 $' },
+    { id: 16, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
+    { id: 17, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
+    { id: 18, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
 ];
 
 /* ---------------------------------- */
@@ -58,35 +89,212 @@ const EstadoBadge = ({ estado }: { estado: Cotizacion['estado'] }) => {
     );
 };
 
-/* ---------------------------------- */
-/*  Page component */
-/* ---------------------------------- */
-export default function HistorialCotizaciones() {
+const Pagination: React.FC<PaginationProps> = ({ page, totalPages, onChange }) => {
+  if (totalPages <= 1) return null;
+  const pages = Array.from({ length: totalPages }, (_, i) => i + 1);
+
+  return (
+    <div className="flex items-center gap-2 justify-end mt-6">
+      <button
+        className="px-2 py-1 rounded hover:bg-gray-200 cursor-pointer"
+        disabled={page === 1}
+        onClick={() => onChange(page - 1)}
+      >
+        ◀
+      </button>
+      {pages.map((p) => (
+        <button
+          key={p}
+          className={`px-3 py-1 rounded cursor-pointer ${p === page ? "bg-blue-600 text-white" : "hover:bg-gray-200"}`}
+          onClick={() => onChange(p)}
+        >
+          {p}
+        </button>
+      ))}
+      <button
+        className="px-2 py-1 rounded hover:bg-gray-200 cursor-pointer"
+        disabled={page === totalPages}
+        onClick={() => onChange(page + 1)}
+      >
+        ▶
+      </button>
+    </div>
+  );
+};
+
+export const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) => {
+  const router = useRouter();
+
+  if (cotizaciones.length === 0) {
     return (
-        <main className="ml-[180px] mt-[70px] p-8 bg-gray-50 min-h-screen">
+      <div className="flex flex-col items-center py-16">
+        <img src="/empty-state.svg" alt="Sin cotizaciones" className="w-40 mb-4 opacity-70" />
+        <p className="text-gray-500 text-lg">No hay cotizaciones para mostrar.</p>
+      </div>
+    );
+  }
+
+  return (
+    <table className="min-w-full text-sm">
+      <thead>
+        <tr className="bg-gray-100">
+          <th className="px-6 py-3 text-left">Fecha</th>
+          <th className="px-6 py-3 text-left">Cliente</th>
+          <th className="px-6 py-3 text-left">RUT</th>
+          <th className="px-6 py-3 text-left">Estado</th>
+          <th className="px-6 py-3 text-left">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {cotizaciones.map((c) => (
+          <tr
+            key={c.id}
+            className="cursor-pointer transition hover:bg-blue-50"
+            onClick={() => onRowClick ? onRowClick(c.id) : router.push(`/cotizaciones/${c.id}`)}
+          >
+            <td className="px-6 py-4 border-b border-gray-200">{c.fecha}</td>
+            <td className="px-6 py-4 border-b border-gray-200">{c.cliente}</td>
+            <td className="px-6 py-4 border-b border-gray-200">{c.rut}</td>
+            <td className="px-6 py-4 border-b border-gray-200">
+              <EstadoBadge estado={c.estado} />
+            </td>
+            <td className="px-6 py-4 border-b border-gray-200">{c.total}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};
+
+// Componente principal de la página
+export default function HistorialCotizaciones() {
+
+    const [filtroDia, setFiltroDia] = useState('');
+    const [filtroMes, setFiltroMes] = useState('');
+    const [filtroAno, setFiltroAno] = useState('');
+    const [filtroEstado, setFiltroEstado] = useState<string>("");
+
+    // Paginación
+    const [page, setPage] = useState(1);
+    const pageSize = 7;
+
+    // Ref para el contenedor principal
+    const mainRef = useRef<HTMLDivElement>(null);
+
+    const cotizacionesFiltradas = data.filter((c) => {
+        const [dia, mes, ano] = c.fecha.split('/');
+        const coincideDia = !filtroDia || Number(filtroDia) === Number(dia);
+        const coincideMes = !filtroMes || Number(filtroMes) === Number(mes);
+        const coincideAno = !filtroAno || filtroAno === ano;
+        const coincideEstado = !filtroEstado || c.estado === filtroEstado;
+        return coincideDia && coincideMes && coincideAno && coincideEstado;
+    });
+
+    // Paginación de resultados
+    const totalPages = Math.ceil(cotizacionesFiltradas.length / pageSize);
+    const cotizacionesPaginadas = cotizacionesFiltradas.slice(
+        (page - 1) * pageSize,
+        page * pageSize
+    );
+
+    // Scroll al top al cambiar página
+    const handlePageChange = (newPage: number) => {
+        setPage(newPage);
+        setTimeout(() => {
+            mainRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 0);
+    };
+
+    return (
+        <main ref={mainRef} className="ml-[180px] mt-[70px] p-8 bg-gray-50 min-h-screen">
             <section className="bg-white rounded-xl shadow-sm p-8">
-                {/* título */}
+                {/* Título */}
                 <h1 className="text-3xl font-bold mb-8">Historial de Cotizaciones</h1>
 
-                {/* chips */}
-                <div className="flex gap-6 mb-10">
-                    <Chip icon={<FaCheck  size={20} />} title="Cotizaciones" subtitle="aprobadas" />
-                    <Chip icon={<FaClock size={20} />} title="Cotizaciones" subtitle="Pendientes" />
-                    <Chip icon={<FaTimes size={20} />} title="Cotizaciones" subtitle="Rechazadas" />
+                {/* Filtros de fecha */}
+                <div className="flex gap-4 mb-8">
+                    <div>
+                        <label className="block text-sm mb-1">Día</label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="31"
+                            className="border rounded px-2 py-1 w-32"
+                            value={filtroDia}
+                            onChange={e => setFiltroDia(e.target.value)}
+                            placeholder="Día"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm mb-1">Mes</label>
+                        <input
+                            type="number"
+                            min="1"
+                            max="12"
+                            className="border rounded px-2 py-1 w-32"
+                            value={filtroMes}
+                            onChange={e => setFiltroMes(e.target.value)}
+                            placeholder="Mes"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm mb-1">Año</label>
+                        <input
+                            type="number"
+                            min="2000"
+                            max="2100"
+                            className="border rounded px-2 py-1 w-32"
+                            value={filtroAno}
+                            onChange={e => setFiltroAno(e.target.value)}
+                            placeholder="Año"
+                        />
+                    </div>
                 </div>
 
-                {/* tabla */}
-                <div className="overflow-x-auto">
-                    <table className="min-w-full text-sm">
-                        <thead>
-                        <tr className="bg-gray-100 text-gray-900 font-semibold">
-                            <th className="px-6 py-3 text-left">Fecha</th>
-                            <th className="px-6 py-3 text-left">Cliente</th>
-                            <th className="px-6 py-3 text-left">Estado</th>
-                            <th className="px-6 py-3 text-left">Total</th>
-                        </tr>
-                        </thead>
+                {/* Chips como botones de filtro por estado */}
+                <div className="flex gap-6 mb-10">
+                    {[
+                        { estado: "Aprobada", icon: <FaCheck size={20} />, title: "Cotizaciones", subtitle: "Aprobadas" },
+                        { estado: "Pendiente", icon: <FaClock size={20} />, title: "Cotizaciones", subtitle: "Pendientes" },
+                        { estado: "Rechazada", icon: <FaTimes size={20} />, title: "Cotizaciones", subtitle: "Rechazadas" },
+                    ].map(({ estado, icon, title, subtitle }) => (
+                        <button
+                            key={estado}
+                            type="button"
+                            onClick={() => {
+                                setFiltroEstado(filtroEstado === estado ? "" : estado);
+                                setPage(1);
+                            }}
+                            className={`
+                                group
+                                rounded-lg
+                                transition
+                                focus:outline-none
+                                cursor-pointer
+                                ${filtroEstado === estado ? "ring-2 ring-orange-500" : ""}
+                                hover:scale-105 hover:shadow-lg
+                            `}
+                            style={{ padding: 0, background: "none", border: "none" }}
+                            >
+                            <span className="block">
+                                <Chip
+                                icon={icon}
+                                title={title}
+                                subtitle={subtitle}
+                                />
+                            </span>
+                        </button>
+                    ))}
+                </div>
 
+                {/* Tabla */}
+                <div className="overflow-x-auto">
+                    <QuotationTable cotizaciones={cotizacionesPaginadas} />
+
+                    {/* Paginación */}
+                    <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
+
+<<<<<<< HEAD
                         <tbody>
                         {data.map((c) => (
                             <tr
@@ -109,7 +317,10 @@ export default function HistorialCotizaciones() {
                         ))}
                         </tbody>
                     </table>
+=======
+>>>>>>> feature/historial-cotizacion
                 </div>
+                            
             </section>
         </main>
     );
