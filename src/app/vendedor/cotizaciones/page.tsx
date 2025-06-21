@@ -294,31 +294,10 @@ export default function HistorialCotizaciones() {
                     {/* Paginación */}
                     <Pagination page={page} totalPages={totalPages} onChange={handlePageChange} />
 
-<<<<<<< HEAD
-                        <tbody>
-                        {data.map((c) => (
-                            <tr
-                                key={c.id}
-                                className="border-b last:border-b-0 hover:bg-gray-100 cursor-pointer transition-colors"
-                            >
-                                <td className="px-6 py-4 border-b border-b-[1px] border-b-[#EDEFEE]">
-                                    {c.fecha}
-                                </td>
-                                <td className="px-6 py-4 border-b border-b-[1px] border-b-[#EDEFEE]">
-                                    {c.cliente}
-                                </td>
-                                <td className="px-6 py-4 border-b border-b-[1px] border-b-[#EDEFEE]">
-                                    <EstadoBadge estado={c.estado} />
-                                </td>
-                                <td className="px-6 py-4 border-b border-b-[1px] border-b-[#EDEFEE]">
-                                    {c.total}
-                                </td>
-                            </tr>
-                        ))}
-                        </tbody>
-                    </table>
-=======
->>>>>>> feature/historial-cotizacion
+
+    
+
+
                 </div>
                             
             </section>
