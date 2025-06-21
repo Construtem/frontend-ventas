@@ -1,5 +1,6 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface Cotizacion {
     id: number;
@@ -35,7 +36,13 @@ export const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) =>
     if (cotizaciones.length === 0) {
         return (
             <div className="flex flex-col items-center py-16">
-                <img src="/empty-state.svg" alt="Sin cotizaciones" className="w-40 mb-4 opacity-70" />
+                <Image
+                    src="/empty-state.svg"
+                    alt="Sin cotizaciones"
+                    width={160}
+                    height={160}
+                    className="w-40 mb-4 opacity-70"
+                />
                 <p className="text-gray-500 text-lg">No hay cotizaciones para mostrar.</p>
             </div>
         );
