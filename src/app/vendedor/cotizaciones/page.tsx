@@ -5,6 +5,7 @@ import Link from 'next/link';
 
 /* ---------------------------------- */
 /*  Dummy data */
+
 /* ---------------------------------- */
 interface Cotizacion {
     id: number;
@@ -110,3 +111,4 @@ export default function HistorialCotizaciones() {
         </main>
     );
 }
+
