@@ -76,7 +76,7 @@ jobs:
           project_id: construtem
 
       - name: Aplicar manifiestos de Kubernetes
-        run: kubectl apply -f k8s/
+        run: kubectl apply -f k8s/testing/
 
       - name: Verificar estado de pods
         run: kubectl get pods -n default 
