@@ -1,7 +1,6 @@
 # Frontend - Ventas
 
-- Este repositorio contiene el frontend del módulo de **ventas** para el sistema digital de la ferretería Construtem.
-- Este microservicio será desplegado en la siguiente URL: https://ventas.tssw.cl
+Este repositorio contiene el frontend del módulo de **ventas** para el sistema digital de la ferretería Construtem.
 
 ## 🛠️ Tecnologías
 - Next.js
@@ -10,13 +9,17 @@
 - Gestión de productos disponibles para la venta.
 - Creación de nuevas órdenes de compra.
 - Consulta de historial de ventas.
+- Interacción con backend-ventas a través de API Gateway.
+
+## 📂 Estructura principal
+- Por definir
 
 ## Requisitos
 
 - Docker Desktop instalado
 - Git instalado  
 
-## Instalación (entorno de desarrollo)
+  ## Instalación (entorno de desarrollo)
 
 1. Clonar el repositorio en el directorio deseado:
 
@@ -39,10 +42,17 @@ cd .\Desktop\
 git clone https://github.com/Construtem/frontend-ventas
 cd frontend-ventas
 ```
-2. Correr aplicación desde directorio creado (ej "C:\Users\Admin\Desktop\frontend-ventas"),
-ejecutando el siguiente comando:
+2. Construir imagen desde el directorio creado (ej "C:\Users\Admin\Desktop\frontend-ventas"), debe ejecutar el siguiente comando:
+
 ```bash
-docker compose up
+docker build -t front-ventas .
+```
+*Esto creará una imagen que contiene todas las dependencias y lo necesario para correr su app en forma local*
+
+3. Correr la imagen creada:
+
+```bash
+docker run -p 3000:3000 front-ventas
 ```
 *Luego de ejecutar este comando, su app se encontrará corriendo en el puerto 3000 en "http://localhost:3000"*
 
