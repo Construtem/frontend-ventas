@@ -7,6 +7,7 @@ import {
   useState,
   ReactNode,
 } from 'react';
+import { useCustomer } from './ClienteContext';
 
 /* ---------- Tipos ---------- */
 
@@ -32,25 +33,28 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'construtem-cart';
+const BASE_KEY = 'construtem-cart';
 
 /* ---------- Provider ---------- */
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [cart, setCart] = useState<Product[]>([]);
+  const { cliente } = useCustomer();
+
+  const storageKey = `${BASE_KEY}-${cliente?.id ?? 'guest'}`;
 
   /* Cargar carrito almacenado (solo en cliente) */
   useEffect(() => {
-    if (typeof window === 'undefined') return;            // evita SSR
-    const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored) setCart(JSON.parse(stored));
-  }, []);
+    if (typeof window === 'undefined') return; // evita SSR
+    const stored = localStorage.getItem(storageKey);
+    setCart(stored ? JSON.parse(stored) : []);
+  }, [storageKey]);
 
   /* Guardar automáticamente cada vez que cambia */
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cart));
-  }, [cart]);
+    localStorage.setItem(storageKey, JSON.stringify(cart));
+  }, [cart, storageKey]);
 
   /* ---------- Acciones ---------- */
 
@@ -79,7 +83,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       setCart(prev => prev.filter(p => p.sku !== sku));
 
   /** Vacía el carrito */
-  const clearCart = () => setCart([]);
+  const clearCart = () => {
+    setCart([]);
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem(storageKey);
+    }
+  };
 
   /** Cambia la cantidad exacta; si es <1 lo quita */
   const updateQuantity = (sku: string, cantidad: number) =>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { FaSearch } from 'react-icons/fa';
@@ -8,6 +8,7 @@ import { FaSearch } from 'react-icons/fa';
 import { CLIENTES_DEMO, ClienteDemo } from '@/mock/mockClients';
 import ModalNuevoCliente, { ClienteForm } from '@/components/ModalNuevoCliente';
 import { useCustomer } from '@/context/ClienteContext';
+import { useCart } from '@/context/CartContext';
 
 export default function VendedorPage() {
     /* ------------------------------------------------------------- */
@@ -15,9 +16,16 @@ export default function VendedorPage() {
     /* ------------------------------------------------------------- */
     const router = useRouter();
     const { cliente, setCliente, clearCliente } = useCustomer();
+    const { clearCart } = useCart();
 
     const [query, setQuery] = useState('');
     const [openModal, setOpenModal] = useState(false);
+
+    // Limpiar contextos al entrar al Home
+    useEffect(() => {
+        clearCliente();
+        clearCart();
+    }, []);
 
     /* ------------------------------------------------------------- */
     /*  BÚSQUEDA DE CLIENTES                                         */
@@ -94,7 +102,7 @@ export default function VendedorPage() {
                                 onClick={clearCliente}
                                 className="cursor-pointer text-sm text-white hover:underline bg-orange-500 hover:bg-orange-600 px-3 py-1 rounded-md font-semibold"
                             >
-                                Cambiar cliente
+                                Cerrar ficha
                             </button>
                         </div>
 

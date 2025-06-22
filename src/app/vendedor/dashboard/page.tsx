@@ -1,3 +1,5 @@
-export default function Dashboard (){
-    return <div>Inventario</div>;
+import UnderConstruction from '@/components/UnderConstruction';
+
+export default function Dashboard() {
+    return <UnderConstruction />;
 }

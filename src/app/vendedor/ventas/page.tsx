@@ -1,4 +1,6 @@
 
-export default function Ventas (){
-    return <div>Inventario</div>;
+import UnderConstruction from '@/components/UnderConstruction';
+
+export default function Ventas() {
+    return <UnderConstruction />;
 }

@@ -1,3 +1,5 @@
-export default function Inventario (){
-    return <div>Inventario</div>;
+import UnderConstruction from '@/components/UnderConstruction';
+
+export default function Inventario() {
+    return <UnderConstruction />;
 }
