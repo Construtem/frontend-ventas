@@ -113,7 +113,7 @@ const Pagination: React.FC<PaginationProps> = ({ page, totalPages, onChange }) =
   );
 };
 
-export const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) => {
+const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) => {
   const router = useRouter();
 
   if (cotizaciones.length === 0) {
