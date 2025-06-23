@@ -172,7 +172,7 @@ export default function CarritoPage() {
                                         detalle_cotizacion: cart.map(item => ({
                                             producto_id: getProductoId(item.sku), // ← aquí se convierte el SKU a id
                                             cantidad: item.cantidad,
-                                            precio_unitario: totalFinal
+                                            precio_unitario: Math.round((item.precio - (item.precio * (item.descuento ?? 0) / 100)) * 1.19) // Precio con IVA
                                         }))
                                     };
                                     console.log("Cotización enviada:", cotizacion);
@@ -190,9 +190,9 @@ export default function CarritoPage() {
                                     } else {
                                         alert('Error al enviar cotización');
                                     }
-                                } catch (err) {
-                                    alert('Error de red');
-                                }
+                                    } catch {
+                                        alert('Error de red');
+                                    }
                             }}
                             className="w-full bg-orange-500 hover:bg-orange-700 text-white py-2 rounded-md text-center font-semibold"
                         >

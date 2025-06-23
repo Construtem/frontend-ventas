@@ -3,6 +3,7 @@
 import React, { useState, useEffect , useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheck, FaClock, FaTimes } from 'react-icons/fa';
+import Image from 'next/image';
 
 /* ---------------------------------- */
 /*  Datos del cliente */
@@ -14,6 +15,17 @@ interface Cotizacion {
     rut: string;
     estado: 'Aprobada' | 'Pendiente' | 'Rechazada';
     total: string;
+}
+
+/* ---------------------------------- */
+/*  Datos del backend */
+/* ---------------------------------- */
+interface CotizacionBackend {
+  id: number;
+  fecha: string;
+  cliente?: { nombre?: string; rut?: string };
+  estado: string;
+  total?: number;
 }
 
 /* ---------------------------------- */
@@ -107,7 +119,13 @@ export const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) =>
   if (cotizaciones.length === 0) {
     return (
       <div className="flex flex-col items-center py-16">
-        <img src="/empty-state.svg" alt="Sin cotizaciones" className="w-40 mb-4 opacity-70" />
+        <Image 
+          src="/empty-state.svg" 
+          alt="Sin cotizaciones"
+          width={160}
+          height={160}
+          className="w-40 mb-4 opacity-70"
+        />
         <p className="text-gray-500 text-lg">No hay cotizaciones para mostrar.</p>
       </div>
     );
@@ -199,7 +217,7 @@ export default function HistorialCotizaciones() {
         .then(data => {
           // Mapeo de datos del backend al formato esperado
           const cotizacionesBackend = Array.isArray(data) ? data : data.data;
-          const cotizacionesMapeadas = cotizacionesBackend.map((c: any) => ({
+          const cotizacionesMapeadas = cotizacionesBackend.map((c: CotizacionBackend) => ({
             id: c.id,
             fecha: c.fecha ? new Date(c.fecha).toLocaleDateString('es-CL') : '',
             cliente: c.cliente?.nombre || 'Sin nombre',
@@ -215,6 +233,26 @@ export default function HistorialCotizaciones() {
           setLoading(false);
         });
     }, []);
+
+    if (loading) {
+      return (
+        <main ref={mainRef} className="ml-[180px] mt-[70px] p-8 bg-gray-50 min-h-screen">
+          <section className="bg-white rounded-xl shadow-sm p-8 flex justify-center items-center min-h-[300px]">
+            <span className="text-gray-500 text-lg">Cargando cotizaciones...</span>
+          </section>
+        </main>
+      );
+    }    
+
+    if (error) {
+      return (
+        <main ref={mainRef} className="ml-[180px] mt-[70px] p-8 bg-gray-50 min-h-screen">
+          <section className="bg-white rounded-xl shadow-sm p-8 flex justify-center items-center min-h-[300px]">
+            <span className="text-red-500 text-lg">{error}</span>
+          </section>
+        </main>
+      );
+    }
 
     return (
         <main ref={mainRef} className="ml-[180px] mt-[70px] p-8 bg-gray-50 min-h-screen">

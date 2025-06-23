@@ -12,10 +12,9 @@ interface Props {
 }
 
 const ProductCard: React.FC<Props> = ({ product }) => {
-    const { addToCart, cart } = useCart();
+    const { addToCart } = useCart();
     const [qty, setQty] = useState(1);
 
-   // console.log("Carrito:", cart);
 
     const decrease = () => setQty(q => Math.max(q - 1, 1));
     const increase = () => setQty(q => q + 1);
