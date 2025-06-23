@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useEffect , useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { FaCheck, FaClock, FaTimes } from 'react-icons/fa';
 
@@ -30,6 +30,8 @@ interface Props {
     onRowClick?: (id: number) => void;
 }
 
+
+/*
 const data: Cotizacion[] = [
     { id: 1, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
     { id: 2, fecha: '05/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Pendiente', total: '26.500 $' },
@@ -50,6 +52,7 @@ const data: Cotizacion[] = [
     { id: 17, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
     { id: 18, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
 ];
+*/
 
 /* ---------------------------------- */
 /*  Chips reutilizables */
@@ -168,20 +171,26 @@ export const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) =>
 
 // Componente principal de la página
 export default function HistorialCotizaciones() {
+    // Estado para cotizaciones y control de carga/error
+    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
+    // Estados para filtros de fecha y estado
     const [filtroDia, setFiltroDia] = useState('');
     const [filtroMes, setFiltroMes] = useState('');
     const [filtroAno, setFiltroAno] = useState('');
     const [filtroEstado, setFiltroEstado] = useState<string>("");
 
-    // Paginación
+    // Estado y configuración de paginación
     const [page, setPage] = useState(1);
     const pageSize = 7;
 
     // Ref para el contenedor principal
     const mainRef = useRef<HTMLDivElement>(null);
 
-    const cotizacionesFiltradas = data.filter((c) => {
+    // Filtrado de cotizaciones según los filtros activos
+    const cotizacionesFiltradas = cotizaciones.filter((c) => {
         const [dia, mes, ano] = c.fecha.split('/');
         const coincideDia = !filtroDia || Number(filtroDia) === Number(dia);
         const coincideMes = !filtroMes || Number(filtroMes) === Number(mes);
@@ -190,20 +199,45 @@ export default function HistorialCotizaciones() {
         return coincideDia && coincideMes && coincideAno && coincideEstado;
     });
 
-    // Paginación de resultados
+    // Paginación de resultados filtrados
     const totalPages = Math.ceil(cotizacionesFiltradas.length / pageSize);
     const cotizacionesPaginadas = cotizacionesFiltradas.slice(
         (page - 1) * pageSize,
         page * pageSize
     );
 
-    // Scroll al top al cambiar página
+    // Función para cambiar de página y hacer scroll al top
     const handlePageChange = (newPage: number) => {
         setPage(newPage);
         setTimeout(() => {
             mainRef.current?.scrollIntoView({ behavior: 'smooth' });
         }, 0);
     };
+
+    // Carga de cotizaciones desde la API al montar el componente
+    useEffect(() => {
+      setLoading(true);
+      fetch('http://localhost:8080/api/cotizaciones')
+        .then(res => res.json())
+        .then(data => {
+          // Mapeo de datos del backend al formato esperado
+          const cotizacionesBackend = Array.isArray(data) ? data : data.data;
+          const cotizacionesMapeadas = cotizacionesBackend.map((c: any) => ({
+            id: c.id,
+            fecha: c.fecha ? new Date(c.fecha).toLocaleDateString('es-CL') : '',
+            cliente: c.cliente?.nombre || 'Sin nombre',
+            rut: c.cliente?.rut || '',
+            estado: c.estado,
+            total: c.total ? `${c.total.toLocaleString('es-CL')} $` : '',
+          }));
+          setCotizaciones(cotizacionesMapeadas);
+          setLoading(false);
+        })
+        .catch(() => {
+          setError('Error al cargar cotizaciones');
+          setLoading(false);
+        });
+    }, []);
 
     return (
         <main ref={mainRef} className="ml-[180px] mt-[70px] p-8 bg-gray-50 min-h-screen">
@@ -287,7 +321,7 @@ export default function HistorialCotizaciones() {
                     ))}
                 </div>
 
-                {/* Tabla */}
+                {/* Tabla de cotizaciones */}
                 <div className="overflow-x-auto">
                     <QuotationTable cotizaciones={cotizacionesPaginadas} />
 
