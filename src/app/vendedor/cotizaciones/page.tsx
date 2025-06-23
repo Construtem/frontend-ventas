@@ -30,30 +30,6 @@ interface Props {
     onRowClick?: (id: number) => void;
 }
 
-
-/*
-const data: Cotizacion[] = [
-    { id: 1, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
-    { id: 2, fecha: '05/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Pendiente', total: '26.500 $' },
-    { id: 3, fecha: '05/03/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Rechazada', total: '26.500 $' },
-    { id: 4, fecha: '05/05/2019', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '10.500 $' },
-    { id: 5, fecha: '07/05/2019', cliente: 'Cliente B', rut: "00000000-0", estado: 'Rechazada',  total: '2.500 $' },
-    { id: 6, fecha: '05/05/2018', cliente: 'Cliente C', rut: "00000000-0", estado: 'Rechazada',  total: '200.500 $' },
-    { id: 7, fecha: '05/07/2023', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '9.800 $' },
-    { id: 8, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
-    { id: 9, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
-    { id: 10, fecha: '05/05/2018', cliente: 'Cliente C', rut: "00000000-0", estado: 'Rechazada',  total: '200.500 $' },
-    { id: 11, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
-    { id: 12, fecha: '05/03/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Rechazada', total: '26.500 $' },    
-    { id: 13, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
-    { id: 14, fecha: '05/05/2025', cliente: 'Cliente B', rut: "00000000-0", estado: 'Pendiente', total: '22.000 $' },
-    { id: 15, fecha: '05/07/2023', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '9.800 $' },
-    { id: 16, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
-    { id: 17, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
-    { id: 18, fecha: '10/05/2025', cliente: 'Cliente A', rut: "00000000-0", estado: 'Aprobada',  total: '26.500 $' },
-];
-*/
-
 /* ---------------------------------- */
 /*  Chips reutilizables */
 /* ---------------------------------- */

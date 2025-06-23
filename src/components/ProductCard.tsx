@@ -12,8 +12,10 @@ interface Props {
 }
 
 const ProductCard: React.FC<Props> = ({ product }) => {
-    const { addToCart } = useCart();
+    const { addToCart, cart } = useCart();
     const [qty, setQty] = useState(1);
+
+   // console.log("Carrito:", cart);
 
     const decrease = () => setQty(q => Math.max(q - 1, 1));
     const increase = () => setQty(q => q + 1);
@@ -30,10 +32,10 @@ const ProductCard: React.FC<Props> = ({ product }) => {
             </div>
 
             <p className="text-orange-500 font-bold text-lg line-through">
-                ${product.precio.toLocaleString()} <span className="text-sm">c/u</span>
+                ${product.precio.toLocaleString('es-CL')} <span className="text-sm">c/u</span>
             </p>
             <span className="text-xs bg-[#B4FFA9] rounded px-2 py-0.5 w-fit mt-1">
-        {(product.precio-product.precio*product.descuento/100).toLocaleString()} C/U    {product.descuento}% OFF
+        {(product.precio-product.precio*product.descuento/100).toLocaleString('es-CL')} C/U    {product.descuento}% OFF
       </span>
 
             {/* Selector de cantidad */}

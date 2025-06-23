@@ -5,6 +5,13 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import producto from '@/styles/images/producto.png';
 
+// Función para convertir SKU a producto_id numérico
+const getProductoId = (sku: string) => {
+    // Extrae el número después del guion y lo convierte a número
+    const match = sku.match(/SKU-(\d+)/);
+    return match ? Number(match[1]) : null;
+};
+
 export default function CarritoPage() {
     const { cart, updateQuantity } = useCart();
 
@@ -151,7 +158,42 @@ export default function CarritoPage() {
                         </Link>
 
                         <Link
-                            href="/vendedor/checkout"
+                            href="#"
+                            onClick={async (e) => {
+                                e.preventDefault();
+                                try {
+                                    // Aquí debes obtener los IDs reales según tu lógica/app
+                                    const cotizacion = {
+                                        fecha: new Date().toISOString(), // Fecha actual en formato ISO
+                                        cliente_id: 3, // <-- reemplaza por el ID real del cliente
+                                        vendedor_id: 5, // <-- reemplaza por el ID real del vendedor
+                                        ubicacion_id: 7, // <-- reemplaza por el ID real de la ubicación
+                                        estado: "Pendiente",
+                                        detalle_cotizacion: cart.map(item => ({
+                                            producto_id: getProductoId(item.sku), // ← aquí se convierte el SKU a id
+                                            cantidad: item.cantidad,
+                                            precio_unitario: totalFinal
+                                        }))
+                                    };
+                                    console.log("Cotización enviada:", cotizacion);
+                                    const res = await fetch('http://localhost:8080/api/cotizaciones', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                        },
+                                        body: JSON.stringify(cotizacion),
+                                    });
+                                    const data = await res.json().catch(() => ({}));
+                                    console.log("Respuesta del backend:", data);
+                                    if (res.ok) {
+                                        alert('Cotización enviada correctamente');
+                                    } else {
+                                        alert('Error al enviar cotización');
+                                    }
+                                } catch (err) {
+                                    alert('Error de red');
+                                }
+                            }}
                             className="w-full bg-orange-500 hover:bg-orange-700 text-white py-2 rounded-md text-center font-semibold"
                         >
                             Confirmar Cotización
