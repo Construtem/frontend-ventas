@@ -215,6 +215,7 @@ export default function HistorialCotizaciones() {
     };
 
     // Carga de cotizaciones desde la API al montar el componente
+    // Pruebas con https://github.com/Construtem/backend-ventas/tree/feature/cotizacion-union-front
     useEffect(() => {
       setLoading(true);
       fetch('http://localhost:8080/api/cotizaciones')
