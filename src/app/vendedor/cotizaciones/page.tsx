@@ -11,6 +11,7 @@ import Image from 'next/image';
 interface Cotizacion {
     id: number;
     fecha: string;
+    fechaISO?: string;
     cliente: string;
     rut: string;
     estado: 'Aprobada' | 'Pendiente' | 'Rechazada';
@@ -185,9 +186,12 @@ export default function HistorialCotizaciones() {
 
     // Filtrado de cotizaciones según los filtros activos
     const cotizacionesFiltradas = cotizaciones.filter((c) => {
-        const [dia, mes, ano] = c.fecha.split('/');
-        const coincideDia = !filtroDia || Number(filtroDia) === Number(dia);
-        const coincideMes = !filtroMes || Number(filtroMes) === Number(mes);
+        const fecha = c.fechaISO ? new Date(c.fechaISO) : null;
+        const dia = fecha ? fecha.getDate() : null;
+        const mes = fecha ? fecha.getMonth() + 1 : null; // getMonth() es 0-indexado
+        const ano = fecha ? fecha.getFullYear().toString() : null;
+        const coincideDia = !filtroDia || Number(filtroDia) === dia;
+        const coincideMes = !filtroMes || Number(filtroMes) === mes;
         const coincideAno = !filtroAno || filtroAno === ano;
         const coincideEstado = !filtroEstado || c.estado === filtroEstado;
         return coincideDia && coincideMes && coincideAno && coincideEstado;
@@ -217,14 +221,18 @@ export default function HistorialCotizaciones() {
         .then(data => {
           // Mapeo de datos del backend al formato esperado
           const cotizacionesBackend = Array.isArray(data) ? data : data.data;
-          const cotizacionesMapeadas = cotizacionesBackend.map((c: CotizacionBackend) => ({
-            id: c.id,
-            fecha: c.fecha ? new Date(c.fecha).toLocaleDateString('es-CL') : '',
-            cliente: c.cliente?.nombre || 'Sin nombre',
-            rut: c.cliente?.rut || '',
-            estado: c.estado,
-            total: c.total ? `${c.total.toLocaleString('es-CL')} $` : '',
-          }));
+          const cotizacionesMapeadas = cotizacionesBackend.map((c: CotizacionBackend) => {
+            const fechaObj = c.fecha ? new Date(c.fecha) : null;
+            return {
+              id: c.id,
+              fecha: fechaObj ? fechaObj.toLocaleDateString('es-CL') : '',
+              fechaISO: c.fecha || '', // <-- Guarda la fecha ISO
+              cliente: c.cliente?.nombre || 'Sin nombre',
+              rut: c.cliente?.rut || '',
+              estado: c.estado,
+              total: c.total ? `${c.total.toLocaleString('es-CL')} $` : '',
+            };
+          });
           setCotizaciones(cotizacionesMapeadas);
           setLoading(false);
         })
