@@ -147,7 +147,7 @@ const QuotationTable: React.FC<Props> = ({ cotizaciones, onRowClick }) => {
           <tr
             key={c.id}
             className="cursor-pointer transition hover:bg-blue-50"
-            onClick={() => onRowClick ? onRowClick(c.id) : router.push(`/cotizaciones/${c.id}`)}
+            onClick={() => onRowClick ? onRowClick(c.id) : router.push(`/vendedor/cotizaciones/${c.id}`)}
           >
             <td className="px-6 py-4 border-b border-gray-200">{c.fecha}</td>
             <td className="px-6 py-4 border-b border-gray-200">{c.cliente}</td>

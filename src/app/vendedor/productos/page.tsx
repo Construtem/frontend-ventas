@@ -43,16 +43,6 @@ const ProductList: React.FC = () => {
             <div className="flex-1">
                 {/* Filtros */}
                 <div className="flex gap-4 mb-4">
-                    {/* Select para elegir el campo de filtro */}
-                    <select
-                        value={filterBy}
-                        onChange={e => setFilterBy(e.target.value as FilterKey)}
-                        className="bg-[#EDEFF2] text-black font-montserrat font-semibold px-4 py-2 rounded-lg shadow appearance-none focus:outline-none"
-                    >
-                        <option value="nombre">Nombre</option>
-                        <option value="sku">SKU</option>
-                        <option value="precio">Precio</option>
-                    </select>
                     {/* Input de búsqueda*/}
                     <input
                         type={filterBy === 'precio' ? 'number' : 'text'}
