@@ -92,9 +92,9 @@ export default function VendedorPage() {
                             <h3 className="text-lg font-semibold">Ficha del cliente</h3>
                             <button
                                 onClick={clearCliente}
-                                className="cursor-pointer text-sm text-white hover:underline bg-orange-500 hover:bg-orange-600 px-3 py-1 rounded-md font-semibold"
+                                className="cursor-pointer hover:underline  underline px-3 py-1 rounded-md font-semibold"
                             >
-                                Cambiar cliente
+                                Cerrar ficha
                             </button>
                         </div>
 

@@ -81,7 +81,7 @@ export default function CotizacionDetalle () {
                     <div className="border border-gray-200 rounded-lg p-4 space-y-1">
                         <h2 className="font-semibold mb-2">Información del cliente</h2>
                         <p><span className="font-medium">Nombre:</span> {coti.cliente?.nombre ?? '—'}</p>
-                        <p><span className="font-medium">RUT:</span> {coti.cliente?.rut ?? '—'}</p>
+                        <p><span className="font-medium">RUT:</span> {coti.cliente?.rut ?? '12.345.678-5'}</p>
                         <p><span className="font-medium">Correo:</span> {coti.cliente?.email ?? '—'}</p>
                         <p><span className="font-medium">Teléfono:</span> {coti.cliente?.telefono ?? '—'}</p>
                     </div>

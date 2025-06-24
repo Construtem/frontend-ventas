@@ -221,7 +221,7 @@ export default function HistorialCotizaciones() {
             id: c.id,
             fecha: c.fecha ? new Date(c.fecha).toLocaleDateString('es-CL') : '',
             cliente: c.cliente?.nombre || 'Sin nombre',
-            rut: c.cliente?.rut || '',
+            rut: c.cliente?.rut || '12.345.678-5',
             estado: c.estado,
             total: c.total ? `${c.total.toLocaleString('es-CL')} $` : '',
           }));

@@ -13,7 +13,7 @@ const getProductoId = (sku: string) => {
 };
 
 export default function CarritoPage() {
-    const { cart, updateQuantity } = useCart();
+    const { cart, updateQuantity, clearCart } = useCart();
 
     /* ────────────────  CÁLCULOS  ──────────────── */
     const subtotalBruto = cart.reduce(
@@ -187,6 +187,7 @@ export default function CarritoPage() {
                                     console.log("Respuesta del backend:", data);
                                     if (res.ok) {
                                         alert('Cotización enviada correctamente');
+                                        clearCart();
                                     } else {
                                         alert('Error al enviar cotización');
                                     }
