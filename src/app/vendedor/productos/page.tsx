@@ -13,7 +13,8 @@ const ProductList: React.FC = () => {
 
     const [search, setSearch] = useState('');
     const [sortBy, setSortBy] = useState<SortKey>('nombre');
-    const [filterBy, setFilterBy] = useState<FilterKey>('nombre');
+    const [filterBy] = useState<FilterKey>('nombre'); // sin setter
+
 
     // El filtro primero filtra por el campo seleccionado (nombre, sku o precio)
     // Si es precio, busca por precio. Si es nombre o sku, busca por ambos campos.
