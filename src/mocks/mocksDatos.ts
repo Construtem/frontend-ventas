@@ -55,6 +55,8 @@ export interface Quotation {
     totalDespacho: number
     totalDescuento: number
     totalCotizacion: number
+    ComunaDespacho: string
+    ciudadCespacho: string 
 }
 
 export interface QuotationItem {
@@ -69,7 +71,6 @@ export interface QuotationItem {
     descuento: number
     mejorPrecio: number
 }
-
 
 // 2. Datos MOCK simulando filas de BD
 
@@ -92,6 +93,15 @@ export const clients: Client[] = [
         telefono: '56949677526',
         email: 'njimenezr@utem.cl',
     },
+        {
+        id: 'c2',
+        documentoId: '19582475-3',
+        tipoCliente: 'Persona',
+        nombre: 'Alejandra',
+        apellido: 'Lucero',
+        telefono: '56949954956',
+        email: 'ALucero@utem.cl',
+    },
 ]
 
 export const addresses: Address[] = [
@@ -100,6 +110,14 @@ export const addresses: Address[] = [
         clientId: 'c1',
         nombre: 'Casa Principal',
         direccion: 'abc abc 2921',
+        comuna: 'Ñuñoa',
+        ciudad: 'Santiago',
+    },
+        {
+        id: 'a2',
+        clientId: 'c2',
+        nombre: 'Casa Azul',
+        direccion: 'abc abc 482',
         comuna: 'Ñuñoa',
         ciudad: 'Santiago',
     },
@@ -155,6 +173,8 @@ export const quotations: Quotation[] = [
         totalDespacho: 3990,
         totalDescuento: 3990,           // aplicamos un descuento en Martillo
         totalCotizacion: 167980 + 3990 - 3990,
+        ComunaDespacho: 'Cerrillos',
+        ciudadCespacho: 'Santiago', 
     },
     {
         id: 'q2',
@@ -171,6 +191,8 @@ export const quotations: Quotation[] = [
         totalDespacho: 5500,
         totalDescuento: 0,
         totalCotizacion: 414000 + 5500,
+        ComunaDespacho: 'El Bosque',
+        ciudadCespacho: 'Santiago',
     },
 ]
 
@@ -215,3 +237,4 @@ export const quotationItems: QuotationItem[] = [
         mejorPrecio: 138000,
     },
 ]
+
