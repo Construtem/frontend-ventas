@@ -25,18 +25,18 @@ const QuotationHistory: React.FC<QuotationHistoryProps> = ({ quotationId, isOpen
         })
     }
 
-    const getActionColor = (action: string) => {
-        switch (action) {
-            case 'Creada':
-                return 'text-green-600 bg-green-50'
-            case 'Cambio de estado':
-                return 'text-blue-600 bg-blue-50'
-            case 'Modificación de detalle':
-                return 'text-orange-600 bg-orange-50'
-            default:
-                return 'text-gray-600 bg-gray-50'
-        }
-    }
+    // const getActionColor = (action: string) => {
+    //     switch (action) {
+    //         case 'Creada':
+    //             return 'text-green-600 bg-green-50'
+    //         case 'Cambio de estado':
+    //             return 'text-blue-600 bg-blue-50'
+    //         case 'Modificación de detalle':
+    //             return 'text-orange-600 bg-orange-50'
+    //         default:
+    //             return 'text-gray-600 bg-gray-50'
+    //     }
+    // }
 
     const getStatusColor = (action: string) => {
         switch (action) {

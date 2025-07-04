@@ -1,5 +1,5 @@
 // hooks/useQuotationHistory.ts
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { QuotationHistoryItem, getQuotationHistory } from '../mocks/mocksDatos'
 import QuotationService from '../services/quotationService'
 import { API_CONFIG } from '../config/apiConfig'
@@ -24,7 +24,7 @@ export const useQuotationHistory = ({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const fetchHistory = async () => {
+  const fetchHistory = useCallback(async () => {
     setLoading(true)
     setError(null)
 
@@ -49,13 +49,13 @@ export const useQuotationHistory = ({
     } finally {
       setLoading(false)
     }
-  }
+  }, [quotationId, useMockData])
 
   useEffect(() => {
     if (quotationId) {
       fetchHistory()
     }
-  }, [quotationId, useMockData])
+  }, [quotationId, useMockData, fetchHistory])
 
   return {
     history,

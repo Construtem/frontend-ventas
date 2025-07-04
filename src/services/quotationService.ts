@@ -22,7 +22,16 @@ export class QuotationService {
       const data = await response.json()
       
       // Mapear la respuesta de la API al formato esperado por el frontend
-      return data.map((item: any) => ({
+      return data.map((item: {
+        id: number | string;
+        fecha: string;
+        accion: string;
+        usuario?: {
+          id: number | string;
+          nombre: string;
+        };
+        detalles?: string;
+      }) => ({
         id: item.id.toString(),
         fecha: item.fecha,
         accion: item.accion,
@@ -75,7 +84,7 @@ export class QuotationService {
    */
   static async updateQuotationDetails(
     quotationId: string, 
-    details: any[]
+    details: Record<string, unknown>[]
   ): Promise<void> {
     try {
       const response = await fetch(`${API_CONFIG.BASE_URL}${API_ENDPOINTS.QUOTATION_DETAILS(quotationId)}`, {
