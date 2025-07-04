@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react'
 import { quotations, quotationItems, products } from '../mocks/mocksDatos'
+import QuotationHistoryTable from './QuotationHistoryTable'
 
 interface QuotationTableProps {
     quotationId?: string
@@ -72,7 +73,7 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
             </div>
 
             {/* Tabla de productos */}
-            <div className="overflow-x-auto mb-4">
+            <div className="overflow-x-auto mb-4 max-h-96 overflow-y-auto">
                 <table className="w-full border border-gray-400 text-xs">
                     <thead>
                         <tr className="" style={{background:'#fff'}}>
@@ -213,6 +214,9 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                     </div>
                 </div>
             </div>
+
+            {/* Componente de historial integrado */}
+            <QuotationHistoryTable quotationId={quotationId} />
         </div>
     )
 }

@@ -70,6 +70,18 @@ export interface QuotationItem {
     mejorPrecio: number
 }
 
+// Interfaces para el historial de cotizaciones
+export interface QuotationHistoryItem {
+    id: string
+    fecha: string
+    accion: string
+    usuario?: {
+        id: string
+        nombre: string
+    }
+    detalles?: string
+}
+
 
 // 2. Datos MOCK simulando filas de BD
 
@@ -215,3 +227,90 @@ export const quotationItems: QuotationItem[] = [
         mejorPrecio: 138000,
     },
 ]
+
+// Datos mock para el historial de cotizaciones
+export const quotationHistory: QuotationHistoryItem[] = [
+    {
+        id: '10029302',
+        fecha: '2024-06-19T14:30:00-04:00',
+        accion: 'Creada',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent fermentum.'
+    },
+    {
+        id: '10029303',
+        fecha: '2024-06-19T15:45:00-04:00',
+        accion: 'Modificación de detalle',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent fermentum.'
+    },
+    {
+        id: '10029304',
+        fecha: '2024-06-19T16:20:00-04:00',
+        accion: 'Cambio de estado',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent fermentum.'
+    },
+    {
+        id: '10029306',
+        fecha: '2024-06-19T17:15:00-04:00',
+        accion: 'Modificación de detalle',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Agregado nuevo producto a la cotización.'
+    },
+    {
+        id: '10029307',
+        fecha: '2024-06-19T18:30:00-04:00',
+        accion: 'Cambio de estado',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Estado cambiado a Pendiente por revisión.'
+    },
+    {
+        id: '10029308',
+        fecha: '2024-06-20T09:00:00-04:00',
+        accion: 'Modificación de detalle',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Actualización de cantidades y precios.'
+    },
+    // Historial para la segunda cotización
+    {
+        id: '10029305',
+        fecha: '2024-06-20T10:15:00-04:00',
+        accion: 'Creada',
+        usuario: {
+            id: 'u1',
+            nombre: 'Nombre cotización'
+        },
+        detalles: 'Cambio de diseño en la fachada del local.'
+    }
+]
+
+// Función helper para obtener historial por cotización
+export const getQuotationHistory = (quotationId: string): QuotationHistoryItem[] => {
+    // Por simplicidad, devolvemos el historial de la primera cotización para 'q1'
+    // y un historial básico para las demás
+    if (quotationId === 'q1') {
+        return quotationHistory.slice(0, 6) // Devolver 6 registros para ver el scroll
+    } else if (quotationId === 'q2') {
+        return [quotationHistory[6]]
+    }
+    return []
+}
