@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { clients, addresses, quotations} from '@/mocks/mocksDatos';
+import { clients, addresses, quotations, Client, Quotation} from '@/mocks/mocksDatos';
 import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 
@@ -11,7 +11,6 @@ export default function Cliente() {
     const [mostrarBarra, setMostrarBarra] = useState(false);
     const [mostrarCotizaciones, setMostrarCotizaciones] = useState(false);
     const [busqueda, setBusqueda] = useState('');
-    const cliente = clienteSeleccionado; {/*Para Buscar cliente*/}
     const direccionPrincipal = addresses.find(a => a.clientId === clienteSeleccionado?.id);
     const cotizacionesDelCliente = quotations.filter(q => q.clientId === clienteSeleccionado?.id);
 
@@ -140,32 +139,32 @@ export default function Cliente() {
 
                     <tr className="border-b border-gray-800">
                     <td className="px-3 py-1 bg-[#fffcfa] font-medium text-gray-700">Documento Id</td>
-                    <td className="px-3 py-1 bg-[#fff2e8] w-[400px]">{cliente.documentoId}</td>
+                    <td className="px-3 py-1 bg-[#fff2e8] w-[400px]">{clienteSeleccionado.documentoId}</td>
                     </tr>
 
                     <tr className="border-b border-gray-800">
                     <td className="px-3 py-1 bg-[#fffcfa] font-medium text-gray-700">Tipo Cliente</td>
-                    <td className="px-3 py-1 bg-[#fff2e8] ">{cliente.tipoCliente}</td>
+                    <td className="px-3 py-1 bg-[#fff2e8] ">{clienteSeleccionado.tipoCliente}</td>
                     </tr>
 
                     <tr className="border-b border-gray-800">
                     <td className="px-3 py-1 bg-[#fffcfa] font-medium text-gray-700">Nombre</td>
-                    <td className="px-3 py-1 bg-[#fff2e8]">{cliente.nombre}</td>
+                    <td className="px-3 py-1 bg-[#fff2e8]">{clienteSeleccionado.nombre}</td>
                     </tr>
 
                     <tr className="border-b border-gray-800">
                     <td className="px-3 py-1 bg-[#fffcfa] font-medium text-gray-700">Apellido</td>
-                    <td className="px-3 py-1 bg-[#fff2e8]">{cliente.apellido}</td>
+                    <td className="px-3 py-1 bg-[#fff2e8]">{clienteSeleccionado.apellido}</td>
                     </tr>
 
                     <tr className="border-b border-gray-800">
                     <td className="px-3 py-1 bg-[#fffcfa] font-medium text-gray-700">Teléfono</td>
-                    <td className="px-3 py-1 bg-[#fff2e8]">{cliente.telefono}</td>
+                    <td className="px-3 py-1 bg-[#fff2e8]">{clienteSeleccionado.telefono}</td>
                     </tr>                    
 
                     <tr className="border-b border-gray-800">
                     <td className="px-3 py-1 bg-[#fffcfa] font-medium text-gray-700">Email</td>
-                    <td className="px-3 py-1 bg-[#fff2e8]">{cliente.email}</td>
+                    <td className="px-3 py-1 bg-[#fff2e8]">{clienteSeleccionado.email}</td>
                     </tr>
 
                     <tr className="border-b border-gray-800">
