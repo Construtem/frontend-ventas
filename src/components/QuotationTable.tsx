@@ -72,8 +72,8 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
             </div>
 
             {/* Tabla de productos */}
-            <div className="overflow-x-auto mb-4">
-                <table className="w-full border border-gray-400 text-xs">
+            <div className="overflow-x-auto mb-4 max-h-72" style={{overflowY:'auto'}}>
+                <table className="w-full border border-gray-400 text-xs border-collapse">
                     <thead>
                         <tr className="" style={{background:'#fff'}}>
                             <th className="border border-gray-400 px-2 py-1 text-left">SKU</th>
