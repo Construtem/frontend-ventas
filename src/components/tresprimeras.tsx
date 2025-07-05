@@ -8,7 +8,6 @@ export default function Cliente() {
 
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Client | null>(null);
     const [cotizacionSeleccionada, setCotizacionSeleccionada] = useState<Quotation | null>(null);
-    const [setMostrarBusqueda] = useState(true);
     const [mostrarBarra, setMostrarBarra] = useState(false);
     const [mostrarCotizaciones, setMostrarCotizaciones] = useState(false);
     const [busqueda, setBusqueda] = useState('');
@@ -125,7 +124,6 @@ export default function Cliente() {
                         className="p-2 hover:bg-orange-50 cursor-pointer"
                         onClick={() => {
                         setClienteSeleccionado(c);
-                        setMostrarBusqueda(false);
                         setBusqueda('');
                         }}
                     >
