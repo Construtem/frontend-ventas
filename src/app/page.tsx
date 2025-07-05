@@ -2,7 +2,6 @@
 'use client'
 import { NextPage } from 'next'
 import React from 'react'
-import QuotationTable from '../components/QuotationTable'
 import QuotationTable from '@/components/QuotationTable'
 import Cliente from '@/components/tresprimeras';
 import HistorialCotizaciones from '@/components/HistorialCotizaciones'
