@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { clients, addresses, quotations} from '@/mocks/mocksDatos';
+import { clients, addresses, quotations, Client, Quotation} from '@/mocks/mocksDatos';
 import { useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
 
