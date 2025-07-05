@@ -8,7 +8,7 @@ export default function Cliente() {
 
     const [clienteSeleccionado, setClienteSeleccionado] = useState<Client | null>(null);
     const [cotizacionSeleccionada, setCotizacionSeleccionada] = useState<Quotation | null>(null);
-    const [mostrarBusqueda, setMostrarBusqueda] = useState(true);
+    const [setMostrarBusqueda] = useState(true);
     const [mostrarBarra, setMostrarBarra] = useState(false);
     const [mostrarCotizaciones, setMostrarCotizaciones] = useState(false);
     const [busqueda, setBusqueda] = useState('');
