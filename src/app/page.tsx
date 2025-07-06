@@ -10,11 +10,11 @@ const Home: NextPage = () => {
     return (
         <div className="min-h-screen bg-gray-100">
             <div className="container mx-auto py-8 pt-[66px]">
-        <Cliente />
-                <QuotationTable quotationId="q1" />
-                <div className="mt-10">
-                  <h2 className="text-lg font-bold mb-2">Historial</h2>
-                  <HistorialCotizaciones />
+                <Cliente/>
+                <QuotationTable quotationId="q1"/>
+                <div className="bg-white border border-gray-300 p-4 max-w-7xl mx-auto">
+                    <h2 className="text-lg font-bold mb-2">Historial</h2>
+                    <HistorialCotizaciones/>
                 </div>
             </div>
         </div>
