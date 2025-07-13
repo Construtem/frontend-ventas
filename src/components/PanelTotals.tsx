@@ -1,0 +1,78 @@
+'use client'
+import React from 'react'
+
+interface PanelTotalsProps {
+    quotation: {
+        totalProductosNeto: number
+        totalDespacho: number
+        totalDescuento: number
+        totalProductosIVA: number
+        totalCotizacion: number
+    }
+    onGuardar?: () => void
+    onPagar?: () => void
+}
+
+const PanelTotals: React.FC<PanelTotalsProps> = ({ 
+    quotation, 
+    onGuardar, 
+    onPagar 
+}) => {
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('es-CL', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+        }).format(amount)
+    }
+
+    return (
+        <div className="bg-white p-2 w-[280px]">
+            {/* Panel de totales */}
+            <div className="space-y-3 mb-4">
+                <div className="flex justify-between items-center">
+                    <span className="text-sm">Subtotal</span>
+                    <span className="text-sm font-bold">{formatCurrency(quotation.totalProductosNeto)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-sm">Despacho</span>
+                    <span className="text-sm font-bold">{formatCurrency(quotation.totalDespacho)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-sm">Descuento</span>
+                    <span className="text-sm font-bold">{formatCurrency(quotation.totalDescuento)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                    <span className="text-sm">Iva 19%</span>
+                    <span className="text-sm font-bold">{formatCurrency(quotation.totalProductosIVA - quotation.totalProductosNeto)}</span>
+                </div>
+                
+                <hr className="my-3 border-gray-300" />
+                
+                <div className="flex justify-between items-center">
+                    <span className="text-lg font-bold">Total</span>
+                    <span className="text-lg font-bold">{formatCurrency(quotation.totalCotizacion)}</span>
+                </div>
+            </div>
+
+            {/* Botones lado a lado */}
+            <div className="flex gap-2">
+                <button 
+                    onClick={onGuardar}
+                    className="flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors hover:bg-blue-700" 
+                    style={{background:'#2563B6'}}
+                >
+                    Guardar
+                </button>
+                <button 
+                    onClick={onPagar}
+                    className="flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer hover:bg-orange-600" 
+                    style={{background:'#F59243'}}
+                >
+                    Pagar
+                </button>
+            </div>
+        </div>
+    )
+}
+
+export default PanelTotals
