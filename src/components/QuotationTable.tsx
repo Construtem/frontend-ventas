@@ -1,16 +1,20 @@
 'use client'
 import React, { useState } from 'react'
-import { quotations, quotationItems, products } from '../mocks/mocksDatos'
+import { quotations, quotationItems, products, Product, QuotationItem } from '../mocks/mocksDatos'
 
 interface QuotationTableProps {
     quotationId?: string
 }
+
+// Combined type for table rows
+type TableRowData = QuotationItem & Partial<Product>
 
 const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) => {
     // Estados para el modal y búsqueda
     const [showPickApplet, setShowPickApplet] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
     const [searchType, setSearchType] = useState<'sku' | 'nombre'>('sku')
+    const [isSaving, setIsSaving] = useState(false)
     
     // Obtener la cotización específica
     const quotation = quotations.find(q => q.id === quotationId)
@@ -30,7 +34,7 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
     })
 
     // Crear datos de la tabla combinando items con productos
-    const tableData = items.map(item => {
+    const tableData: TableRowData[] = items.map(item => {
         const product = products.find(p => p.sku === item.sku)
         return {
             ...item,
@@ -47,6 +51,19 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
 
     const formatDecimal = (value: number) => {
         return value.toFixed(1)
+    }
+
+    const handleSave = async () => {
+        setIsSaving(true)
+        try {
+            // Simulate saving process
+            await new Promise(resolve => setTimeout(resolve, 1000))
+            // Save logic would go here
+        } catch {
+            // Handle error
+        } finally {
+            setIsSaving(false)
+        }
     }
 
     return (
@@ -205,7 +222,13 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                             <div className="bg-[#ffe9d2] border border-gray-400 flex flex-col gap-2 p-5 h-full justify-between" style={{minHeight: '100%'}}>
                                 <div className="flex gap-2 w-full">
                                     <button className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100">Obtener PDF</button>
-                                    <button className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100">Guardar</button>
+                                    <button 
+                                        onClick={handleSave}
+                                        disabled={isSaving}
+                                        className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isSaving ? 'Guardando...' : 'Guardar'}
+                                    </button>
                                 </div>
                                 <button className="w-full bg-orange-500 hover:bg-orange-600 text-white border border-gray-400 py-2 text-xs font-bold cursor-pointer">PAGAR</button>
                             </div>
