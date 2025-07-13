@@ -1,5 +1,5 @@
 import React from 'react';
-import { quotations, clients } from '../mocks/mocksDatos';
+import { quotations, clients } from '@/mocks/mocksDatos';
 
 const columns = [
   'ID Cotización',

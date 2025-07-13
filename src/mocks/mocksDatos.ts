@@ -31,13 +31,8 @@ export interface Address {
 export interface Product {
     sku: string
     nombre: string
-    marca: string
-    precioNeto: number
-    precioIVA: number
-    anchoMm: number
-    altoMm: number
-    largoMm: number
-    pesoKg: number
+    descripcion: string
+    precio: number
 }
 
 export interface Quotation {
@@ -135,24 +130,14 @@ export const products: Product[] = [
     {
         sku: '100039292',
         nombre: 'Martillo',
-        marca: 'Acero',
-        precioNeto: 12990,
-        precioIVA: 14990,
-        anchoMm: 200,
-        altoMm: 1000,
-        largoMm: 200,
-        pesoKg: 0.1,
+        descripcion: 'Acero',
+        precio: 12990,
     },
     {
         sku: '100039293',
         nombre: 'Sierra circular',
-        marca: 'Makita',
-        precioNeto: 120000,
-        precioIVA: 138000,
-        anchoMm: 250,
-        altoMm: 1200,
-        largoMm: 250,
-        pesoKg: 3.5,
+        descripcion: 'Makita',
+        precio: 120000,
     },
 ]
 
