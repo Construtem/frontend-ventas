@@ -1,6 +1,7 @@
 'use client'
-import React, { useState } from 'react'
-import { quotations, quotationItems, products } from '../mocks/mocksDatos'
+import React, { useState, useEffect } from 'react'
+import { quotations, quotationItems } from '../mocks/mocksDatos'
+import api from '../api'
 
 interface QuotationTableProps {
     quotationId?: string
@@ -11,10 +12,50 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
     const [showPickApplet, setShowPickApplet] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
     const [searchType, setSearchType] = useState<'sku' | 'nombre'>('sku')
+    const [selectedProducts, setSelectedProducts] = useState<any[]>([])
+    const [despachoConfirmado, setDespachoConfirmado] = useState(false)
+    const [productosConfirmados, setProductosConfirmados] = useState(false)
+    const [isSaving, setIsSaving] = useState(false)
+    const [saveError, setSaveError] = useState<string|null>(null)
+    const [saveSuccess, setSaveSuccess] = useState<string|null>(null)
+    const [paySuccess, setPaySuccess] = useState<string|null>(null)
     
+
     // Obtener la cotización específica
     const quotation = quotations.find(q => q.id === quotationId)
     const items = quotationItems.filter(item => item.quotationId === quotationId)
+
+    // Estado para productos desde API
+    const [products, setProducts] = useState<any[]>([])
+    const [loadingProducts, setLoadingProducts] = useState(false)
+    const [errorProducts, setErrorProducts] = useState<string | null>(null)
+
+    useEffect(() => {
+        setLoadingProducts(true)
+        api.get('/productos')
+            .then(res => {
+                // Mapeo adaptado a la estructura real de la API
+                const rawProducts = Array.isArray(res.data) ? res.data : [];
+                const mapped = rawProducts.map((p: any) => ({
+                    sku: p.sku,
+                    nombre: p.nombre,
+                    descripcion: p.descripcion,
+                    marca: p.proveedor?.marca || '',
+                    precioNeto: p.precio,
+                    precioIVA: Math.round((p.precio || 0) * 1.19),
+                    anchoMm: p.ancho,
+                    altoMm: p.alto,
+                    largoMm: p.largo,
+                    pesoKg: p.peso,
+                }))
+                setProducts(mapped)
+                setErrorProducts(null)
+            })
+            .catch(err => {
+                setErrorProducts('Error al cargar productos')
+            })
+            .then(() => setLoadingProducts(false))
+    }, [])
 
     if (!quotation) {
         return <div>Cotización no encontrada</div>
@@ -30,13 +71,51 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
     })
 
     // Crear datos de la tabla combinando items con productos
-    const tableData = items.map(item => {
-        const product = products.find(p => p.sku === item.sku)
-        return {
-            ...item,
-            ...product
+    // Combina productos seleccionados con los de la cotización
+    // Agrupa productos seleccionados por SKU y suma cantidades
+    const selectedGrouped = selectedProducts.reduce((acc: any, prod: any) => {
+        const found = acc.find((p: any) => p.sku === prod.sku)
+        if (found) {
+            found.cantidad += 1
+        } else {
+            acc.push({ ...prod, cantidad: 1 })
         }
-    })
+        return acc
+    }, [])
+
+    const tableData = [
+        ...items.map(item => {
+            // Buscar producto en la API para obtener nombre y marca
+            const product = products.find((p: any) => p.sku === item.sku)
+            return {
+                ...item,
+                nombre: product ? product.nombre : '',
+                marca: product ? product.marca : '',
+                precioNeto: product ? product.precioNeto : item.precioNeto,
+                precioIVA: product ? product.precioIVA : item.precioIVA,
+                anchoMm: product ? product.anchoMm : 0,
+                altoMm: product ? product.altoMm : 0,
+                largoMm: product ? product.largoMm : 0,
+                pesoKg: product ? product.pesoKg : 0,
+            }
+        }),
+        ...selectedGrouped.map((product: any) => ({
+            sku: product.sku,
+            nombre: product.nombre,
+            marca: product.marca,
+            cantidad: product.cantidad,
+            precioNeto: product.precioNeto,
+            precioIVA: product.precioIVA,
+            calculado: product.precioIVA * product.cantidad,
+            anchoMm: product.anchoMm,
+            altoMm: product.altoMm,
+            largoMm: product.largoMm,
+            pesoKg: product.pesoKg,
+            valorDespacho: 0,
+            descuento: 0,
+            mejorPrecio: product.precioIVA,
+        }))
+    ]
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -51,6 +130,11 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
 
     return (
         <div className="bg-white border border-gray-300 p-4 max-w-7xl mx-auto">
+            {loadingProducts && <div className="text-center text-gray-500">Cargando productos...</div>}
+            {errorProducts && <div className="text-center text-red-500">{errorProducts}</div>}
+            {saveError && <div className="text-center text-red-500">{saveError}</div>}
+            {saveSuccess && <div className="text-center text-green-600">{saveSuccess}</div>}
+            {paySuccess && <div className="text-center text-green-600">{paySuccess}</div>}
             {/* Header */}
             <div className="mb-9">
                 <div className="flex items-center gap-2 mb-2">
@@ -93,8 +177,8 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                         </tr>
                     </thead>
                     <tbody>
-                        {tableData.map((row) => (
-                            <tr key={row.id} className="" style={{background: '#fff2e8'}}>
+                        {tableData.map((row, idx) => (
+                            <tr key={row.id || row.sku || idx} className="" style={{background: '#fff2e8'}}>
                                 <td className="border border-gray-300 px-2 py-1">{row.sku}</td>
                                 <td className="border border-gray-300 px-2 py-1">{row.nombre || ''}</td>
                                 <td className="border border-gray-300 px-2 py-1">{row.marca || ''}</td>
@@ -151,11 +235,12 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                                     <th className="border border-gray-300 px-1 py-1">Nombre</th>
                                     <th className="border border-gray-300 px-1 py-1">Precio Neto</th>
                                     <th className="border border-gray-300 px-1 py-1">Precio + Iva</th>
+                                    <th className="border border-gray-300 px-1 py-1">Agregar</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredProducts.length === 0 ? (
-                                    <tr><td colSpan={4} className="text-center text-gray-500 py-2">Sin resultados</td></tr>
+                                    <tr><td colSpan={5} className="text-center text-gray-500 py-2">Sin resultados</td></tr>
                                 ) : (
                                     filteredProducts.map(product => (
                                         <tr key={product.sku} className="hover:bg-blue-50 cursor-pointer">
@@ -163,11 +248,35 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                                             <td className="border border-gray-300 px-1 py-1">{product.nombre}</td>
                                             <td className="border border-gray-300 px-1 py-1 text-right">{formatCurrency(product.precioNeto)}</td>
                                             <td className="border border-gray-300 px-1 py-1 text-right">{formatCurrency(product.precioIVA)}</td>
+                                            <td className="border border-gray-300 px-1 py-1 text-center">
+                                                <button
+                                                    className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-xs"
+                                                    disabled={!despachoConfirmado}
+                                                    title={despachoConfirmado ? 'Agregar a cotización' : 'Confirma despacho primero'}
+                                                    onClick={() => {
+                                                        setSelectedProducts(prev => {
+                                                            const idx = prev.findIndex(p => p.sku === product.sku)
+                                                            if (idx !== -1) {
+                                                                // Si ya existe, suma cantidad
+                                                                const updated = [...prev]
+                                                                updated[idx] = {
+                                                                    ...updated[idx],
+                                                                    cantidad: (updated[idx].cantidad || 1) + 1
+                                                                }
+                                                                return updated
+                                                            } else {
+                                                                return [...prev, { ...product, cantidad: 1 }]
+                                                            }
+                                                        })
+                                                    }}
+                                                >Agregar</button>
+                                            </td>
                                         </tr>
                                     ))
                                 )}
                             </tbody>
                         </table>
+                        {!despachoConfirmado && <div className="text-xs text-orange-600 mt-2">Debes confirmar despacho antes de agregar productos.</div>}
                     </div>
                 )}
                 </div>
@@ -203,11 +312,66 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                         </div>
                         <div className="flex-1 flex flex-col justify-between">
                             <div className="bg-[#ffe9d2] border border-gray-400 flex flex-col gap-2 p-5 h-full justify-between" style={{minHeight: '100%'}}>
-                                <div className="flex gap-2 w-full">
-                                    <button className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100">Obtener PDF</button>
-                                    <button className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100">Guardar</button>
+                                <div className="flex gap-2 w-full mb-2">
+                                    <button className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100 rounded-md" style={{marginRight: '8px'}}>
+                                        Obtener PDF
+                                    </button>
+                                    <button className="flex-1 bg-white text-black py-2 text-xs font-bold shadow-md cursor-pointer transition-colors hover:bg-gray-100 rounded-md" style={{marginLeft: '8px'}}
+                                        disabled={selectedGrouped.length === 0 || !productosConfirmados}
+                                        onClick={async () => {
+                                        setSaveError(null)
+                                        setSaveSuccess(null)
+                                        setIsSaving(true)
+                                        try {
+                                            // Si la cotización existe, PATCH; si no, POST
+                                            if (quotation) {
+                                                await api.patch(`/cotizaciones/${quotation.id}`, { productos: selectedGrouped })
+                                                setSaveSuccess('Cotización actualizada correctamente.')
+                                            } else {
+                                                await api.post('/cotizaciones', { productos: selectedGrouped })
+                                                setSaveSuccess('Cotización creada correctamente.')
+                                            }
+                                            setSelectedProducts([])
+                                            setProductosConfirmados(false)
+                                            setTimeout(() => setSaveSuccess(null), 3000)
+                                        } catch (e) {
+                                            setSaveError('Error al guardar cotización')
+                                        } finally {
+                                            setIsSaving(false)
+                                        }
+                                    }}>Guardar</button>
                                 </div>
-                                <button className="w-full bg-orange-500 hover:bg-orange-600 text-white border border-gray-400 py-2 text-xs font-bold cursor-pointer">PAGAR</button>
+                                <button
+                                    className="w-full bg-orange-500 hover:bg-orange-600 text-white border border-gray-400 py-2 text-xs font-bold cursor-pointer rounded-md mb-2"
+                                    disabled={!productosConfirmados || selectedGrouped.length === 0}
+                                    title={productosConfirmados ? 'Ir a pagar' : 'Confirma productos para habilitar pago'}
+                                    style={{marginBottom: '10px'}}
+                                    onClick={async () => {
+                                        setPaySuccess(null)
+                                        if (!productosConfirmados || selectedGrouped.length === 0) return
+                                        setPaySuccess('¡Pago realizado con éxito!')
+                                        setTimeout(() => setPaySuccess(null), 3000)
+                                    }}
+                                >PAGAR</button>
+                                <button
+                                    className="w-full bg-green-500 hover:bg-green-600 text-white border border-gray-400 py-2 text-xs font-bold cursor-pointer rounded-md mb-2"
+                                    disabled={selectedGrouped.length === 0 || productosConfirmados}
+                                    onClick={() => {
+                                        setProductosConfirmados(true)
+                                        setSaveSuccess('Productos confirmados. Ahora puedes guardar o pagar.')
+                                        setTimeout(() => setSaveSuccess(null), 2000)
+                                    }}
+                                    style={{marginBottom: '10px'}}
+                                >Confirmar productos</button>
+                                <button
+                                    className="w-full bg-blue-500 hover:bg-blue-600 text-white border border-gray-400 py-2 text-xs font-bold cursor-pointer rounded-md"
+                                    onClick={() => {
+                                        setDespachoConfirmado(true)
+                                        setSaveSuccess('Despacho confirmado. Ahora puedes agregar productos.')
+                                        setTimeout(() => setSaveSuccess(null), 2000)
+                                    }}
+                                    disabled={despachoConfirmado}
+                                >Confirmar despacho</button>
                             </div>
                         </div>
                     </div>
