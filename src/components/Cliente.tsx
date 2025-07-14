@@ -16,7 +16,7 @@ tipo_id:number;
                                                                                                                                    
 export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
-
+    const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
@@ -40,25 +40,18 @@ export default function Cliente() {
                 Seleccionar cliente
             </div>
         
-            {mostrarModal && (
+
+            {/*Modal*/}
+            {MostrarModal_His && (
             <div className="fixed inset-0 flex justify-center items-center">
             <div className="bg-[#0B1631] p-8 rounded-lg w-[600px]">
-                <h2 className="text-2xl text-white font-semibold mb-4">Detalle cotización</h2>
+                <h2 className="text-2xl text-white font-semibold mb-4">Cotizaciones</h2>
 
 
                 <div className="flex my-4">
 
                     <div className="rounded bg-white w-[250]">
-                       
-                    <p className="mb-4">Nombre</p>
-                    
-                    </div>
-
-
-                    <div className="ml-4 rounded bg-white w-[269]">
-                    
-                    <p className="mb-4">Cliente</p>
-
+                    <p className="mb-4">prueba</p>
                     </div>
 
                 </div>
@@ -67,58 +60,11 @@ export default function Cliente() {
                 <div className="flex justify-end">
                 <button
                     className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={() => setMostrarModal(false)}
+                    onClick={(e) => setMostrarModal_His(false)}
                 >
-                    Cancelar
-                </button>
-                 <button
-                    className="px-17 py-2 ml-2 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={() => setMostrarModal(false)}
-                >
-                    Guardar
+                    Salir
                 </button>
                 </div>
-
-
-            </div>
-            </div>
-            )}
-
-            {/*Modal Ver*/}
-            {mostrarModal && (
-            <div className="fixed inset-0 flex justify-center items-center">
-            <div className="bg-[#0B1631] p-8 rounded-lg w-[600px]">
-                <h2 className="text-2xl text-white font-semibold mb-4">Detalle cotización</h2>
-
-
-                <div className="flex my-4">
-
-                    <div className="rounded bg-white w-[250]">
-                    <p className="mb-4">Nombre</p>
-                    </div>
-
-                    <div className="ml-4 rounded bg-white w-[269]">
-                    <p className="mb-4">Cliente</p>
-                    </div>
-
-                </div>
-
-
-                <div className="flex justify-end">
-                <button
-                    className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={() => setMostrarModal(false)}
-                >
-                    Cancelar
-                </button>
-                 <button
-                    className="px-17 py-2 ml-2 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={() => setMostrarModal(false)}
-                >
-                    Guardar
-                </button>
-                </div>
-
 
             </div>
             </div>
@@ -128,7 +74,7 @@ export default function Cliente() {
             {AñadirCliente && (
             <div className="fixed inset-0 flex justify-center items-center">
             <div className="bg-[#0B1631] p-8 rounded-lg w-[600px]">
-                <h2 className="text-2xl text-white font-semibold mb-4">Detalle cotización</h2>
+                <h2 className="text-2xl text-white font-semibold mb-4">Cliente</h2>
 
                     <div className="rounded bg-white w-[200]">
                     <p className="mb-4">Nombre</p>
@@ -137,13 +83,13 @@ export default function Cliente() {
                 <div className="flex justify-end">
                 <button
                     className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={() => setAñadirCliente(false)}
+                    onClick={(e) => setAñadirCliente(false)}
                 >
                     Cancelar
                 </button>
                  <button
                     className="px-17 py-2 ml-2 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={() => setAñadirCliente(false)}
+                    onClick={(e) => setAñadirCliente(false)}
                 >
                     Guardar
                                 </button>
@@ -251,13 +197,13 @@ export default function Cliente() {
                 <div className="flex justify-end">
                 <button
                     className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={() => setMostrarModal(false)}
+                    onClick={(e) => setMostrarModal(false)}
                 >
                     Cancelar
                 </button>
                  <button
                     className="px-17 py-2 ml-2 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={() => setMostrarModal(false)}
+                    onClick={(e) => setMostrarModal(false)}
                 >
                     Guardar
                 </button>
@@ -325,12 +271,12 @@ export default function Cliente() {
             <div className="flex justify-end mt-7">
 
                 <button className="px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
-                onClick={() => setMostrarModal_His(true)}>
+                onClick={(e) => setMostrarModal_His(true)}>
                 Ver historial
                 </button>
 
                 <button className="px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
-                onClick={() => setMostrarModal(true)}>
+                onClick={(e) => setMostrarModal(true)}>
                 Ver detalle
                 </button>
 
