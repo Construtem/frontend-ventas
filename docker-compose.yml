@@ -7,7 +7,13 @@ services:
       # El contexto de construcción es el directorio actual (donde se encuentra este docker-compose.yml y el Dockerfile).
       context: .
       dockerfile: Dockerfile 
-    
+      args:
+        # Argumentos de construcción que se pasan al Dockerfile.
+        NEXT_PUBLIC_API_INVENTARIO: ${NEXT_PUBLIC_API_INVENTARIO}
+        NEXT_PUBLIC_API_VENTAS: ${NEXT_PUBLIC_API_VENTAS}
+        NEXT_PUBLIC_API_FACTURACION: ${NEXT_PUBLIC_API_FACTURACION}
+        NEXT_PUBLIC_FRONT_LOGIN: ${NEXT_PUBLIC_FRONT_LOGIN}
+        NEXT_PUBLIC_FRONT_FACTURACION: ${NEXT_PUBLIC_FRONT_FACTURACION}
     # El puerto 3000 del host se mapea al puerto 3000 del contenedor,
     # permitiendo acceder a tu aplicación desde tu máquina local (ej. http://localhost:3000).
     ports:
@@ -22,5 +28,5 @@ services:
     
     # Opcional: Define variables de entorno específicas para el contenedor en desarrollo.
     # Por ejemplo, para configurar el entorno de Node.js.
-    env_file:
-      - .env.local # Carga las variables de entorno desde un archivo .env en el directorio actual
+    #env_file:
+    # - .env.local # Carga las variables de entorno desde un archivo .env en el directorio actual
