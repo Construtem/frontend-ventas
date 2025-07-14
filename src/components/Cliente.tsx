@@ -18,7 +18,7 @@ export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    const [clientes /*, setClientes*/] = useState<Cliente[]>([]);
+    //const [clientes /*, setClientes*/] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
 
    /* useEffect(() => {
@@ -242,20 +242,7 @@ export default function Cliente() {
                 </div>
             </div>
 
-
-                            {/*Para mostrar las opciones de la barra de busqueda*/}
-                {busqueda.trim() !== "" && (
-                <ul className="mt-2 border rounded max-h-30 overflow-y-auto">
-                {clientes
-                    .filter((c) =>
-                    c.nombre.toLowerCase().includes(busqueda.toLowerCase())
-                    )
-                    .map((cliente) => (
-                    <li key={cliente.rut} className="p-2 hover:bg-gray-100 cursor-pointer">
-                        {cliente.nombre} - {cliente.rut}
-                    </li>
-                    ))}
-                </ul>)}
+ 
 
 
             {/*Titulo: Nombre Cliente*/}
