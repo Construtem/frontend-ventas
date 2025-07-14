@@ -3,6 +3,40 @@ import React, { useState, useEffect } from 'react'
 import { quotations, quotationItems } from '../mocks/mocksDatos'
 import api from '../api'
 
+// Interfaces para TypeScript
+interface Product {
+    sku: string
+    nombre: string
+    descripcion: string
+    marca: string
+    precioNeto: number
+    precioIVA: number
+    anchoMm: number
+    altoMm: number
+    largoMm: number
+    pesoKg: number
+    cantidad?: number
+}
+
+interface QuotationItem {
+    id: string
+    quotationId: string
+    sku: string
+    nombre?: string
+    marca?: string
+    cantidad: number
+    precioNeto: number
+    precioIVA: number
+    calculado: number
+    anchoMm?: number
+    altoMm?: number
+    largoMm?: number
+    pesoKg?: number
+    valorDespacho: number
+    descuento: number
+    mejorPrecio: number
+}
+
 interface QuotationTableProps {
     quotationId?: string
 }
@@ -12,10 +46,9 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
     const [showPickApplet, setShowPickApplet] = useState(false)
     const [searchTerm, setSearchTerm] = useState('')
     const [searchType, setSearchType] = useState<'sku' | 'nombre'>('sku')
-    const [selectedProducts, setSelectedProducts] = useState<any[]>([])
+    const [selectedProducts, setSelectedProducts] = useState<Product[]>([])
     const [despachoConfirmado, setDespachoConfirmado] = useState(false)
     const [productosConfirmados, setProductosConfirmados] = useState(false)
-    const [isSaving, setIsSaving] = useState(false)
     const [saveError, setSaveError] = useState<string|null>(null)
     const [saveSuccess, setSaveSuccess] = useState<string|null>(null)
     const [paySuccess, setPaySuccess] = useState<string|null>(null)
@@ -321,7 +354,6 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                                         onClick={async () => {
                                         setSaveError(null)
                                         setSaveSuccess(null)
-                                        setIsSaving(true)
                                         try {
                                             // Si la cotización existe, PATCH; si no, POST
                                             if (quotation) {
@@ -334,10 +366,9 @@ const QuotationTable: React.FC<QuotationTableProps> = ({ quotationId = 'q1' }) =
                                             setSelectedProducts([])
                                             setProductosConfirmados(false)
                                             setTimeout(() => setSaveSuccess(null), 3000)
-                                        } catch (e) {
+                                        } catch (error) {
+                                            console.error('Error al guardar cotización:', error)
                                             setSaveError('Error al guardar cotización')
-                                        } finally {
-                                            setIsSaving(false)
                                         }
                                     }}>Guardar</button>
                                 </div>
