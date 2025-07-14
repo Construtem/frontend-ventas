@@ -226,7 +226,7 @@ export default function Cliente() {
                 <input
                     type="text"
                     /*value={}*/
-                    onChange={() => setBusqueda(e.target.value)}
+                    onChange={() => [/*setBusqueda(e.target.value)*/]}
                     placeholder="Buscar"
                     className="border rounded-sm border-[#DFDFDF] pl-10 px-3 py-1 w-[420]"
                 >
