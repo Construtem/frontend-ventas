@@ -60,7 +60,7 @@ export default function Cliente() {
                 <div className="flex justify-end">
                 <button
                     className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={(e) => setMostrarModal_His(false)}
+                    onClick={() => setMostrarModal_His(false)}
                 >
                     Salir
                 </button>
@@ -83,13 +83,13 @@ export default function Cliente() {
                 <div className="flex justify-end">
                 <button
                     className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={(e) => setAñadirCliente(false)}
+                    onClick={() => setAñadirCliente(false)}
                 >
                     Cancelar
                 </button>
                  <button
                     className="px-17 py-2 ml-2 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={(e) => setAñadirCliente(false)}
+                    onClick={() => setAñadirCliente(false)}
                 >
                     Guardar
                                 </button>
@@ -113,7 +113,7 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="Nombre cotización"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
                         ></input>      
@@ -122,7 +122,7 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="Calle #1234"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
                         ></input> 
@@ -131,7 +131,7 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="Añada una descripción"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
                         ></input> 
@@ -145,14 +145,14 @@ export default function Cliente() {
                         <input
                             type="date"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[150]"
                         ></input> 
 
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="Santiago"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[131]"
                         ></input> 
@@ -162,7 +162,7 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="Dirección"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
                         ></input> 
@@ -171,7 +171,7 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="Vendedor nombre"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
                         ></input> 
@@ -180,7 +180,7 @@ export default function Cliente() {
                         <input
                             type="number"
                             /*value={}*/
-                            onChange={(e) => {}}
+                            onChange={() => {}}
                             placeholder="10000"
                             className="ml-2 mb-3 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
                         ></input> 
@@ -197,13 +197,13 @@ export default function Cliente() {
                 <div className="flex justify-end">
                 <button
                     className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={(e) => setMostrarModal(false)}
+                    onClick={() => setMostrarModal(false)}
                 >
                     Cancelar
                 </button>
                  <button
                     className="px-17 py-2 ml-2 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={(e) => setMostrarModal(false)}
+                    onClick={() => setMostrarModal(false)}
                 >
                     Guardar
                 </button>
@@ -226,7 +226,7 @@ export default function Cliente() {
                 <input
                     type="text"
                     /*value={}*/
-                    onChange={(e) => setBusqueda(e.target.value)}
+                    onChange={() => setBusqueda(e.target.value)}
                     placeholder="Buscar"
                     className="border rounded-sm border-[#DFDFDF] pl-10 px-3 py-1 w-[420]"
                 >
@@ -271,12 +271,12 @@ export default function Cliente() {
             <div className="flex justify-end mt-7">
 
                 <button className="px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
-                onClick={(e) => setMostrarModal_His(true)}>
+                onClick={() => setMostrarModal_His(true)}>
                 Ver historial
                 </button>
 
                 <button className="px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
-                onClick={(e) => setMostrarModal(true)}>
+                onClick={() => setMostrarModal(true)}>
                 Ver detalle
                 </button>
 
