@@ -19,7 +19,7 @@ export default function Cliente() {
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
     //const [clientes /*, setClientes*/] = useState<Cliente[]>([]);
-    const [/*busqueda,*/ setBusqueda] = useState("");
+    //const [busqueda, setBusqueda] = useState("");
 
    /* useEffect(() => {
         fetch("http://localhost:8080/api/cotizaciones")
