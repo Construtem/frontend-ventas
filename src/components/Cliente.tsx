@@ -16,7 +16,7 @@ tipo_id:number;
                                                                                                                                    
 export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
-    const [MostrarModal_His, setMostrarModal_His] =useState(false);
+
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
