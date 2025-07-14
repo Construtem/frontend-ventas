@@ -4,23 +4,31 @@ import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 
 
-
+/*interface Cliente {
+id: number;
+rut: string;
+nombre: string;
+telefono: string;
+email: string;
+razon_social: string;
+tipo_id:number;
+}*/
                                                                                                                                    
 export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [clientes /*, setClientes*/] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
 
-    useEffect(() => {
+   /* useEffect(() => {
         fetch("http://localhost:8080/api/cotizaciones")
         .then((res) => res.json())
         .then((data) => {
             const clientesExtraídos = data.map((c: any) => c.cliente);
             setClientes(clientesExtraídos);
         });
-    }, []);
+    }, []);*/
 
 
     return (
