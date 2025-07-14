@@ -4,15 +4,7 @@ import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 
 
-interface Cliente {
-id: number;
-rut: string;
-nombre: string;
-telefono: string;
-email: string;
-razon_social: string;
-tipo_id:number;
-}
+
                                                                                                                                    
 export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
