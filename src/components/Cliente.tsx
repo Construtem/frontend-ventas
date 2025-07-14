@@ -1,7 +1,7 @@
 'use client'
 
 import { FaSearch } from "react-icons/fa";
-import { useEffect, useState } from 'react';
+import {/*useEffect,*/ useState } from 'react';
 
 
 /*interface Cliente {
