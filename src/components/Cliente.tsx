@@ -97,7 +97,17 @@ const guardarCliente = async () => {
     alert("No se pudo guardar el cliente");
   }
 };
-
+    
+    useEffect(() => {
+    fetch(`${apiVentasUrl}/api/cotizaciones`)
+        .then((res) => res.json())
+        .then((data) => {
+        setCotizaciones(data);
+        })
+        .catch((error) => {
+            console.error("Error fetching cotizaciones:", error);
+        });
+    }, [apiVentasUrl]);
 
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {

@@ -67,7 +67,7 @@ export default function AuthCallbackClient() {
 
     verifyAndLogin(firebaseToken);
 
-  }, [searchParams, router]); // Dependencias del efecto
+  }, [searchParams, router, frontLoginUrl, apiVentasUrl]); // Dependencias del efecto
 
   // Muestra el spinner mientras se procesa el token
   return <LoadingSpinner />;
