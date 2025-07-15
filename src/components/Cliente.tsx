@@ -5,14 +5,18 @@ import { useEffect, useState } from 'react';
 
 
 export default function Cliente() {
-    const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
+    const apiVentasUrl = "http://localhost:8080/api/cotizaciones";
+    const apiClientesUrl = "http://localhost:8080/api/clientes";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+    const [seleccionada, setSeleccionada] = useState<Cotizacion | null>(null);
     const [busqueda, setBusqueda] = useState("");
+    const [NumeroID, SetNumeroID] = useState("Seleccione id");
 
-    interface Cotizacion{
+
+interface Cotizacion{
         id: number,
         fecha_crea: string,
         estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
@@ -20,7 +24,7 @@ export default function Cliente() {
         user_id: string,
         nombre: string,
         tipo_despacho: string,
-        descripcion: null,
+        descripcion: string,
         cliente: {
             nombre: string,
             telefono: string,
@@ -28,10 +32,71 @@ export default function Cliente() {
             rut: string,
             razon_social: string
         },
-        items: null,
+        items: string,
         total_items: number,
         total_precio: number
+    }   
+
+/*interface Cliente {
+    nombre: string;
+    telefono: string;
+    email: string;
+    razon_social?: "";
+    rut: string;
+    id?: number;
+}*/
+const [nuevoCliente, setNuevoCliente] = useState({
+    nombre: "",
+    telefono: "",
+    email: "",
+    razon_social: "",
+    rut: "",
+    tipo_id: "",
+});
+
+const guardarCliente = async () => {
+  // Validaciones básicas antes de guardar
+  if (
+    !nuevoCliente.nombre.trim() ||
+    !nuevoCliente.rut.match(/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/) ||
+    !nuevoCliente.email.includes("@") ||
+    nuevoCliente.telefono.length > 8
+  ) {
+    alert("Completa correctamente los campos obligatorios");
+    return;
+  }
+
+  try {
+    const response = await fetch(apiClientesUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(nuevoCliente),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al guardar el cliente");
     }
+
+    const clienteGuardado = await response.json();
+    console.log("Cliente guardado:", clienteGuardado);
+    alert("Cliente guardado exitosamente");
+
+    setAñadirCliente(false);
+    setNuevoCliente({
+      nombre: "",
+      telefono: "",
+      email: "",
+      razon_social: "",
+      rut: "",
+      tipo_id: "",
+    });
+  } catch (error) {
+    console.error("Error al guardar:", error);
+    alert("No se pudo guardar el cliente");
+  }
+};
     
     useEffect(() => {
     fetch(`${apiVentasUrl}/api/cotizaciones`)
@@ -44,7 +109,6 @@ export default function Cliente() {
         });
     }, [apiVentasUrl]);
 
-
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
     const termino = busqueda.toLowerCase();
@@ -54,7 +118,16 @@ export default function Cliente() {
     );
     });
 
-
+    useEffect(() => {
+    fetch(apiVentasUrl)
+        .then((res) => res.json())
+        .then((data) => {
+        setCotizaciones(data);
+        })
+        .catch((error) => {
+            console.error("Error fetching cotizaciones:", error);
+        });
+    }, [apiVentasUrl]);
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
@@ -80,7 +153,7 @@ export default function Cliente() {
                         <FaSearch />
                     </span>
                 </div>
-                {/*Barra busqueda*/}
+                {/*Barra busqueda historial*/}
                 <input 
                 type="text"
                 placeholder="Buscar"
@@ -105,33 +178,33 @@ export default function Cliente() {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr className="text-center bg-white">
-                                    <td className="border-t p-2">101</td>
-                                    <td className="border-t p-2">Cotización01</td>
-                                    <td className="border-t p-2">10-01-25</td>
-                                    <td className="border-t p-2">12</td>
-                                    <td className="border-t p-2">24.500</td>
-                                    <td className="border-t p-2">pendiente</td>
+                                {seleccionada ? (
+                                    <tr className="text-center bg-white">
+                                    <td className="border-t p-2">{seleccionada.id}</td>
+                                    <td className="border-t p-2">{seleccionada.nombre}</td>
+                                    <td className="border-t p-2">{new Date(seleccionada.fecha_crea).toLocaleDateString()}</td>
+                                    <td className="border-t p-2">{seleccionada.total_items}</td>
+                                    <td className="border-t p-2">${seleccionada.total_precio}</td>
+                                    <td className="border-t p-2">{seleccionada.estado}</td>
                                     <td className="border-t p-2"></td>
-                                </tr>
-                        
-                             </tbody>
-                        </table>
-                        
+                                    </tr>
+                                ) : (
+                                    <tr className="text-center bg-white">
+                                    <td colSpan={7} className="border-t p-2 text-gray-400">
+                                        No hay cotizaciones
+                                    </td>
+                                    </tr>
+                                )}
+                            </tbody>        
+                        </table>  
+                            <button
+                                className="ml-167 mt-5 px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
+                                onClick={() => setMostrarModal_His(false)}
+                            >
+                                Salir
+                            </button>                        
                     </div>
-
                 </div>
-
-                {/*Boton para cerrar modal*/}
-                <div className="flex justify-end">
-                <button
-                    className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={() => setMostrarModal_His(false)}
-                >
-                    Salir
-                </button>
-                </div>
-
               </div>
             </div>
             )}
@@ -147,7 +220,7 @@ export default function Cliente() {
                 <div className="flex font-bold text-white text-xl my-2">
                     <p className="ml-1 mb-1 mt-2">Datos cliente</p>
                     <p className="ml-37 mb-1 mt-2">Direcciones</p>
-                    {/*Boton más*/}
+                    {/*Botón agregar otra dirección*/}
                     <button className="w-7 h-7 mt-2 ml-2 items-center gap-3 text-white rounded-full justify-center 
                             text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
                             onClick={() => []}>
@@ -163,35 +236,50 @@ export default function Cliente() {
                         <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
-                            /*value={}*/
-                            onChange={() => {}}
+                            value={nuevoCliente.nombre}
+                            onChange={(e) => { const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/;
+                            if (soloLetras.test(e.target.value)) setNuevoCliente({...nuevoCliente, nombre: e.target.value})}}
                             placeholder="ej: Nicolás Jiménez"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input> 
 
-                        <p className="ml-3 mb-1 mt-1 font-bold">Tipo de cliente</p>
+                        <p className="ml-3 mb-1 font-bold">Rut</p>
                         <input
                             type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="ej: 1"
+                            value={nuevoCliente.rut}
+                            onChange={(e) => { const restriccion_rut = /^[0-9.\-kK]*$/;                              
+                            if (restriccion_rut.test(e.target.value)) { setNuevoCliente({...nuevoCliente, rut: e.target.value})}}}
+                            placeholder="ej: 12.345.678-9"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
+
+                        <p className="ml-3 mb-1 mt-1 font-bold">Tipo de cliente</p>
+                        <select
+                        value={NumeroID}
+                        onChange={(e) => SetNumeroID(e.target.value)}
+                        className="ml-3 mb-1 px-2 py-1 text-black rounded"
+                    >
+                        
+                        <option value="PorDefecto">Persona</option>
+                        <option value="ID1">1</option>
+                        <option value="ID2">2</option>
+                         </select>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Teléfono</p>
                         <input
                             type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="ej: +56912345678"
+                            value={nuevoCliente.telefono}
+                            onChange={(e) => {const soloNumeros = /^[0-9]*$/;
+                            if (soloNumeros.test(e.target.value)) {setNuevoCliente({...nuevoCliente, telefono: e.target.value})}}}
+                            placeholder="ej: 912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Email</p>
                         <input
                             type="email"
-                            /*value={}*/
-                            onChange={() => {}}
+                            value={nuevoCliente.email}
+                            onChange={(e) => setNuevoCliente({...nuevoCliente, email: e.target.value})}
                             placeholder="ej: nicolas@correo.cl"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
@@ -200,12 +288,12 @@ export default function Cliente() {
 
                     {/*Tabla dos*/}
                     <div className="ml-4 rounded bg-white w-[300]">
-
+                        
                         <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={() => {}}
+                            onChange={() => []}
                             placeholder="ej: Casa"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input> 
@@ -214,7 +302,7 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={() => {}}
+                            onChange={() => []}
                             placeholder="ej: calle #1234"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
@@ -223,8 +311,8 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={() => {}}
-                            placeholder="ej: +56912345678"
+                            onChange={() => []}
+                            placeholder="ej: Maipú"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
 
@@ -232,8 +320,8 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={() => {}}
-                            placeholder="ej: nicolas@correo.cl"
+                            onChange={() => []}
+                            placeholder="ej: Santiago"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
                         
@@ -241,25 +329,24 @@ export default function Cliente() {
                         <input
                             type="text"
                             /*value={}*/
-                            onChange={() => {}}
+                            onChange={() => []}
                             placeholder="ej: Chile"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
-
+                        
                     </div>
                 </div>
                 {/*Botones Cancelar y guardar*/}
                 <div className="flex justify-end">
                 <button
-                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
+                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
                     onClick={() => setAñadirCliente(false)}
                 >
                     Cancelar
                 </button>
                 <button
-                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={() => setAñadirCliente(false)}
-                >
+                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FFB04A] cursor-pointer"
+                    onClick={guardarCliente}>
                     Guardar
                 </button>
                 </div>
@@ -267,6 +354,7 @@ export default function Cliente() {
             </div>
             )}
 
+            {/*Modal Boton Ver detalle */}
             {mostrarModal && (
             <div className="fixed inset-0 flex justify-center items-center">
             <div className="bg-[#0B1631] p-8 rounded-lg w-[650px]">
@@ -456,34 +544,49 @@ export default function Cliente() {
             </div>
 
             {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
-                            {busqueda.trim() !== "" && (
+            {busqueda.trim() !== "" && (
                 <ul className="border rounded w-[420]">
                     {cotizacionesFiltradas.map((coti, index) => (
-                    <li key={index} className="p-2 border-b hover:bg-gray-50 cursor-pointer">
-                        <strong>{coti.cliente?.nombre}</strong> - {coti.cliente?.rut}
+                    <li 
+                        key={index} 
+                        className="p-2 border-b hover:bg-gray-50 cursor-pointer" 
+                        onClick={() => {
+                            setSeleccionada(coti);
+                            setBusqueda("");
+                        }}>
+                        <div className="flex">
+                        <h1>{coti.cliente?.nombre}</h1> <div className="ml-1 text-gray-500">({coti.cliente?.rut})</div></div>
                     </li>
                     ))}
                 </ul>
-                )}
+            )}
 
-            {/*Titulo: Nombre Cliente*/}
-            <div className="mt-2 text-xl text-base text-black font-bold">
-                Nombre Cliente
-            </div>
-            <div className="mt-4 ml-2 text-base text-black flex">
-                Rut 12.345.678-9 Tipo cliente Correo@gmail.com
-            </div>
+            {/*Muestra los datos del cliente seleccionado*/}
+            {seleccionada && (
+                <div className="mt-4 ml-2">
 
+                    <div className="text-xl font-bold text-black">
+                        {seleccionada.cliente.nombre}
+                    </div>
+
+                    <div className="flex my-2 text-base text-black">
+                        <p>Rut:{seleccionada.cliente.rut}</p>
+                        <p className="ml-8">Tipo Cliente</p>
+                        <p className="ml-8">{seleccionada.cliente.email}</p>
+                    </div>
+
+                </div>
+            )}
 
             {/*Botones*/}
             <div className="flex justify-end mt-7">
 
-                <button className="px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
+                <button className="box-shadow px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
                 onClick={() => setMostrarModal_His(true)}>
                 Ver historial
                 </button>
 
-                <button className="px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
+                <button className="box-shadow px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
                 onClick={() => setMostrarModal(true)}>
                 Ver detalle
                 </button>
