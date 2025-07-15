@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 
 
 export default function Cliente() {
+    const apiVentasUrl = "http://localhost:8080/api/cotizaciones";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
@@ -12,12 +13,15 @@ export default function Cliente() {
     const [busqueda, setBusqueda] = useState("");
 
     useEffect(() => {
-    fetch("http://localhost:8080/api/cotizaciones")
+    fetch(apiVentasUrl)
         .then((res) => res.json())
         .then((data) => {
         setCotizaciones(data);
+        })
+        .catch((error) => {
+            console.error("Error fetching cotizaciones:", error);
         });
-    }, []);
+    }, [apiVentasUrl]);
 
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
@@ -468,4 +472,3 @@ export default function Cliente() {
         </div>
     );
 }
-
