@@ -1,34 +1,33 @@
 'use client'
 
 import { FaSearch } from "react-icons/fa";
-import {/*useEffect,*/ useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
-/*interface Cliente {
-id: number;
-rut: string;
-nombre: string;
-telefono: string;
-email: string;
-razon_social: string;
-tipo_id:number;
-}*/
-                                                                                                                                   
 export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    //const [clientes /*, setClientes*/] = useState<Cliente[]>([]);
-    //const [busqueda, setBusqueda] = useState("");
+    const [cotizaciones, setCotizaciones] = useState<any[]>([]);
+    const [busqueda, setBusqueda] = useState("");
 
-   /* useEffect(() => {
-        fetch("http://localhost:8080/api/cotizaciones")
+    useEffect(() => {
+    fetch("http://localhost:8080/api/cotizaciones")
         .then((res) => res.json())
         .then((data) => {
-            const clientesExtraídos = data.map((c: any) => c.cliente);
-            setClientes(clientesExtraídos);
+        setCotizaciones(data);
         });
-    }, []);*/
+    }, []);
+
+    
+    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
+    const termino = busqueda.toLowerCase();
+    return (
+        coti.cliente?.nombre.toLowerCase().includes(termino) ||
+        coti.cliente?.rut.toLowerCase().includes(termino)
+    );
+    });
+
 
 
     return (
@@ -149,7 +148,7 @@ export default function Cliente() {
                             type="text"
                             /*value={}*/
                             onChange={() => {}}
-                            placeholder="ej: Nicolás Jiménez"
+                            placeholder="ej: 1"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
 
@@ -413,8 +412,8 @@ export default function Cliente() {
                 {/*Barrita*/}
                 <input
                     type="text"
-                    /*value={}*/
-                    onChange={() => [/*setBusqueda(e.target.value)*/]}
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
                     placeholder="Buscar"
                     className="border rounded-sm border-[#DFDFDF] pl-10 px-3 py-1 w-[420]"
                 >
@@ -430,8 +429,16 @@ export default function Cliente() {
                 </div>
             </div>
 
- 
-
+            {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
+                            {busqueda.trim() !== "" && (
+                <ul className="border rounded w-[420]">
+                    {cotizacionesFiltradas.map((coti, index) => (
+                    <li key={index} className="p-2 border-b hover:bg-gray-50 cursor-pointer">
+                        <strong>{coti.cliente?.nombre}</strong> - {coti.cliente?.rut}
+                    </li>
+                    ))}
+                </ul>
+                )}
 
             {/*Titulo: Nombre Cliente*/}
             <div className="mt-2 text-xl text-base text-black font-bold">
