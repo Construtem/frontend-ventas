@@ -4,7 +4,7 @@ import { useState } from "react";
 
 export default function Vendedor() {
 
-const [tiendaSeleccionada, setTiendaSeleccionada] = useState("Tienda A");
+const [tiendaSeleccionada, setTiendaSeleccionada] = useState("Nombre tienda");
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
