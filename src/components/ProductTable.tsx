@@ -110,15 +110,29 @@ const ProductTable: React.FC<ProductTableProps> = ({ quotationId }) => {
         )
         
         if (productoExistente) {
+            // Verificar que no se exceda el stock disponible
+            const nuevaCantidadTotal = productoExistente.cantidad + cantidad
+            
+            if (nuevaCantidadTotal > producto.stockDisponible) {
+                alert(`No puedes agregar más productos. Stock disponible: ${producto.stockDisponible}, ya tienes: ${productoExistente.cantidad}`)
+                return
+            }
+            
             // Si ya existe, actualizar cantidad
             setProductosEnCotizacion(prev => 
                 prev.map(p => 
                     p.sku === producto.sku && p.sucursalId === sucursalSeleccionada
-                        ? { ...p, cantidad: p.cantidad + cantidad }
+                        ? { ...p, cantidad: nuevaCantidadTotal }
                         : p
                 )
             )
         } else {
+            // Verificar que la cantidad inicial no exceda el stock
+            if (cantidad > producto.stockDisponible) {
+                alert(`No puedes agregar ${cantidad} productos. Stock disponible: ${producto.stockDisponible}`)
+                return
+            }
+            
             // Si no existe, agregar nuevo producto
             const nuevoProducto: ProductoEnCotizacion = {
                 sku: producto.sku,
@@ -136,6 +150,26 @@ const ProductTable: React.FC<ProductTableProps> = ({ quotationId }) => {
         }
 
         console.log(`Producto agregado a cotización ${quotationId} desde sucursal ${sucursalSeleccionada}:`, producto.sku, 'Cantidad:', cantidad)
+    }
+
+    // Función para eliminar producto de la cotización
+    const eliminarProductoDeCotizacion = (sku: string): void => {
+        if (!sucursalSeleccionada) {
+            console.error('No hay sucursal seleccionada')
+            return
+        }
+
+        setProductosEnCotizacion(prev => 
+            prev.filter(p => !(p.sku === sku && p.sucursalId === sucursalSeleccionada))
+        )
+        
+        // Resetear la cantidad en el modal para este producto
+        setCantidadesModal(prev => ({
+            ...prev,
+            [sku]: 1
+        }))
+        
+        console.log(`Producto ${sku} eliminado de cotización ${quotationId} desde sucursal ${sucursalSeleccionada}`)
     }
 
     // Convertir productosEnCotizacion a formato de tabla
@@ -202,7 +236,7 @@ const ProductTable: React.FC<ProductTableProps> = ({ quotationId }) => {
                                             <td className="border border-gray-300 px-3 py-2">
                                                 {descuentoDelStock > 0 ? (
                                                     <span className="text-green-600 font-semibold">
-                                                        -${formatCurrency(descuentoDelStock)}
+                                                        -{formatCurrency(descuentoDelStock)}%
                                                     </span>
                                                 ) : (
                                                     <span className="text-gray-400">Sin descuento</span>
@@ -238,7 +272,18 @@ const ProductTable: React.FC<ProductTableProps> = ({ quotationId }) => {
                         zIndex: 9999
                     }}
                 >
-                    <div className="rounded-lg p-6 w-[1200px] h-[700px] mx-4 flex flex-col" style={{background: '#0B1631'}}>
+                    <div 
+                        className="rounded-lg p-6 flex flex-col"
+                        style={{
+                            background: '#0B1631',
+                            width: '960px',        // Ancho fijo
+                            height: '509px',        // Alto fijo
+                            minWidth: '960px',     // Ancho mínimo
+                            minHeight: '509px',     // Alto mínimo
+                            maxWidth: '960px',     // Ancho máximo
+                            maxHeight: '509px'      // Alto máximo
+                        }}
+                    >
                         {/* Header del modal */}
                         <div className="flex justify-between items-center mb-4 gap-4 flex-shrink-0">
                             <h2 className="text-xl font-bold text-white">Productos</h2>
@@ -314,6 +359,13 @@ const ProductTable: React.FC<ProductTableProps> = ({ quotationId }) => {
                                                 <tbody>
                                                     {productosConStock.map((product) => {
                                                         const cantidad = cantidadesModal[product.sku] || 1
+                                                        
+                                                        const productoEnCotizacion = productosEnCotizacion.find(p => 
+                                                            p.sku === product.sku && p.sucursalId === sucursalSeleccionada
+                                                        )
+                                                        const cantidadEnCotizacion = productoEnCotizacion?.cantidad || 0
+                                                        const yaEstaEnCotizacion = productoEnCotizacion !== undefined
+                                                        
                                                         return (
                                                             <tr key={product.sku} className="bg-white">
                                                                 <td className="border border-gray-300 px-3 py-2 font-mono text-sm">{product.sku}</td>
@@ -343,50 +395,96 @@ const ProductTable: React.FC<ProductTableProps> = ({ quotationId }) => {
                                                                         >
                                                                             -
                                                                         </button>
-                                                                        <span className="w-8 text-center">{cantidad}</span>
+                                                                        
+                                                                        <input
+                                                                            type="number"
+                                                                            value={cantidad}
+                                                                            onChange={(e) => {
+                                                                                const inputValue = parseInt(e.target.value) || 1
+                                                                                // Limitar según stock disponible y cantidad ya en cotización
+                                                                                const stockRestante = product.stockDisponible - cantidadEnCotizacion
+                                                                                const newCantidad = Math.max(1, Math.min(inputValue, stockRestante))
+                                                                                setCantidadesModal(prev => ({...prev, [product.sku]: newCantidad}))
+                                                                            }}
+                                                                            min="1"
+                                                                            max={product.stockDisponible - cantidadEnCotizacion}
+                                                                            className="w-12 h-8 text-center border border-gray-300 rounded text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                                            style={{
+                                                                                appearance: 'textfield',
+                                                                                MozAppearance: 'textfield'
+                                                                            }}
+                                                                            onWheel={(e) => e.currentTarget.blur()}
+                                                                        />
+                                                                        
                                                                         <button 
                                                                             onClick={() => {
-                                                                                const newCantidad = Math.min(product.stockDisponible, cantidad + 1)
+                                                                                const stockRestante = product.stockDisponible - cantidadEnCotizacion
+                                                                                const newCantidad = Math.min(stockRestante, cantidad + 1)
                                                                                 setCantidadesModal(prev => ({...prev, [product.sku]: newCantidad}))
                                                                             }}
                                                                             className="bg-gray-200 hover:bg-gray-300 text-gray-700 w-8 h-8 rounded text-sm font-bold cursor-pointer"
-                                                                            disabled={cantidad >= product.stockDisponible}
+                                                                            disabled={cantidad >= (product.stockDisponible - cantidadEnCotizacion)}
                                                                         >
                                                                             +
                                                                         </button>
                                                                     </div>
+                                                                    
+                                                                    {/* Mostrar información adicional */}
+                                                                    {yaEstaEnCotizacion && (
+                                                                        <div className="text-xs text-blue-600 mt-1">
+                                                                            Ya en cotización: {cantidadEnCotizacion}
+                                                                        </div>
+                                                                    )}
                                                                 </td>
                                                                 <td className="border border-gray-300 px-3 py-2">
                                                                     <div className="flex gap-2">
                                                                         <button 
                                                                             className={`px-3 py-1 rounded text-sm font-semibold cursor-pointer ${
-                                                                                product.stockDisponible <= 0
+                                                                                product.stockDisponible <= 0 || (cantidadEnCotizacion >= product.stockDisponible)
                                                                                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                                                                                    : 'bg-green-500 text-white hover:bg-green-600'
+                                                                                    : cantidadEnCotizacion + cantidad > product.stockDisponible
+                                                                                        ? 'bg-yellow-500 text-white hover:bg-yellow-600'
+                                                                                        : 'bg-green-500 text-white hover:bg-green-600'
                                                                             }`}
                                                                             onClick={() => {
-                                                                                if (product.stockDisponible > 0) {
+                                                                                if (product.stockDisponible > 0 && cantidadEnCotizacion < product.stockDisponible) {
                                                                                     agregarProductoACotizacion(product, cantidad)
-                                                                                    console.log('Producto agregado:', product.sku, 'Cantidad:', cantidad)
                                                                                 }
                                                                             }}
-                                                                            disabled={product.stockDisponible <= 0}
-                                                                            title={product.stockDisponible <= 0 ? 'Sin stock disponible' : 'Agregar a cotización'}
+                                                                            disabled={product.stockDisponible <= 0 || cantidadEnCotizacion >= product.stockDisponible}
+                                                                            title={
+                                                                                product.stockDisponible <= 0 
+                                                                                    ? 'Sin stock disponible' 
+                                                                                    : cantidadEnCotizacion >= product.stockDisponible
+                                                                                        ? 'Stock completamente asignado'
+                                                                                        : cantidadEnCotizacion + cantidad > product.stockDisponible
+                                                                                            ? `Excede stock disponible (${product.stockDisponible})`
+                                                                                            : 'Agregar a cotización'
+                                                                            }
                                                                         >
-                                                                            Agregar
+                                                                            {cantidadEnCotizacion >= product.stockDisponible
+                                                                                ? 'Sin Stock'
+                                                                                : cantidadEnCotizacion + cantidad > product.stockDisponible
+                                                                                    ? 'Excede Stock'
+                                                                                    : 'Agregar'
+                                                                            }
                                                                         </button>
+                                                                        
+                                                                        {/* Botón de eliminar - solo mostrar si el producto está en la cotización */}
+                                                                        {yaEstaEnCotizacion && (
+                                                                            <button 
+                                                                                className="w-8 h-8 bg-red-500 text-white rounded text-sm font-bold cursor-pointer hover:bg-red-600 flex items-center justify-center"
+                                                                                onClick={() => eliminarProductoDeCotizacion(product.sku)}
+                                                                                title="Eliminar de cotización"
+                                                                            >
+                                                                                ✕
+                                                                            </button>
+                                                                        )}
                                                                     </div>
                                                                 </td>
                                                             </tr>
                                                         )
                                                     })}
-                                                    {productosConStock.length === 0 && !loading && (
-                                                        <tr>
-                                                            <td colSpan={8} className="border border-gray-300 px-3 py-2 text-center text-gray-500">
-                                                                {searchTerm ? 'No se encontraron productos que coincidan con la búsqueda' : 'No hay productos disponibles en esta sucursal'}
-                                                            </td>
-                                                        </tr>
-                                                    )}
                                                 </tbody>
                                             </table>
                                         </div>
