@@ -2,34 +2,56 @@
 
 import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
-import { Cotizacion } from "@/services/apiService";
 
 
 export default function Cliente() {
     const apiVentasUrl = "http://localhost:8080/api/cotizaciones";
-    const apiClientesUrl = "http://localhost:8080/clientes";
+    const apiClientesUrl = "http://localhost:8080/api/clientes";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
     const [seleccionada, setSeleccionada] = useState<Cotizacion | null>(null);
     const [busqueda, setBusqueda] = useState("");
+    const [NumeroID, SetNumeroID] = useState("Seleccione id");
+
+
+interface Cotizacion{
+        id: number,
+        fecha_crea: string,
+        estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
+        costo_envio: number,
+        user_id: string,
+        nombre: string,
+        tipo_despacho: string,
+        descripcion: string,
+        cliente: {
+            nombre: string,
+            telefono: string,
+            email: string,
+            rut: string,
+            razon_social: string
+        },
+        items: string,
+        total_items: number,
+        total_precio: number
+    }   
 
 interface Cliente {
-  id?: number;
-  nombre: string;
-  telefono: string;
-  email: string;
-  razon_social?: "";
-  rut: string;
+    nombre: string;
+    telefono: string;
+    email: string;
+    razon_social?: "";
+    rut: string;
+    id?: number;
 }
 const [nuevoCliente, setNuevoCliente] = useState({
-  nombre: "",
-  telefono: "",
-  email: "",
-  razon_social: "",
-  rut: "",
-  tipo_id: "",
+    nombre: "",
+    telefono: "",
+    email: "",
+    razon_social: "",
+    rut: "",
+    tipo_id: "",
 });
 
 const guardarCliente = async () => {
@@ -38,7 +60,7 @@ const guardarCliente = async () => {
     !nuevoCliente.nombre.trim() ||
     !nuevoCliente.rut.match(/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/) ||
     !nuevoCliente.email.includes("@") ||
-    nuevoCliente.telefono.length == 9
+    nuevoCliente.telefono.length > 8
   ) {
     alert("Completa correctamente los campos obligatorios");
     return;
@@ -77,26 +99,14 @@ const guardarCliente = async () => {
 };
 
 
-    interface Cotizacion{
-        id: number,
-        fecha_crea: string,
-        estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
-        costo_envio: number,
-        user_id: string,
-        nombre: string,
-        tipo_despacho: string,
-        descripcion: string,
-        cliente: {
-            nombre: string,
-            telefono: string,
-            email: string,
-            rut: string,
-            razon_social: string
-        },
-        items: string,
-        total_items: number,
-        total_precio: number
-    }
+    
+    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
+    const termino = busqueda.toLowerCase();
+    return (
+        coti.cliente?.nombre.toLowerCase().includes(termino) ||
+        coti.cliente?.rut.toLowerCase().includes(termino)
+    );
+    });
 
     useEffect(() => {
     fetch(apiVentasUrl)
@@ -108,17 +118,6 @@ const guardarCliente = async () => {
             console.error("Error fetching cotizaciones:", error);
         });
     }, [apiVentasUrl]);
-
-    
-    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
-    const termino = busqueda.toLowerCase();
-    return (
-        coti.cliente?.nombre.toLowerCase().includes(termino) ||
-        coti.cliente?.rut.toLowerCase().includes(termino)
-    );
-    });
-
-
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
@@ -238,21 +237,23 @@ const guardarCliente = async () => {
                         <input
                             type="text"
                             value={nuevoCliente.rut}
-                            onChange={(e) => { const restriccion_rut = /^[0-9.\-]?$/;                                
+                            onChange={(e) => { const restriccion_rut = /^[0-9.\-kK]*$/;                              
                             if (restriccion_rut.test(e.target.value)) { setNuevoCliente({...nuevoCliente, rut: e.target.value})}}}
                             placeholder="ej: 12.345.678-9"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Tipo de cliente</p>
-                        <input
-                            type="text"
-                            value={nuevoCliente.tipo_id}
-                            onChange={(e) => { const soloNumeros = /^[0-9]*$/; 
-                            if (soloNumeros.test(e.target.value)) setNuevoCliente({...nuevoCliente, tipo_id: e.target.value})}}
-                            placeholder="ej: 1"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        <select
+                        value={NumeroID}
+                        onChange={(e) => SetNumeroID(e.target.value)}
+                        className="ml-3 mb-1 px-2 py-1 text-black rounded"
+                    >
+                        
+                        <option value="PorDefecto">Persona</option>
+                        <option value="ID1">1</option>
+                        <option value="ID2">2</option>
+                         </select>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Teléfono</p>
                         <input
