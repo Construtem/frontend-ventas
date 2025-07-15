@@ -29,36 +29,51 @@ const [nuevoCliente, setNuevoCliente] = useState({
   email: "",
   razon_social: "",
   rut: "",
-  tipo_id: 1,
+  tipo_id: "",
 });
 
-
 const guardarCliente = async () => {
-    if (!nuevoCliente.nombre || !nuevoCliente.rut || !nuevoCliente.email || !nuevoCliente.tipo_id || !nuevoCliente.telefono) {
-        alert("Completa los campos obligatorios");
-        return;
+  // Validaciones básicas antes de guardar
+  if (
+    !nuevoCliente.nombre.trim() ||
+    !nuevoCliente.rut.match(/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/) ||
+    !nuevoCliente.email.includes("@") ||
+    nuevoCliente.telefono.length == 9
+  ) {
+    alert("Completa correctamente los campos obligatorios");
+    return;
+  }
+
+  try {
+    const response = await fetch(apiClientesUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(nuevoCliente),
+    });
+
+    if (!response.ok) {
+      throw new Error("Error al guardar el cliente");
     }
 
-    try {
-        const res = await fetch("http://localhost:8080/clientes", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify(nuevoCliente)
-        });
+    const clienteGuardado = await response.json();
+    console.log("Cliente guardado:", clienteGuardado);
+    alert("Cliente guardado exitosamente");
 
-        if (!res.ok) {
-        throw new Error("Error al guardar cliente");
-        }
-
-        const data = await res.json();
-        console.log("Cliente guardado:", data);
-        setAñadirCliente(false);
-    } catch (error) {
-        console.error(error);
-        alert("No se pudo guardar el cliente");
-    }
+    setAñadirCliente(false);
+    setNuevoCliente({
+      nombre: "",
+      telefono: "",
+      email: "",
+      razon_social: "",
+      rut: "",
+      tipo_id: "",
+    });
+  } catch (error) {
+    console.error("Error al guardar:", error);
+    alert("No se pudo guardar el cliente");
+  }
 };
 
 
@@ -162,7 +177,7 @@ const guardarCliente = async () => {
                                     <td className="border-t p-2">{seleccionada.total_items}</td>
                                     <td className="border-t p-2">${seleccionada.total_precio}</td>
                                     <td className="border-t p-2">{seleccionada.estado}</td>
-                                    <td className="border-t p-2">No se que va</td>
+                                    <td className="border-t p-2"></td>
                                     </tr>
                                 ) : (
                                     <tr className="text-center bg-white">
@@ -213,7 +228,8 @@ const guardarCliente = async () => {
                         <input
                             type="text"
                             value={nuevoCliente.nombre}
-                            onChange={(e) => setNuevoCliente({...nuevoCliente, nombre: e.target.value})}
+                            onChange={(e) => { const soloLetras = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/;
+                            if (soloLetras.test(e.target.value)) setNuevoCliente({...nuevoCliente, nombre: e.target.value})}}
                             placeholder="ej: Nicolás Jiménez"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input> 
@@ -222,8 +238,9 @@ const guardarCliente = async () => {
                         <input
                             type="text"
                             value={nuevoCliente.rut}
-                            onChange={(e) => setNuevoCliente({...nuevoCliente, rut: e.target.value})}
-                            placeholder="ej: 123456789"
+                            onChange={(e) => { const restriccion_rut = /^[0-9.\-]?$/;                                
+                            if (restriccion_rut.test(e.target.value)) { setNuevoCliente({...nuevoCliente, rut: e.target.value})}}}
+                            placeholder="ej: 12.345.678-9"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
 
@@ -231,7 +248,8 @@ const guardarCliente = async () => {
                         <input
                             type="text"
                             value={nuevoCliente.tipo_id}
-                            onChange={(e) => setNuevoCliente({...nuevoCliente, tipo_id: Number(e.target.value)})}
+                            onChange={(e) => { const soloNumeros = /^[0-9]*$/; 
+                            if (soloNumeros.test(e.target.value)) setNuevoCliente({...nuevoCliente, tipo_id: e.target.value})}}
                             placeholder="ej: 1"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
@@ -240,7 +258,8 @@ const guardarCliente = async () => {
                         <input
                             type="text"
                             value={nuevoCliente.telefono}
-                            onChange={(e) => setNuevoCliente({...nuevoCliente, telefono: e.target.value})}
+                            onChange={(e) => {const soloNumeros = /^[0-9]*$/;
+                            if (soloNumeros.test(e.target.value)) {setNuevoCliente({...nuevoCliente, telefono: e.target.value})}}}
                             placeholder="ej: 912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
@@ -309,13 +328,13 @@ const guardarCliente = async () => {
                 {/*Botones Cancelar y guardar*/}
                 <div className="flex justify-end">
                 <button
-                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
+                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
                     onClick={() => setAñadirCliente(false)}
                 >
                     Cancelar
                 </button>
                 <button
-                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
+                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FFB04A] cursor-pointer"
                     onClick={guardarCliente}>
                     Guardar
                 </button>
