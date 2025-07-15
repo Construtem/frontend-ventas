@@ -35,7 +35,8 @@ const Home: NextPage = () => {
                             <Cliente  />
                         </div>
                         <div>
-                            <Cotizacion />
+                            {/* CAMBIAR POR LA ID DE LA COTIZACIÓN ACTUAL SEGÚN CORRESPONDA*/}
+                            <Cotizacion id={1}/>
                         </div>
                     </div>
                 <div className="flex gap-4 mb-8 max-w-7xl mx-auto">
@@ -53,10 +54,6 @@ const Home: NextPage = () => {
                     </div>
                 </div>
 
-                <div className="mt-10">
-                    <h2 className="text-lg font-bold mb-2">Historial</h2>
-                    <HistorialCotizaciones />
-                </div>
             </div>
         </div>
     )

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Configuración base de Axios
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_VENTAS || 'https://api-ventas.tssw.cl';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_VENTAS || 'https://api-ventas.tssw.cl/';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -75,6 +75,7 @@ export interface CotizacionSimplificada {
     user_id: string;
     nombre: string;
     tipo_despacho: string;
+    descripcion: string;
     cliente: {
         nombre: string;
         telefono: string;
@@ -118,6 +119,7 @@ export const clienteService = {
   },
 };
 
+// …
 // Servicios de Cotización
 export const cotizacionService = {
   // Obtener cotizaciones simplificadas
