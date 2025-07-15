@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 
 export default function Cliente() {
-    const apiVentasUrl = "http://localhost:8080/api/cotizaciones";
+    const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
@@ -34,7 +34,7 @@ export default function Cliente() {
     }
     
     useEffect(() => {
-    fetch(apiVentasUrl)
+    fetch(`${apiVentasUrl}/api/cotizaciones`)
         .then((res) => res.json())
         .then((data) => {
         setCotizaciones(data);
@@ -42,7 +42,7 @@ export default function Cliente() {
         .catch((error) => {
             console.error("Error fetching cotizaciones:", error);
         });
-    }, [apiVentasUrl]);
+    }, [`${apiVentasUrl}/api/cotizaciones`]);
 
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
