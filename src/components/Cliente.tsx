@@ -1,35 +1,15 @@
 'use client'
 
 import { FaSearch } from "react-icons/fa";
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 
 export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    const [cotizaciones, setCotizaciones] = useState<any[]>([]);
-    const [busqueda, setBusqueda] = useState("");
-
-    useEffect(() => {
-    fetch("http://localhost:8080/api/cotizaciones")
-        .then((res) => res.json())
-        .then((data) => {
-        setCotizaciones(data);
-        });
-    }, []);
 
     
-    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
-    const termino = busqueda.toLowerCase();
-    return (
-        coti.cliente?.nombre.toLowerCase().includes(termino) ||
-        coti.cliente?.rut.toLowerCase().includes(termino)
-    );
-    });
-
-
-
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
             
@@ -412,8 +392,8 @@ export default function Cliente() {
                 {/*Barrita*/}
                 <input
                     type="text"
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
+                    /*value={busqueda}*/
+                    onChange={() => []}
                     placeholder="Buscar"
                     className="border rounded-sm border-[#DFDFDF] pl-10 px-3 py-1 w-[420]"
                 >
