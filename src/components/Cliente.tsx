@@ -5,8 +5,7 @@ import { useEffect, useState } from 'react';
 
 
 export default function Cliente() {
-    const apiVentasUrl = "http://localhost:8080/api/cotizaciones";
-    const apiClientesUrl = "http://localhost:8080/api/clientes";
+    const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
@@ -67,7 +66,7 @@ const guardarCliente = async () => {
   }
 
   try {
-    const response = await fetch(apiClientesUrl, {
+    const response = await fetch(`${apiVentasUrl}/api/clientes`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -107,7 +106,7 @@ const guardarCliente = async () => {
         .catch((error) => {
             console.error("Error fetching cotizaciones:", error);
         });
-    }, [apiVentasUrl]);
+    }, [`${apiVentasUrl}/api/cotizaciones`]);
 
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
@@ -119,7 +118,7 @@ const guardarCliente = async () => {
     });
 
     useEffect(() => {
-    fetch(apiVentasUrl)
+    fetch(`${apiVentasUrl}/api/cotizaciones`)
         .then((res) => res.json())
         .then((data) => {
         setCotizaciones(data);
@@ -127,7 +126,7 @@ const guardarCliente = async () => {
         .catch((error) => {
             console.error("Error fetching cotizaciones:", error);
         });
-    }, [apiVentasUrl]);
+    }, [`${apiVentasUrl}/api/cotizaciones`]);
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
