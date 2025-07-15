@@ -409,17 +409,7 @@ export default function Cliente() {
                 </div>
             </div>
 
-            {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
-                            {busqueda.trim() !== "" && (
-                <ul className="border rounded w-[420]">
-                    {cotizacionesFiltradas.map((coti, index) => (
-                    <li key={index} className="p-2 border-b hover:bg-gray-50 cursor-pointer">
-                        <strong>{coti.cliente?.nombre}</strong> - {coti.cliente?.rut}
-                    </li>
-                    ))}
-                </ul>
-                )}
-
+           
             {/*Titulo: Nombre Cliente*/}
             <div className="mt-2 text-xl text-base text-black font-bold">
                 Nombre Cliente
