@@ -1,24 +1,14 @@
 import axios from 'axios';
 
 // Configuración base de Axios
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080';
-const INVENTARIO_API_URL = process.env.NEXT_PUBLIC_API_INVENTARIO || 'http://localhost:8080';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_VENTAS || 'https://api-ventas.tssw.cl';
 
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 segundos
-});
-
-// API específica para el backend de inventario
-const inventarioApi = axios.create({
-  baseURL: INVENTARIO_API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  timeout: 10000, // 10 segundos
+  timeout: 15000, // 15 segundos
 });
 
 // Interceptor para manejo de errores
@@ -26,15 +16,6 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('API Error:', error);
-    return Promise.reject(error);
-  }
-);
-
-// Interceptor para la API de inventario
-inventarioApi.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('Inventario API Error:', error);
     return Promise.reject(error);
   }
 );
@@ -267,19 +248,19 @@ export const cotizacionService = {
 export const productoService = {
   // Obtener todos los productos
   obtenerProductos: async (): Promise<Producto[]> => {
-    const response = await inventarioApi.get<Producto[]>('/api/productos');
+    const response = await api.get<Producto[]>('/api/productos');
     return response.data;
   },
 
   // Obtener producto por SKU
   obtenerProductoPorSKU: async (sku: string): Promise<Producto> => {
-    const response = await inventarioApi.get<Producto>(`/api/productos/${sku}`);
+    const response = await api.get<Producto>(`/api/productos/${sku}`);
     return response.data;
   },
 
   // Obtener stock de sucursal
   obtenerStockSucursal: async (): Promise<StockSucursal[]> => {
-    const response = await inventarioApi.get<StockSucursal[]>('/api/stock-sucursal');
+    const response = await api.get<StockSucursal[]>('/api/stock-sucursal');
     return response.data;
   },
 
@@ -314,7 +295,7 @@ export const productoService = {
 export const sucursalService = {
   obtenerSucursales: async (): Promise<Sucursal[]> => {
     try {
-      const response = await inventarioApi.get<Sucursal[]>('/api/sucursales')
+      const response = await api.get<Sucursal[]>('/api/sucursales')
       return response.data
     } catch (error) {
       console.error('Error al obtener sucursales:', error)
@@ -328,7 +309,7 @@ export const stockService = {
   // Obtener stock de un producto específico en una sucursal
   obtenerStockProductoEnSucursal: async (sucursalId: number, productoId: string): Promise<StockSucursalCompleto | null> => {
     try {
-      const response = await inventarioApi.get<StockSucursalCompleto>(`/api/stock-sucursal/${sucursalId}/${productoId}`);
+      const response = await api.get<StockSucursalCompleto>(`/api/stock-sucursal/${sucursalId}/${productoId}`);
       return response.data;
     } catch (error: unknown) {
       if (error && typeof error === 'object' && 'response' in error) {
@@ -370,7 +351,7 @@ export const stockService = {
 
   // Obtener todos los stocks de todas las sucursales
   obtenerTodoElStock: async (): Promise<StockSucursalCompleto[]> => {
-    const response = await inventarioApi.get<StockSucursalCompleto[]>('/api/stock-sucursal');
+    const response = await api.get<StockSucursalCompleto[]>('/api/stock-sucursal');
     return response.data;
   }
 };
@@ -382,8 +363,8 @@ export const inventarioService = {
     try {
       // Hacer ambas peticiones en paralelo
       const [productos, stocksCompletos] = await Promise.all([
-        inventarioApi.get<Producto[]>('/api/productos'),
-        inventarioApi.get<StockSucursal[]>('/api/stock-sucursal')
+        api.get<Producto[]>('/api/productos'),
+        api.get<StockSucursal[]>('/api/stock-sucursal')
       ]);
 
       // Combinar los datos
@@ -418,8 +399,8 @@ export const inventarioService = {
     try {
       // Hacer ambas peticiones en paralelo
       const [productos, stocksCompletos] = await Promise.all([
-        inventarioApi.get<Producto[]>('/api/productos'),
-        inventarioApi.get<StockSucursal[]>('/api/stock-sucursal')
+        api.get<Producto[]>('/api/productos'),
+        api.get<StockSucursal[]>('/api/stock-sucursal')
       ]);
 
       // Combinar los datos solo para las sucursales seleccionadas
@@ -453,7 +434,7 @@ export const inventarioService = {
   // Obtener stock de un producto específico en todas las sucursales
   obtenerStockProductoPorSKU: async (sku: string): Promise<StockSucursal[]> => {
     try {
-      const response = await inventarioApi.get<StockSucursal[]>('/api/stock-sucursal');
+      const response = await api.get<StockSucursal[]>('/api/stock-sucursal');
       return response.data.filter(stock => stock.sku === sku);
     } catch (error) {
       console.error(`Error al obtener stock del producto ${sku}:`, error);

@@ -1,4 +1,3 @@
-// pages/index.tsx
 'use client'
 import { NextPage } from 'next'
 import React from 'react'
@@ -9,10 +8,9 @@ import Cotizacion from '@/components/Cotizacion';
 import HistorialCotizaciones from '@/components/HistorialCotizaciones'
 import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
-import { useSucursales } from '@/hooks/useSucursales'
 
 const Home: NextPage = () => {
-    const { sucursales, loading: loadingSucursales } = useSucursales()
+    // Ya no necesitamos cargar sucursales aquí porque ProductTable las carga internamente
     
     // Obtener la cotización para el panel de totales
     const quotation = quotations.find(q => q.id === 'q1')
@@ -20,21 +18,6 @@ const Home: NextPage = () => {
     if (!quotation) {
         return <div>Error: Cotización no encontrada</div>
     }
-
-    // Mostrar loading mientras cargan las sucursales
-    if (loadingSucursales) {
-        return (
-            <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
-                    <p className="text-gray-600">Cargando datos...</p>
-                </div>
-            </div>
-        )
-    }
-
-    // Extraer todos los IDs de sucursales disponibles
-    const sucursalesIds = sucursales.map(sucursal => sucursal.id)
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -59,7 +42,7 @@ const Home: NextPage = () => {
 
                 <div className="flex gap-4 mb-8 max-w-7xl mx-auto">
                     <div className="flex-1">
-                        <ProductTable quotationId="q1" sucursalesIds={sucursalesIds} />
+                        <ProductTable quotationId="q1" />
                     </div>
                     <div className="w-[280px]">
                         <div className="bg-white flex justify-center border border-gray-300 p-4 shadow-md rounded-lg">
