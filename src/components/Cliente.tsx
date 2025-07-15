@@ -37,14 +37,14 @@ interface Cotizacion{
         total_precio: number
     }   
 
-interface Cliente {
+/*interface Cliente {
     nombre: string;
     telefono: string;
     email: string;
     razon_social?: "";
     rut: string;
     id?: number;
-}
+}*/
 const [nuevoCliente, setNuevoCliente] = useState({
     nombre: "",
     telefono: "",
