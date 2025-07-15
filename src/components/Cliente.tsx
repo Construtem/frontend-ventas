@@ -44,6 +44,7 @@ export default function Cliente() {
         });
     }, [apiVentasUrl]);
 
+
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
     const termino = busqueda.toLowerCase();
