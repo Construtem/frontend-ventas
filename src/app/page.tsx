@@ -6,7 +6,6 @@ import ProductTable from '@/components/ProductTable'
 import Vendedor from '@/components/Vendedor';
 import Cliente from '@/components/Cliente';
 import Cotizacion from '@/components/Cotizacion';
-import HistorialCotizaciones from '@/components/HistorialCotizaciones'
 import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
 
