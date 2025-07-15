@@ -9,9 +9,30 @@ export default function Cliente() {
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    const [cotizaciones, setCotizaciones] = useState<any[]>([]);
+    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
     const [busqueda, setBusqueda] = useState("");
 
+    interface Cotizacion{
+        id: number,
+        fecha_crea: string,
+        estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
+        costo_envio: number,
+        user_id: string,
+        nombre: string,
+        tipo_despacho: string,
+        descripcion: null,
+        cliente: {
+            nombre: string,
+            telefono: string,
+            email: string,
+            rut: string,
+            razon_social: string
+        },
+        items: null,
+        total_items: number,
+        total_precio: number
+    }
+    
     useEffect(() => {
     fetch(apiVentasUrl)
         .then((res) => res.json())
