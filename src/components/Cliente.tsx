@@ -1,15 +1,60 @@
 'use client'
 
 import { FaSearch } from "react-icons/fa";
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 
 export default function Cliente() {
+    const apiVentasUrl = "http://localhost:8080/api/cotizaciones";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
+    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+    const [busqueda, setBusqueda] = useState("");
+
+    interface Cotizacion{
+        id: number,
+        fecha_crea: string,
+        estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
+        costo_envio: number,
+        user_id: string,
+        nombre: string,
+        tipo_despacho: string,
+        descripcion: null,
+        cliente: {
+            nombre: string,
+            telefono: string,
+            email: string,
+            rut: string,
+            razon_social: string
+        },
+        items: null,
+        total_items: number,
+        total_precio: number
+    }
+    
+    useEffect(() => {
+    fetch(apiVentasUrl)
+        .then((res) => res.json())
+        .then((data) => {
+        setCotizaciones(data);
+        })
+        .catch((error) => {
+            console.error("Error fetching cotizaciones:", error);
+        });
+    }, [apiVentasUrl]);
 
     
+    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
+    const termino = busqueda.toLowerCase();
+    return (
+        coti.cliente?.nombre.toLowerCase().includes(termino) ||
+        coti.cliente?.rut.toLowerCase().includes(termino)
+    );
+    });
+
+
+
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
             
@@ -392,8 +437,8 @@ export default function Cliente() {
                 {/*Barrita*/}
                 <input
                     type="text"
-                    /*value={busqueda}*/
-                    onChange={() => []}
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
                     placeholder="Buscar"
                     className="border rounded-sm border-[#DFDFDF] pl-10 px-3 py-1 w-[420]"
                 >
@@ -409,7 +454,17 @@ export default function Cliente() {
                 </div>
             </div>
 
-           
+            {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
+                            {busqueda.trim() !== "" && (
+                <ul className="border rounded w-[420]">
+                    {cotizacionesFiltradas.map((coti, index) => (
+                    <li key={index} className="p-2 border-b hover:bg-gray-50 cursor-pointer">
+                        <strong>{coti.cliente?.nombre}</strong> - {coti.cliente?.rut}
+                    </li>
+                    ))}
+                </ul>
+                )}
+
             {/*Titulo: Nombre Cliente*/}
             <div className="mt-2 text-xl text-base text-black font-bold">
                 Nombre Cliente
