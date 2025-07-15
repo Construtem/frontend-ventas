@@ -1,4 +1,3 @@
-// pages/index.tsx
 'use client'
 import { NextPage } from 'next'
 import React from 'react'
@@ -11,6 +10,8 @@ import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
 
 const Home: NextPage = () => {
+    // Ya no necesitamos cargar sucursales aquí porque ProductTable las carga internamente
+    
     // Obtener la cotización para el panel de totales
     const quotation = quotations.find(q => q.id === 'q1')
 
@@ -38,6 +39,7 @@ const Home: NextPage = () => {
                             <Cotizacion />
                         </div>
                     </div>
+
                 <div className="flex gap-4 mb-8 max-w-7xl mx-auto">
                     <div className="flex-1">
                         <ProductTable quotationId="q1" />

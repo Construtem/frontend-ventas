@@ -42,7 +42,8 @@ export default function Cliente() {
         .catch((error) => {
             console.error("Error fetching cotizaciones:", error);
         });
-    }, [`${apiVentasUrl}/api/cotizaciones`]);
+    }, [apiVentasUrl]);
+
 
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
