@@ -3,12 +3,14 @@ import axios from 'axios';
 // Configuración base de Axios
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_VENTAS || 'https://api-ventas.tssw.cl';
 
+console.log('API_BASE_URL:', API_BASE_URL); // Para debugging
+
 const api = axios.create({
   baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10 segundos
+  timeout: 30000, // 30 segundos
 });
 
 // Interceptor para manejo de errores
@@ -16,6 +18,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     console.error('API Error:', error);
+    if (error.code === 'ECONNABORTED') {
+      console.error('Request timeout');
+    }
     return Promise.reject(error);
   }
 );
@@ -122,7 +127,9 @@ export const clienteService = {
 export const cotizacionService = {
   // Obtener cotizaciones simplificadas
   obtenerCotizacionesSimplificadas: async (): Promise<CotizacionSimplificada[]> => {
+    console.log('apiService: Solicitando cotizaciones simplificadas...');
     const response = await api.get('/api/cotizaciones');
+    console.log('apiService: Respuesta de cotizaciones:', response.data);
     return response.data;
   },
 

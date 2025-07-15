@@ -2,56 +2,76 @@
 
 import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
+import HistorialCotizacionModal from './HistorialCotizacionModal';
+import DetalleCotizacionModal from './DetalleCotizacionModal';
+import { CotizacionSimplificada, Cliente as ClienteType, clienteService } from '@/services/apiService';
 
+interface ClienteProps {
+    onClienteSeleccionado?: (cliente: ClienteType) => void;
+}
 
-export default function Cliente() {
-    const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
+export default function Cliente({ onClienteSeleccionado }: ClienteProps) {
     const [mostrarModal, setMostrarModal] = useState(false);
-    const [MostrarModal_His, setMostrarModal_His] =useState(false);
+    const [MostrarModal_His, setMostrarModal_His] = useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+    const [clientes, setClientes] = useState<ClienteType[]>([]);
+    const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteType | null>(null);
     const [busqueda, setBusqueda] = useState("");
-
-    interface Cotizacion{
-        id: number,
-        fecha_crea: string,
-        estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
-        costo_envio: number,
-        user_id: string,
-        nombre: string,
-        tipo_despacho: string,
-        descripcion: null,
-        cliente: {
-            nombre: string,
-            telefono: string,
-            email: string,
-            rut: string,
-            razon_social: string
-        },
-        items: null,
-        total_items: number,
-        total_precio: number
-    }
+    const [selectedCotizacionId, setSelectedCotizacionId] = useState<number | null>(null);
+    const [showDetalleModal, setShowDetalleModal] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
     
+    // Cargar clientes al montar el componente
     useEffect(() => {
-    fetch(`${apiVentasUrl}/api/cotizaciones`)
-        .then((res) => res.json())
-        .then((data) => {
-        setCotizaciones(data);
-        })
-        .catch((error) => {
-            console.error("Error fetching cotizaciones:", error);
-        });
-    }, [`${apiVentasUrl}/api/cotizaciones`]);
+        const fetchClientes = async () => {
+            try {
+                console.log('Cliente.tsx: Iniciando carga de clientes...');
+                setLoading(true);
+                const data = await clienteService.obtenerClientes();
+                console.log('Cliente.tsx: Clientes obtenidos:', data);
+                setClientes(data);
+                setError(null);
+            } catch (err) {
+                console.error('Cliente.tsx: Error al cargar clientes:', err);
+                setError(err instanceof Error ? err.message : 'Error al cargar clientes');
+            } finally {
+                setLoading(false);
+            }
+        };
 
-    
-    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
-    const termino = busqueda.toLowerCase();
-    return (
-        coti.cliente?.nombre.toLowerCase().includes(termino) ||
-        coti.cliente?.rut.toLowerCase().includes(termino)
-    );
+        fetchClientes();
+    }, []);
+
+    // Filtrar clientes basado en la búsqueda
+    const clientesFiltrados = clientes.filter((cliente) => {
+        const termino = busqueda.toLowerCase();
+        return (
+            cliente.nombre.toLowerCase().includes(termino) ||
+            cliente.rut.toLowerCase().includes(termino) ||
+            cliente.razon_social?.toLowerCase().includes(termino)
+        );
     });
+
+    console.log('Cliente.tsx: Estados actuales:', {
+        loading,
+        error,
+        clientesTotal: clientes.length,
+        clientesFiltrados: clientesFiltrados.length,
+        busqueda,
+        clienteSeleccionado: clienteSeleccionado?.nombre
+    });
+
+    // Manejar selección de cliente
+    const handleClienteSeleccionado = (cliente: ClienteType) => {
+        console.log('Cliente.tsx: Seleccionando cliente:', cliente);
+        setClienteSeleccionado(cliente);
+        setBusqueda("");
+        if (onClienteSeleccionado) {
+            console.log('Cliente.tsx: Llamando callback onClienteSeleccionado');
+            onClienteSeleccionado(cliente);
+        }
+    };
 
 
 
@@ -66,73 +86,32 @@ export default function Cliente() {
         
 
             {/*Modal boton ver historial*/}
-            {MostrarModal_His && (
-            <div className="fixed inset-0 flex justify-center items-center">
-              <div className="bg-[#0B1631] p-8 rounded-lg w-[900px]">
+            <HistorialCotizacionModal
+                isOpen={MostrarModal_His}
+                onClose={() => setMostrarModal_His(false)}
+                onSelectCotizacion={(cotizacion: CotizacionSimplificada) => {
+                    console.log('Cotización seleccionada:', cotizacion);
+                    setSelectedCotizacionId(cotizacion.id);
+                    setMostrarModal_His(false);
+                    setShowDetalleModal(true);
+                }}
+            />
 
-                {/*Titulo Barra Icono*/}
-                <div className="flex">
-                <h2 className="text-2xl text-white font-semibold mb-4">Cotizaciones</h2>
-                {/*Icono barra*/}
-                <div  className="relative">
-                    <span className="absolute ml-5 top-[16] inset-y-1/2 left-3 items-center text-[#949494]">
-                        <FaSearch />
-                    </span>
-                </div>
-                {/*Barra busqueda*/}
-                <input 
-                type="text"
-                placeholder="Buscar"
-                className="ml-5 pl-10 px-3 py-1 border rounded-md bg-white border-[#DFDFDF] w-[570]"/>
-                </div>
-
-                {/*Tablas*/}
-                <div className="flex my-4">
-
-                    <div className="center w-[900]">
-                        
-                        <table className=" w-full text-left border border-gray-300 rounded-md">
-                            <thead>
-                                <tr className="text-center bg-gray-100">
-                                    <th className="border-t p-2">ID</th>
-                                    <th className="border-t p-2">Nombre</th>
-                                    <th className="border-t p-2">Fecha</th>
-                                    <th className="border-t p-2">Cantidad</th>
-                                    <th className="border-t p-2">Total</th>
-                                    <th className="border-t p-2">Estado</th>
-                                    <th className="border-t p-2">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr className="text-center bg-white">
-                                    <td className="border-t p-2">101</td>
-                                    <td className="border-t p-2">Cotización01</td>
-                                    <td className="border-t p-2">10-01-25</td>
-                                    <td className="border-t p-2">12</td>
-                                    <td className="border-t p-2">24.500</td>
-                                    <td className="border-t p-2">pendiente</td>
-                                    <td className="border-t p-2"></td>
-                                </tr>
-                        
-                             </tbody>
-                        </table>
-                        
-                    </div>
-
-                </div>
-
-                {/*Boton para cerrar modal*/}
-                <div className="flex justify-end">
-                <button
-                    className="px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
-                    onClick={() => setMostrarModal_His(false)}
-                >
-                    Salir
-                </button>
-                </div>
-
-              </div>
-            </div>
+            {/* Modal de detalle de cotización */}
+            {showDetalleModal && selectedCotizacionId && (
+                <DetalleCotizacionModal
+                    cotizacionId={selectedCotizacionId}
+                    isOpen={showDetalleModal}
+                    onClose={() => {
+                        setShowDetalleModal(false);
+                        setSelectedCotizacionId(null);
+                    }}
+                    onEdit={(cotizacion) => {
+                        console.log('Editar cotización:', cotizacion);
+                        setShowDetalleModal(false);
+                        setSelectedCotizacionId(null);
+                    }}
+                />
             )}
             
             {/*Boton añadir cliente*/}
@@ -162,38 +141,38 @@ export default function Cliente() {
                         <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: Nicolás Jiménez"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        /> 
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Tipo de cliente</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: 1"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Teléfono</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: +56912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Email</p>
                         <input
                             type="email"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: nicolas@correo.cl"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
 
                     </div>
 
@@ -203,47 +182,47 @@ export default function Cliente() {
                         <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: Casa"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        /> 
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Dirección principal</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: calle #1234"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Comuna</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: +56912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Ciudad</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: nicolas@correo.cl"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
                         
                         <p className="ml-3 mb-1 mt-1 font-bold">País</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="ej: Chile"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        />  
 
                     </div>
                 </div>
@@ -282,29 +261,29 @@ export default function Cliente() {
                     <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Nombre cotización"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input>      
+                        />      
 
                     <p className="ml-3 mb-1 font-bold">Id</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Calle #1234"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        /> 
 
                     <p className="ml-3 mb-1 font-bold">Descripción</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Añada una descripción"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        /> 
                     
                     <div className="flex">
                      <p className="ml-3 mb-1 font-bold">Fecha creación</p>
@@ -314,46 +293,46 @@ export default function Cliente() {
                        
                         <input
                             type="date"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[150]"
-                        ></input> 
+                        /> 
 
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Santiago"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[131]"
-                        ></input> 
+                        /> 
                     </div>
 
                     <p className="ml-3 mb-1 font-bold">Dirección destino</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Dirección"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        /> 
 
                     <p className="ml-3 mb-1 font-bold">Creado por</p>
                         <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Vendedor nombre"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        /> 
 
                     <p className="ml-3 mb-1 font-bold">Total</p>
                         <input
                             type="number"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="10000"
                             className="ml-2 mb-3 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        /> 
 
                     </div>
 
@@ -364,38 +343,38 @@ export default function Cliente() {
                     <p className="mt-2 ml-2 mb-1 font-bold">Cliente</p>
                                             <input
                             type="text"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Cliente"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        /> 
 
                     <p className="ml-2 mb-1 font-bold">Email</p>
                                             <input
                             type="email"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="Email@Example.cl"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        /> 
 
                     <p className="ml-2 mb-1 font-bold">Teléfono</p>
                                             <input
                             type="email"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="+56912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        /> 
 
                     <p className="ml-2 mb-1 font-bold">Tipo cliente</p>
                                             <input
                             type="email"
-                            /*value={}*/
+                            // value={}
                             onChange={() => {}}
                             placeholder="tipo"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        /> 
 
                     <button className="my-2 ml-2 px-16 py-4 mr-2 text-2xl text-black font-bold rounded bg-[#F1F6EF]">
                         Aprobada
@@ -455,38 +434,104 @@ export default function Cliente() {
             </div>
 
             {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
-                            {busqueda.trim() !== "" && (
-                <ul className="border rounded w-[420]">
-                    {cotizacionesFiltradas.map((coti, index) => (
-                    <li key={index} className="p-2 border-b hover:bg-gray-50 cursor-pointer">
-                        <strong>{coti.cliente?.nombre}</strong> - {coti.cliente?.rut}
-                    </li>
-                    ))}
+            {busqueda.trim() !== "" && (
+                <ul className="border rounded w-[420] bg-white shadow-lg max-h-60 overflow-y-auto">
+                    {loading ? (
+                        <li className="p-2 text-gray-500">Cargando...</li>
+                    ) : error ? (
+                        <li className="p-2 text-red-500">Error: {error}</li>
+                    ) : clientesFiltrados.length > 0 ? (
+                        clientesFiltrados.map((cliente, index) => (
+                            <li 
+                                key={index} 
+                                className="p-2 border-b hover:bg-gray-50 cursor-pointer"
+                                onClick={() => handleClienteSeleccionado(cliente)}
+                            >
+                                <div className="flex flex-col">
+                                    <strong className="text-gray-800">{cliente.nombre}</strong>
+                                    <span className="text-sm text-gray-600">{cliente.rut}</span>
+                                    {cliente.razon_social && (
+                                        <span className="text-xs text-gray-500">{cliente.razon_social}</span>
+                                    )}
+                                </div>
+                            </li>
+                        ))
+                    ) : (
+                        <li className="p-2 text-gray-500">No se encontraron clientes</li>
+                    )}
                 </ul>
-                )}
+            )}
+
+            {/* Lista de clientes disponibles (siempre visible) */}
+            <div className="mt-3">
+                <p className="text-sm text-gray-600 mb-2">Clientes disponibles (haga clic para seleccionar):</p>
+                <div className="max-h-40 overflow-y-auto border rounded bg-gray-50 p-2">
+                    {loading ? (
+                        <p className="text-gray-500">Cargando clientes...</p>
+                    ) : error ? (
+                        <p className="text-red-500">Error: {error}</p>
+                    ) : clientes.length > 0 ? (
+                        clientes.slice(0, 5).map((cliente, index) => (
+                            <div 
+                                key={index}
+                                className="p-2 mb-1 bg-white rounded cursor-pointer hover:bg-blue-50 border"
+                                onClick={() => handleClienteSeleccionado(cliente)}
+                            >
+                                <div className="flex flex-col">
+                                    <strong className="text-sm text-gray-800">{cliente.nombre}</strong>
+                                    <span className="text-xs text-gray-600">{cliente.rut}</span>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500">No hay clientes disponibles</p>
+                    )}
+                    {clientes.length > 5 && (
+                        <p className="text-xs text-gray-500 mt-2">
+                            Y {clientes.length - 5} clientes más... Use la búsqueda para encontrar específicos.
+                        </p>
+                    )}
+                </div>
+            </div>
 
             {/*Titulo: Nombre Cliente*/}
             <div className="mt-2 text-xl text-base text-black font-bold">
                 Nombre Cliente
             </div>
             <div className="mt-4 ml-2 text-base text-black flex">
-                Rut 12.345.678-9 Tipo cliente Correo@gmail.com
+                {clienteSeleccionado ? (
+                    <div className="flex flex-col">
+                        <span className="font-semibold">{clienteSeleccionado.nombre}</span>
+                        <span className="text-sm text-gray-600">
+                            Rut {clienteSeleccionado.rut} | 
+                            {clienteSeleccionado.tipo_cliente?.nombre || `Tipo ${clienteSeleccionado.tipo_id}`} | 
+                            {clienteSeleccionado.email || 'Sin email'}
+                        </span>
+                        {clienteSeleccionado.razon_social && (
+                            <span className="text-xs text-gray-500">{clienteSeleccionado.razon_social}</span>
+                        )}
+                    </div>
+                ) : (
+                    <span className="text-gray-500 italic">Seleccione un cliente</span>
+                )}
             </div>
 
 
             {/*Botones*/}
             <div className="flex justify-end mt-7">
-
-                <button className="px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
-                onClick={() => setMostrarModal_His(true)}>
-                Ver historial
+                <button 
+                    className="px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
+                    onClick={() => setMostrarModal_His(true)}
+                >
+                    Ver historial
                 </button>
 
-                <button className="px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
-                onClick={() => setMostrarModal(true)}>
-                Ver detalle
+                <button 
+                    className="px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
+                    onClick={() => setMostrarModal(true)}
+                >
+                    Ver detalle
                 </button>
-
             </div>
 
             </div>

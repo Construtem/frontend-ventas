@@ -1,7 +1,7 @@
 // pages/index.tsx
 'use client'
 import { NextPage } from 'next'
-import React from 'react'
+import React, { useState } from 'react'
 import ProductTable from '@/components/ProductTable'
 import Vendedor from '@/components/Vendedor';
 import Cliente from '@/components/Cliente';
@@ -9,14 +9,22 @@ import Cotizacion from '@/components/Cotizacion';
 import HistorialCotizaciones from '@/components/HistorialCotizaciones'
 import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
+import { Cliente as ClienteType } from '@/services/apiService';
 
 const Home: NextPage = () => {
+    const [clienteSeleccionado, setClienteSeleccionado] = useState<ClienteType | null>(null);
+    
     // Obtener la cotización para el panel de totales
     const quotation = quotations.find(q => q.id === 'q1')
 
     if (!quotation) {
         return <div>Error: Cotización no encontrada</div>
     }
+
+    const handleClienteSeleccionado = (cliente: ClienteType) => {
+        console.log('Página principal: Cliente seleccionado:', cliente);
+        setClienteSeleccionado(cliente);
+    };
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -29,13 +37,20 @@ const Home: NextPage = () => {
                             </div>
                             </div>
                 
+                {/* Debug info */}
+                {clienteSeleccionado && (
+                    <div className="ml-30 text-sm text-gray-600 mb-2">
+                        Cliente seleccionado: {clienteSeleccionado.nombre} ({clienteSeleccionado.rut})
+                    </div>
+                )}
+                
                         <div className='flex'>
                         <div>
                             <Vendedor />
-                            <Cliente  />
+                            <Cliente onClienteSeleccionado={handleClienteSeleccionado} />
                         </div>
                         <div>
-                            <Cotizacion />
+                            <Cotizacion clienteSeleccionado={clienteSeleccionado} />
                         </div>
                     </div>
                 <div className="flex gap-4 mb-8 max-w-7xl mx-auto">
