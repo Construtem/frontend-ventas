@@ -1,6 +1,6 @@
 'use client'
 
-
+/*
 export default function Cotizacion() {
 
     return (
@@ -14,7 +14,6 @@ export default function Cotizacion() {
                         Cotización #123456
                     </div>
 
-                    {/*Boton Estado*/}
                     <div className="ml-107">
                     <button className="px-3 py-1 mr-2 font-bold text-black rounded bg-[#F1F6EF]">
                         Aprobada
@@ -57,4 +56,18 @@ export default function Cotizacion() {
 
         </div>
     );
+}
+
+*/
+
+
+
+export default function Cotizacion() {
+    return    (
+        <div>
+            <h3>
+                Detalle cotización
+            </h3>
+        </div>
+    )
 }

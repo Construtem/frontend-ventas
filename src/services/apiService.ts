@@ -182,25 +182,25 @@ export interface CotizacionSimplificada {
 export const clienteService = {
   // Obtener todos los clientes
   obtenerClientes: async (): Promise<Cliente[]> => {
-    const response = await api.get<Cliente[]>('/clientes');
+    const response = await api.get<Cliente[]>('/api/clientes');
     return response.data;
   },
 
   // Crear nuevo cliente
   crearCliente: async (cliente: Omit<Cliente, 'id'>): Promise<{ id: number }> => {
-    const response = await api.post<{ id: number }>('/clientes', cliente);
+    const response = await api.post<{ id: number }>('/api/clientes', cliente);
     return response.data;
   },
 
   // Actualizar cliente
   actualizarCliente: async (id: number, cliente: Partial<Cliente>): Promise<Cliente> => {
-    const response = await api.patch<Cliente>(`/clientes/${id}`, cliente);
+    const response = await api.patch<Cliente>(`/api/clientes/${id}`, cliente);
     return response.data;
   },
 
   // Eliminar cliente
   eliminarCliente: async (id: number): Promise<{ mensaje: string }> => {
-    const response = await api.delete<{ mensaje: string }>(`/clientes/${id}`);
+    const response = await api.delete<{ mensaje: string }>(`/api/clientes/${id}`);
     return response.data;
   },
 };

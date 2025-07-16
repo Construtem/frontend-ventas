@@ -1,5 +1,5 @@
 'use client'
-
+/*
 import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
 
@@ -34,16 +34,9 @@ interface Cotizacion{
         items: string,
         total_items: number,
         total_precio: number
-    }   
+    }
 
-/*interface Cliente {
-    nombre: string;
-    telefono: string;
-    email: string;
-    razon_social?: "";
-    rut: string;
-    id?: number;
-}*/
+
 const [nuevoCliente, setNuevoCliente] = useState({
     nombre: "",
     telefono: "",
@@ -96,7 +89,7 @@ const guardarCliente = async () => {
     alert("No se pudo guardar el cliente");
   }
 };
-    
+
     useEffect(() => {
     fetch(`${apiVentasUrl}/api/cotizaciones`)
         .then((res) => res.json())
@@ -108,7 +101,7 @@ const guardarCliente = async () => {
         });
     }, [`${apiVentasUrl}/api/cotizaciones`]);
 
-    
+
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
     const termino = busqueda.toLowerCase();
     return (
@@ -130,40 +123,32 @@ const guardarCliente = async () => {
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
-            
+
             <div className="ml-3">
-            {/*Titulo: Seleccionar cliente*/}
             <div className="text-2xl font-bold text-black flex gap-2 mb-2">
                 Seleccionar cliente
             </div>
-        
-
-            {/*Modal boton ver historial*/}
             {MostrarModal_His && (
             <div className="fixed inset-0 flex justify-center items-center">
               <div className="bg-[#0B1631] p-8 rounded-lg w-[900px]">
 
-                {/*Titulo Barra Icono*/}
                 <div className="flex">
                 <h2 className="text-2xl text-white font-semibold mb-4">Cotizaciones</h2>
-                {/*Icono barra*/}
                 <div  className="relative">
                     <span className="absolute ml-5 top-[16] inset-y-1/2 left-3 items-center text-[#949494]">
                         <FaSearch />
                     </span>
                 </div>
-                {/*Barra busqueda historial*/}
-                <input 
+                <input
                 type="text"
                 placeholder="Buscar"
                 className="ml-5 pl-10 px-3 py-1 border rounded-md bg-white border-[#DFDFDF] w-[570]"/>
                 </div>
 
-                {/*Tablas*/}
                 <div className="flex my-4">
 
                     <div className="center w-[900]">
-                        
+
                         <table className=" w-full text-left border border-gray-300 rounded-md">
                             <thead>
                                 <tr className="text-center bg-gray-100">
@@ -194,43 +179,37 @@ const guardarCliente = async () => {
                                     </td>
                                     </tr>
                                 )}
-                            </tbody>        
-                        </table>  
+                            </tbody>
+                        </table>
                             <button
                                 className="ml-167 mt-5 px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
                                 onClick={() => setMostrarModal_His(false)}
                             >
                                 Salir
-                            </button>                        
+                            </button>
                     </div>
                 </div>
               </div>
             </div>
             )}
-            
-            {/*Boton añadir cliente*/}
+
             {AñadirCliente && (
             <div className="fixed inset-0 flex justify-center items-center">
             <div className="bg-[#0B1631] p-8 rounded-lg w-[600px]">
-                {/*Titulo*/}
                 <h2 className="text-3xl text-white font-semibold mb-2">Cliente</h2>
 
-                {/*Titulos con flex y boton*/}
                 <div className="flex font-bold text-white text-xl my-2">
                     <p className="ml-1 mb-1 mt-2">Datos cliente</p>
                     <p className="ml-37 mb-1 mt-2">Direcciones</p>
-                    {/*Botón agregar otra dirección*/}
-                    <button className="w-7 h-7 mt-2 ml-2 items-center gap-3 text-white rounded-full justify-center 
+                    <button className="w-7 h-7 mt-2 ml-2 items-center gap-3 text-white rounded-full justify-center
                             text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
                             onClick={() => []}>
                     +
                     </button>
                 </div>
 
-                {/*Dos tablas con flex*/}
                 <div className="flex justify-center mb-5">
 
-                    {/*Tabla uno*/}
                     <div className="rounded bg-white w-[300]">
                         <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
@@ -240,17 +219,17 @@ const guardarCliente = async () => {
                             if (soloLetras.test(e.target.value)) setNuevoCliente({...nuevoCliente, nombre: e.target.value})}}
                             placeholder="ej: Nicolás Jiménez"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        ></input>
 
                         <p className="ml-3 mb-1 font-bold">Rut</p>
                         <input
                             type="text"
                             value={nuevoCliente.rut}
-                            onChange={(e) => { const restriccion_rut = /^[0-9.\-kK]*$/;                              
+                            onChange={(e) => { const restriccion_rut = /^[0-9.\-kK]*$/;
                             if (restriccion_rut.test(e.target.value)) { setNuevoCliente({...nuevoCliente, rut: e.target.value})}}}
                             placeholder="ej: 12.345.678-9"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        ></input>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Tipo de cliente</p>
                         <select
@@ -258,7 +237,7 @@ const guardarCliente = async () => {
                         onChange={(e) => SetNumeroID(e.target.value)}
                         className="ml-3 mb-1 px-2 py-1 text-black rounded"
                     >
-                        
+
                         <option value="PorDefecto">Persona</option>
                         <option value="ID1">1</option>
                         <option value="ID2">2</option>
@@ -272,7 +251,7 @@ const guardarCliente = async () => {
                             if (soloNumeros.test(e.target.value)) {setNuevoCliente({...nuevoCliente, telefono: e.target.value})}}}
                             placeholder="ej: 912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        ></input>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Email</p>
                         <input
@@ -281,61 +260,53 @@ const guardarCliente = async () => {
                             onChange={(e) => setNuevoCliente({...nuevoCliente, email: e.target.value})}
                             placeholder="ej: nicolas@correo.cl"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        ></input>
 
                     </div>
-
-                    {/*Tabla dos*/}
                     <div className="ml-4 rounded bg-white w-[300]">
-                        
+
                         <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => []}
                             placeholder="ej: Casa"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        ></input>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Dirección principal</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => []}
                             placeholder="ej: calle #1234"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        ></input>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Comuna</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => []}
                             placeholder="ej: Maipú"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
+                        ></input>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Ciudad</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => []}
                             placeholder="ej: Santiago"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
-                        
+                        ></input>
+
                         <p className="ml-3 mb-1 mt-1 font-bold">País</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => []}
                             placeholder="ej: Chile"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
-                        
+                        ></input>
+
                     </div>
                 </div>
-                {/*Botones Cancelar y guardar*/}
                 <div className="flex justify-end">
                 <button
                     className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
@@ -353,137 +324,120 @@ const guardarCliente = async () => {
             </div>
             )}
 
-            {/*Modal Boton Ver detalle */}
             {mostrarModal && (
             <div className="fixed inset-0 flex justify-center items-center">
             <div className="bg-[#0B1631] p-8 rounded-lg w-[650px]">
 
-                {/*Titulo*/}
                 <h2 className="text-2xl text-white font-semibold mb-4">Detalle cotización</h2>
 
-                {/*Dos tablas con flex*/}
                 <div className="flex my-4">
 
-                    {/*Tabla uno*/}
                     <div className="rounded bg-white w-[325]">
 
                     <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Nombre cotización"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input>      
+                        ></input>
 
                     <p className="ml-3 mb-1 font-bold">Id</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Calle #1234"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        ></input>
 
                     <p className="ml-3 mb-1 font-bold">Descripción</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Añada una descripción"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
-                    
+                        ></input>
+
                     <div className="flex">
                      <p className="ml-3 mb-1 font-bold">Fecha creación</p>
                      <p className="ml-11 mb-1 font-bold">Vigencia</p>
                      </div>
                     <div className="flex">
-                       
+
                         <input
                             type="date"
-                            /*value={}*/
                             onChange={() => {}}
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[150]"
-                        ></input> 
+                        ></input>
 
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Santiago"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[131]"
-                        ></input> 
+                        ></input>
                     </div>
 
                     <p className="ml-3 mb-1 font-bold">Dirección destino</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Dirección"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        ></input>
 
                     <p className="ml-3 mb-1 font-bold">Creado por</p>
                         <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Vendedor nombre"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        ></input>
 
                     <p className="ml-3 mb-1 font-bold">Total</p>
                         <input
                             type="number"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="10000"
                             className="ml-2 mb-3 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        ></input>
 
                     </div>
 
 
-                {/*Tabla dos*/}
                     <div className="ml-4 rounded bg-white h-[380] w-[269]">
 
                     <p className="mt-2 ml-2 mb-1 font-bold">Cliente</p>
                                             <input
                             type="text"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Cliente"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        ></input>
 
                     <p className="ml-2 mb-1 font-bold">Email</p>
                                             <input
                             type="email"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="Email@Example.cl"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        ></input>
 
                     <p className="ml-2 mb-1 font-bold">Teléfono</p>
                                             <input
                             type="email"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="+56912345678"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        ></input>
 
                     <p className="ml-2 mb-1 font-bold">Tipo cliente</p>
                                             <input
                             type="email"
-                            /*value={}*/
                             onChange={() => {}}
                             placeholder="tipo"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        ></input>
 
                     <button className="my-2 ml-2 px-16 py-4 mr-2 text-2xl text-black font-bold rounded bg-[#F1F6EF]">
                         Aprobada
@@ -493,7 +447,6 @@ const guardarCliente = async () => {
 
                 </div>
 
-                {/*Botones Cancelar y guardar*/}
                 <div className="flex justify-end">
                 <button
                     className="px-28 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
@@ -516,13 +469,11 @@ const guardarCliente = async () => {
 
 
             <div className="flex">
-                {/*Icono barrita*/}
                 <div  className="relative">
                     <span className="absolute top-[16] inset-y-1/2 left-3 flex items-center text-[#949494]">
                         <FaSearch />
                     </span>
                 </div>
-                {/*Barrita*/}
                 <input
                     type="text"
                     value={busqueda}
@@ -533,8 +484,7 @@ const guardarCliente = async () => {
                 </input>
                 <div>
 
-                {/*Boton más*/}
-                <button className="w-7 h-7 ml-2 items-center gap-3 text-white rounded-full justify-center 
+                <button className="w-7 h-7 ml-2 items-center gap-3 text-white rounded-full justify-center
                                    text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
                                    onClick={() => setAñadirCliente(true)}>
                     +
@@ -542,13 +492,12 @@ const guardarCliente = async () => {
                 </div>
             </div>
 
-            {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
             {busqueda.trim() !== "" && (
                 <ul className="border rounded w-[420]">
                     {cotizacionesFiltradas.map((coti, index) => (
-                    <li 
-                        key={index} 
-                        className="p-2 border-b hover:bg-gray-50 cursor-pointer" 
+                    <li
+                        key={index}
+                        className="p-2 border-b hover:bg-gray-50 cursor-pointer"
                         onClick={() => {
                             setSeleccionada(coti);
                             setBusqueda("");
@@ -560,7 +509,6 @@ const guardarCliente = async () => {
                 </ul>
             )}
 
-            {/*Muestra los datos del cliente seleccionado*/}
             {seleccionada && (
                 <div className="mt-4 ml-2">
 
@@ -577,7 +525,6 @@ const guardarCliente = async () => {
                 </div>
             )}
 
-            {/*Botones*/}
             <div className="flex justify-end mt-7">
 
                 <button className="box-shadow px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
@@ -595,4 +542,159 @@ const guardarCliente = async () => {
             </div>
         </div>
     );
+}
+
+
+*/
+import {CiUser } from "react-icons/ci";
+import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
+import { useQuery } from '@tanstack/react-query'
+import { clienteService, Cliente as ClienteType } from '@/services/apiService'
+import {useMemo, useState} from "react";
+
+export default function Cliente() {
+    const { state, dispatch } = useCotizacionFlow()
+    const sucursalId = state.sucursalId
+
+    const {
+        data: clientes = [],
+    } = useQuery<ClienteType[]>({
+        queryKey: ['clientes'],
+        queryFn:    clienteService.obtenerClientes,
+        enabled:    !!sucursalId,
+    })
+
+    const [search, setSearch] = useState('')
+    const clientesFiltrados = useMemo(() => {
+        const termino = search.trim().toLowerCase()
+        if (!termino) return []
+        return clientes.filter(c =>
+            c.nombre.toLowerCase().includes(termino) ||
+            c.rut.toLowerCase().includes(termino)
+        )
+    }, [search, clientes])
+
+    const clienteSeleccionado = clientes.find(
+        c => c.rut === state.clienteRut
+    )
+
+    return (
+        <div className="bg-white px-[40px] py-[10px] rounded-[10px]
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] min-h-[404px] min-w-[504px]">
+            <div className="flex w-full gap-[10px] flex-col">
+                <h2 className={"font-semibold font-montserrat text-[24px]"}>
+                    Seleccionar cliente
+                </h2>
+                <div className="flex items-center w-full gap-[10px]">
+
+                {/* WRAPPER RELATIVE */}
+                <div className="relative flex items-center rounded-[10px]
+                        px-4 py-2 w-full border-[#E2E2E2] shadow-sm">
+                    {/* Icono lupa */}
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5 text-gray-400 mr-2 flex-shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                    >
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1116.65
+                 6.65a7.5 7.5 0 010 10.6z"
+                        />
+                    </svg>
+
+                    {/* Input de búsqueda */}
+                    <input
+                        type="text"
+                        placeholder="Nombre o RUT"
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="outline-none w-full placeholder-gray-500 text-gray-800"
+                    />
+
+                    {/* Desplegable de sugerencias */}
+                    {search.trim() !== '' && (
+                        <ul
+                            className="absolute top-full left-0 right-0
+                         w-full bg-white border border-[#E2E2E2]
+                         rounded-lg shadow-lg max-h-60 overflow-y-auto z-10"
+                        >
+                            {clientesFiltrados.length > 0 ? (
+                                clientesFiltrados.map((c) => (
+                                    <li
+                                        key={c.rut}
+                                        onClick={() => {
+                                            dispatch({type: 'SET_CLIENT', payload: c.rut})
+                                            setSearch('')
+                                        }}
+                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer
+                               flex justify-between"
+                                    >
+                                        <span className="font-medium">{c.nombre}</span>
+                                        <span className="text-sm text-gray-500">({c.rut})</span>
+                                    </li>
+                                ))
+                            ) : (
+                                <li className="p-4 text-center text-gray-500">
+                                    No se encontraron clientes
+                                </li>
+                            )}
+                        </ul>
+                    )}
+                </div>
+
+                {/* Botón crear */}
+            </div>
+            </div>
+            {clienteSeleccionado ? (
+
+                    <div className="flex flex-col gap-[20px]">
+                        <h2 className="text-[24px] font-semibold">{clienteSeleccionado.nombre}</h2>
+                    <div className="flex gap-[20px]">
+                        <p className={"font-medium font-montserrat"}>RUT: {clienteSeleccionado.rut}</p>
+                        <p className={"font-medium font-montserrat"}>Tipo: {clienteSeleccionado.tipo_id===1?'Persona':'Empresa'}</p>
+                        <p className={"font-medium font-montserrat"}>{clienteSeleccionado.email ?? '—'}</p>
+                    </div>
+                        <div className="flex gap-[20px] justify-between">
+                            <button
+                                className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear Nuevo
+                            </button>
+                            <button
+                                className={'bg-[#F59243] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#ed8f43]'}>Ver
+                                Historial
+                            </button>
+                            <button
+                                className={'bg-teal-500 font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-teal-550'}>Ver
+                                Detalles
+                            </button>
+                        </div>
+
+                    </div>
+                ) :
+                (
+
+                    <div className="flex flex-col items-center justify-center w-full h-full p-8 text-center">
+                        <CiUser className="w-16 h-16 text-gray-300 mb-4"/>
+                        <h2 className="text-2xl font-semibold font-montserrat text-[24px] my-[2px]">
+                            Ningún cliente seleccionado
+                        </h2>
+                        <p className="text-gray-500 mb-4">
+                            Usa el buscador para encontrar un cliente existente<br/>
+                            o crea uno nuevo haciendo clic en el botón.
+                        </p>
+                        <button
+                            className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear
+                            Cliente
+                        </button>
+                    </div>
+
+                )
+
+            }
+        </div>
+    )
 }
