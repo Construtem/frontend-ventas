@@ -551,10 +551,13 @@ import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { useQuery } from '@tanstack/react-query'
 import { clienteService, Cliente as ClienteType } from '@/services/apiService'
 import {useMemo, useState} from "react";
+import Modal from "@/components/Modal/Modal";
+import {ClienteModal} from "@/components/Modal/ClienteModal";
 
 export default function Cliente() {
     const { state, dispatch } = useCotizacionFlow()
     const sucursalId = state.sucursalId
+    const [showCliente, setShowCliente] = useState(false)
 
     const {
         data: clientes = [],
@@ -646,8 +649,6 @@ export default function Cliente() {
                         </ul>
                     )}
                 </div>
-
-                {/* Botón crear */}
             </div>
             </div>
             {clienteSeleccionado ? (
@@ -660,9 +661,10 @@ export default function Cliente() {
                         <p className={"font-medium font-montserrat"}>{clienteSeleccionado.email ?? '—'}</p>
                     </div>
                         <div className="flex gap-[20px] justify-between">
-                            <button
-                                className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear Nuevo
+                            <button onClick={() => setShowCliente(true)}
+                                className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear Nuevo Cliente
                             </button>
+                            <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
                             <button
                                 className={'bg-[#F59243] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#ed8f43]'}>Ver
                                 Historial
@@ -686,10 +688,11 @@ export default function Cliente() {
                             Usa el buscador para encontrar un cliente existente<br/>
                             o crea uno nuevo haciendo clic en el botón.
                         </p>
-                        <button
-                            className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear
+                        <button onClick={() => setShowCliente(true)}
+                            className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear Nuevo
                             Cliente
                         </button>
+                        <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
                     </div>
 
                 )
