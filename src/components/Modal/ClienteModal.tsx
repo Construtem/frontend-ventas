@@ -9,7 +9,7 @@ interface ClienteModalProps {
 }
 
 export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
-    const [Cliente, setFormCliente] = useState({ nombre: '', tipo: 'Persona', telefono: '', email: '' })
+    const [FormCliente, setFormCliente] = useState({ nombre: '', tipo: 'Persona', telefono: '', email: '' })
     const [Direcciones, setFormDirecciones] = useState([{ id: 1, direccion: '', comuna: '', ciudad: '',  }])
 
     const handleSave = () => {
@@ -26,7 +26,7 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
                     <div className="flex flex-col gap-[5px]">
                         <label className={"text-white font-medium text-[20px]"}>Nombre</label>
                         <input
-                            value={Cliente.nombre}
+                            value={FormCliente.nombre}
                             onChange={e => setFormCliente(f => ({...f, nombre: e.target.value}))}
                             className="w-full border rounded px-2 py-[10px] bg-[#19233c] text-white focus:outline-none border-none "
                         />
@@ -34,7 +34,7 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
                     <div className="flex flex-col gap-[5px]">
                         <label className={"text-white font-medium text-[20px]"}>Tipo de cliente</label>
                         <select
-                            value={Cliente.tipo}
+                            value={FormCliente.tipo}
                             onChange={e => setFormCliente(f => ({...f, tipo: e.target.value}))}
                             className="w-full border rounded px-2 py-[10px] bg-[#19233c] text-white focus:outline-none border-none "
                         >
@@ -45,7 +45,7 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
                     <div className="flex flex-col gap-[5px]">
                         <label className={"text-white font-medium text-[20px]"}>Teléfono</label>
                         <input
-                            value={Cliente.telefono}
+                            value={FormCliente.telefono}
                             onChange={e => setFormCliente(f => ({...f, nombre: e.target.value}))}
                             className="w-full border rounded px-2 py-[10px] bg-[#19233c] text-white focus:outline-none border-none "
                         />
@@ -53,7 +53,7 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
                     <div className="flex flex-col gap-[5px]">
                         <label className={"text-white font-medium text-[20px]"}>Email</label>
                         <input
-                            value={Cliente.email}
+                            value={FormCliente.email}
                             onChange={e => setFormCliente(f => ({...f, nombre: e.target.value}))}
                             className="w-full border rounded px-2 py-[10px] bg-[#19233c] text-white focus:outline-none border-none "
                         />
