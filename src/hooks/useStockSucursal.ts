@@ -29,12 +29,12 @@ export const useStockSucursal = (sucursalId: number): UseStockSucursalReturn => 
     setError(null)
     
     try {
-      console.log('🏪 Cargando stock para sucursal:', sucursalId, 'productos:', productosNuevos.length)
+      console.log('Cargando stock para sucursal:', sucursalId, 'productos:', productosNuevos.length)
       
       const stockData = await stockService.obtenerStockProductosEnSucursal(sucursalId, productosNuevos)
-      
-      console.log('📊 Stock cargado:', stockData.length, 'de', productosNuevos.length, 'productos consultados')
-      
+
+      console.log('Stock cargado:', stockData.length, 'de', productosNuevos.length, 'productos consultados')
+
       // Actualizar stock existente con nuevos datos
       setStock(prevStock => {
         const stockActualizado = [...prevStock]
@@ -58,7 +58,7 @@ export const useStockSucursal = (sucursalId: number): UseStockSucursalReturn => 
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : 'Error al cargar stock'
       setError(mensaje)
-      console.error('❌ Error al cargar stock:', err)
+      console.error('Error al cargar stock:', err)
     } finally {
       setLoading(false)
     }
