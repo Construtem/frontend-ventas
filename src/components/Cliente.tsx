@@ -1,18 +1,18 @@
 'use client'
 
+
 import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
-
-
+import {clienteService , cotizacionService, CotizacionSimplificada} from '@/services/apiService';
+    
 export default function Cliente() {
     const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
-    const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
-    const [seleccionada, setSeleccionada] = useState<Cotizacion | null>(null);
+    const [cotizaciones, setCotizaciones] = useState<CotizacionSimplificada[]>([]);
+    const [seleccionada, setSeleccionada] = useState<CotizacionSimplificada | null>(null);
     const [busqueda, setBusqueda] = useState("");
-    const [NumeroID, SetNumeroID] = useState("Seleccione id");
 
 
 interface Cotizacion{
@@ -29,57 +29,49 @@ interface Cotizacion{
             telefono: string,
             email: string,
             rut: string,
-            razon_social: string
+            razon_social: string,
         },
         items: string,
         total_items: number,
         total_precio: number
     }   
 
-/*interface Cliente {
-    nombre: string;
-    telefono: string;
-    email: string;
-    razon_social?: "";
-    rut: string;
-    id?: number;
-}*/
 const [nuevoCliente, setNuevoCliente] = useState({
     nombre: "",
     telefono: "",
     email: "",
     razon_social: "",
     rut: "",
-    tipo_id: "",
+    tipo_id: 1,
 });
 
+
 const guardarCliente = async () => {
-  // Validaciones básicas antes de guardar
-  if (
-    !nuevoCliente.nombre.trim() ||
-    !nuevoCliente.rut.match(/^\d{1,2}\.?\d{3}\.?\d{3}-[\dkK]$/) ||
-    !nuevoCliente.email.includes("@") ||
-    nuevoCliente.telefono.length > 8
-  ) {
+  console.log("Validando cliente:", nuevoCliente);
+
+  const esNombreValido = nuevoCliente.nombre.trim().length > 0;
+  const esRutValido = /^\d{7,8}-[\dkK]$/.test(nuevoCliente.rut);
+  const esEmailValido = nuevoCliente.email.includes("@");
+  const esTelefonoValido = /^[0-9]{8,9}$/.test(nuevoCliente.telefono);
+
+  if (!esNombreValido || !esRutValido || !esEmailValido || !esTelefonoValido) {
+    console.warn("Validación fallida", {
+      esNombreValido,
+      esRutValido,
+      esEmailValido,
+      esTelefonoValido,
+    });
     alert("Completa correctamente los campos obligatorios");
     return;
   }
 
+const clienteAEnviar = { ...nuevoCliente };
+
+  console.log("Enviando cliente:", clienteAEnviar); 
+
   try {
-    const response = await fetch(`${apiVentasUrl}/api/clientes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(nuevoCliente),
-    });
-
-    if (!response.ok) {
-      throw new Error("Error al guardar el cliente");
-    }
-
-    const clienteGuardado = await response.json();
-    console.log("Cliente guardado:", clienteGuardado);
+    const response = await clienteService.crearCliente(clienteAEnviar);
+    console.log("Cliente guardado:", response);
     alert("Cliente guardado exitosamente");
 
     setAñadirCliente(false);
@@ -89,24 +81,26 @@ const guardarCliente = async () => {
       email: "",
       razon_social: "",
       rut: "",
-      tipo_id: "",
+      tipo_id: 1,
     });
   } catch (error) {
     console.error("Error al guardar:", error);
     alert("No se pudo guardar el cliente");
   }
 };
-    
-    useEffect(() => {
-    fetch(`${apiVentasUrl}/api/cotizaciones`)
-        .then((res) => res.json())
-        .then((data) => {
-        setCotizaciones(data);
-        })
-        .catch((error) => {
-            console.error("Error fetching cotizaciones:", error);
-        });
-    }, [`${apiVentasUrl}/api/cotizaciones`]);
+
+
+useEffect(() => {
+  const fetchCotizaciones = async () => {
+    try {
+      const data = await cotizacionService.obtenerCotizacionesSimplificadas();
+      setCotizaciones(data);
+    } catch (error) {
+      console.error("Error cotizaciones:", error);
+    }
+  };
+  fetchCotizaciones();
+}, []);
 
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
@@ -117,16 +111,6 @@ const guardarCliente = async () => {
     );
     });
 
-    useEffect(() => {
-    fetch(`${apiVentasUrl}/api/cotizaciones`)
-        .then((res) => res.json())
-        .then((data) => {
-        setCotizaciones(data);
-        })
-        .catch((error) => {
-            console.error("Error fetching cotizaciones:", error);
-        });
-    }, [`${apiVentasUrl}/api/cotizaciones`]);
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
@@ -181,7 +165,7 @@ const guardarCliente = async () => {
                                     <tr className="text-center bg-white">
                                     <td className="border-t p-2">{seleccionada.id}</td>
                                     <td className="border-t p-2">{seleccionada.nombre}</td>
-                                    <td className="border-t p-2">{new Date(seleccionada.fecha_crea).toLocaleDateString()}</td>
+                                    <td className="border-t p-2">{seleccionada.fecha_crea}</td>
                                     <td className="border-t p-2">{seleccionada.total_items}</td>
                                     <td className="border-t p-2">${seleccionada.total_precio}</td>
                                     <td className="border-t p-2">{seleccionada.estado}</td>
@@ -211,20 +195,14 @@ const guardarCliente = async () => {
             {/*Boton añadir cliente*/}
             {AñadirCliente && (
             <div className="fixed inset-0 flex justify-center items-center">
-            <div className="bg-[#0B1631] p-8 rounded-lg w-[600px]">
+            <div className="bg-[#0B1631] p-8 rounded-lg w-[380px]">
                 {/*Titulo*/}
                 <h2 className="text-3xl text-white font-semibold mb-2">Cliente</h2>
 
                 {/*Titulos con flex y boton*/}
-                <div className="flex font-bold text-white text-xl my-2">
+                <div className="font-bold text-white text-xl my-2">
                     <p className="ml-1 mb-1 mt-2">Datos cliente</p>
-                    <p className="ml-37 mb-1 mt-2">Direcciones</p>
                     {/*Botón agregar otra dirección*/}
-                    <button className="w-7 h-7 mt-2 ml-2 items-center gap-3 text-white rounded-full justify-center 
-                            text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
-                            onClick={() => []}>
-                    +
-                    </button>
                 </div>
 
                 {/*Dos tablas con flex*/}
@@ -248,20 +226,19 @@ const guardarCliente = async () => {
                             value={nuevoCliente.rut}
                             onChange={(e) => { const restriccion_rut = /^[0-9.\-kK]*$/;                              
                             if (restriccion_rut.test(e.target.value)) { setNuevoCliente({...nuevoCliente, rut: e.target.value})}}}
-                            placeholder="ej: 12.345.678-9"
+                            placeholder="ej: 12345678-9"
                             className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
                         ></input>  
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Tipo de cliente</p>
                         <select
-                        value={NumeroID}
-                        onChange={(e) => SetNumeroID(e.target.value)}
+                        value={nuevoCliente.tipo_id}
+                        onChange={(e) => setNuevoCliente({...nuevoCliente, tipo_id: parseInt(e.target.value)})}
                         className="ml-3 mb-1 px-2 py-1 text-black rounded"
                     >
                         
-                        <option value="PorDefecto">Persona</option>
-                        <option value="ID1">1</option>
-                        <option value="ID2">2</option>
+                        <option value={1}>Persona</option>
+                        <option value={2}>Empresa</option>
                          </select>
 
                         <p className="ml-3 mb-1 mt-1 font-bold">Teléfono</p>
@@ -284,67 +261,18 @@ const guardarCliente = async () => {
                         ></input>  
 
                     </div>
-
-                    {/*Tabla dos*/}
-                    <div className="ml-4 rounded bg-white w-[300]">
-                        
-                        <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => []}
-                            placeholder="ej: Casa"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
-
-                        <p className="ml-3 mb-1 mt-1 font-bold">Dirección principal</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => []}
-                            placeholder="ej: calle #1234"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
-
-                        <p className="ml-3 mb-1 mt-1 font-bold">Comuna</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => []}
-                            placeholder="ej: Maipú"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
-
-                        <p className="ml-3 mb-1 mt-1 font-bold">Ciudad</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => []}
-                            placeholder="ej: Santiago"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
-                        
-                        <p className="ml-3 mb-1 mt-1 font-bold">País</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => []}
-                            placeholder="ej: Chile"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input>  
-                        
-                    </div>
                 </div>
+
                 {/*Botones Cancelar y guardar*/}
-                <div className="flex justify-end">
+                <div className="flex justify-center">
                 <button
-                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
+                    className="px-12 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
                     onClick={() => setAñadirCliente(false)}
                 >
                     Cancelar
                 </button>
                 <button
-                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FFB04A] cursor-pointer"
+                    className="px-12 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FFB04A] cursor-pointer"
                     onClick={guardarCliente}>
                     Guardar
                 </button>
@@ -359,139 +287,87 @@ const guardarCliente = async () => {
             <div className="bg-[#0B1631] p-8 rounded-lg w-[650px]">
 
                 {/*Titulo*/}
-                <h2 className="text-2xl text-white font-semibold mb-4">Detalle cotización</h2>
+                <div className='flex justify-center'>
+                    <h2 className="text-2xl text-white font-semibold mb-4">Detalles del Cliente</h2>
+                    <h2 className="text-2xl text-white font-semibold mb-4 ml-19">Direcciones Cliente</h2>
+                    <button className="w-7 h-7 ml-2 items-center gap-3 text-white rounded-full justify-center 
+                    text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
+                    onClick={() => []}>
+                    +
+                    </button>
+                </div>
+
 
                 {/*Dos tablas con flex*/}
-                <div className="flex my-4">
+                
+                <div className="flex my-4 justify-center">
 
-                    {/*Tabla uno*/}
-                    <div className="rounded bg-white w-[325]">
+                    {seleccionada ? (
+                        
+                    <div className="rounded bg-white w-[300px] h-[380]">
 
-                    <p className="ml-3 mb-1 mt-2 font-bold">Nombre</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Nombre cotización"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input>      
+                        <div className="flex border-b border-[#949494]">
+                        <p className="text-lg ml-3 mb-4 mt-3 font-bold">Nombre:</p>
+                        <p className="text-base ml-2 mt-4 " >{seleccionada.cliente.nombre}</p>    
+                        </div>
 
-                    <p className="ml-3 mb-1 font-bold">Id</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Calle #1234"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Teléfono:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.telefono}</p>    
+                        </div>
 
-                    <p className="ml-3 mb-1 font-bold">Descripción</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Añada una descripción"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
-                    
-                    <div className="flex">
-                     <p className="ml-3 mb-1 font-bold">Fecha creación</p>
-                     <p className="ml-11 mb-1 font-bold">Vigencia</p>
-                     </div>
-                    <div className="flex">
-                       
-                        <input
-                            type="date"
-                            /*value={}*/
-                            onChange={() => {}}
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[150]"
-                        ></input> 
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Email:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.email}</p>    
+                        </div>
 
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Santiago"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[131]"
-                        ></input> 
-                    </div>
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Rut:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.rut}</p>    
+                        </div>
 
-                    <p className="ml-3 mb-1 font-bold">Dirección destino</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Dirección"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
-
-                    <p className="ml-3 mb-1 font-bold">Creado por</p>
-                        <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Vendedor nombre"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
-
-                    <p className="ml-3 mb-1 font-bold">Total</p>
-                        <input
-                            type="number"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="10000"
-                            className="ml-2 mb-3 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[290]"
-                        ></input> 
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Razón Social:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.razon_social}</p>    
+                        </div>
 
                     </div>
+                    ) : null}
+                
+                    {/*Tabla dos*/}
+                    {seleccionada ? (
+                        
+                    <div className="ml-5 rounded bg-white w-[300px] h-[380]">
 
+                        <div className="flex border-b border-[#949494]">
+                        <p className="text-lg ml-3 mb-4 mt-3 font-bold">Nombre:</p>
+                        <p className="text-base ml-2 mt-4 " >{seleccionada.cliente.nombre}</p>    
+                        </div>
 
-                {/*Tabla dos*/}
-                    <div className="ml-4 rounded bg-white h-[380] w-[269]">
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Teléfono:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.telefono}</p>    
+                        </div>
 
-                    <p className="mt-2 ml-2 mb-1 font-bold">Cliente</p>
-                                            <input
-                            type="text"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Cliente"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Email:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.email}</p>    
+                        </div>
 
-                    <p className="ml-2 mb-1 font-bold">Email</p>
-                                            <input
-                            type="email"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="Email@Example.cl"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Rut:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.rut}</p>    
+                        </div>
 
-                    <p className="ml-2 mb-1 font-bold">Teléfono</p>
-                                            <input
-                            type="email"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="+56912345678"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
-
-                    <p className="ml-2 mb-1 font-bold">Tipo cliente</p>
-                                            <input
-                            type="email"
-                            /*value={}*/
-                            onChange={() => {}}
-                            placeholder="tipo"
-                            className="ml-2 mb-2 border rounded-sm border-[#DFDFDF] px-3 py-1 w-[240]"
-                        ></input> 
-
-                    <button className="my-2 ml-2 px-16 py-4 mr-2 text-2xl text-black font-bold rounded bg-[#F1F6EF]">
-                        Aprobada
-                    </button>
+                        <div className="flex border-b border-[#949494] mt-2">
+                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Razón Social:</p>
+                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.razon_social}</p>    
+                        </div>
 
                     </div>
-
+                    ) : null}
                 </div>
+                
 
                 {/*Botones Cancelar y guardar*/}
                 <div className="flex justify-end">
@@ -544,7 +420,7 @@ const guardarCliente = async () => {
 
             {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
             {busqueda.trim() !== "" && (
-                <ul className="border rounded w-[420]">
+                <ul className="border rounded w-[420] max-h-[20] overflow-y-auto">
                     {cotizacionesFiltradas.map((coti, index) => (
                     <li 
                         key={index} 
