@@ -12,7 +12,8 @@ export default function Clientee() {
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [cotizaciones, setCotizaciones] = useState<CotizacionSimplificada[]>([]);
     const [seleccionada, setSeleccionada] = useState<CotizacionSimplificada | null>(null);
-    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [busquedaHistorial, setBusquedaHistorial] = useState('');
+    //const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
     const direcciones: DirCliente[] = [];
 
@@ -124,7 +125,7 @@ useEffect(() => {
 }, []);
 
 
-useEffect(() => {
+{/*useEffect(() => {
     const fetchClientes = async () => {
         try {
             const data = await clienteService.obtenerClientes();
@@ -134,7 +135,7 @@ useEffect(() => {
         }
     };
     fetchClientes();
-}, []);
+}, []);*/}
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
     const termino = busqueda.toLowerCase();
@@ -172,7 +173,9 @@ useEffect(() => {
                 {/*Barra busqueda historial*/}
                 <input 
                 type="text"
-                placeholder="Buscar"
+                placeholder="Buscar por ID"
+                value={busquedaHistorial}
+                onChange={(e) => setBusquedaHistorial(e.target.value)}
                 className="ml-5 pl-10 px-3 py-1 border rounded-md bg-white border-[#DFDFDF] w-[570]"/>
                 </div>
 
@@ -194,23 +197,25 @@ useEffect(() => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {seleccionada ? (
-                                    <tr className="text-center bg-white">
-                                    <td className="border-t p-2">{seleccionada.id}</td>
-                                    <td className="border-t p-2">{seleccionada.nombre}</td>
-                                    <td className="border-t p-2">{seleccionada.fecha_crea}</td>
-                                    <td className="border-t p-2">{seleccionada.total_items}</td>
-                                    <td className="border-t p-2">${seleccionada.total_precio}</td>
-                                    <td className="border-t p-2">{seleccionada.estado}</td>
-                                    <td className="border-t p-2"></td>
-                                    </tr>
-                                ) : (
-                                    <tr className="text-center bg-white">
-                                    <td colSpan={7} className="border-t p-2 text-gray-400">
-                                        No hay cotizaciones
-                                    </td>
-                                    </tr>
-                                )}
+                                
+                            {cotizaciones
+                            .filter((c) => c.cliente.rut === seleccionada.cliente.rut)
+                            .filter((c) =>
+                                busquedaHistorial.trim() === ''
+                                ? true
+                                : c.id === Number(busquedaHistorial)
+                            )
+                            .map((c) => (
+                                <tr key={c.id} className="text-center bg-white">
+                                <td className="border-t p-2">{c.id}</td>
+                                <td className="border-t p-2">{c.nombre}</td>
+                                <td className="border-t p-2">{c.fecha_crea}</td>
+                                <td className="border-t p-2">{c.total_items}</td>
+                                <td className="border-t p-2">${c.total_precio}</td>
+                                <td className="border-t p-2">{c.estado}</td>
+                                <td className="border-t p-2">✏️</td>
+                                </tr>
+                            ))}
                             </tbody>        
                         </table>  
                             <button
@@ -317,27 +322,19 @@ useEffect(() => {
             {/*Modal Boton Ver detalle */}
             {mostrarModal && (
             <div className="fixed inset-0 flex justify-center items-center">
-            <div className="bg-[#0B1631] p-8 rounded-lg w-[650px]">
+            <div className="bg-[#0B1631] p-8 rounded-lg w-[370px]">
 
                 {/*Titulo*/}
-                <div className='flex justify-center'>
-                    <h2 className="text-2xl text-white font-semibold mb-4">Detalles del Cliente</h2>
-                    <h2 className="text-2xl text-white font-semibold mb-4 ml-19">Direcciones Cliente</h2>
-                    <button className="w-7 h-7 ml-2 items-center gap-3 text-white rounded-full justify-center 
-                    text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
-                    onClick={() => []}>
-                    +
-                    </button>
-                </div>
+                <h2 className="text-2xl text-white font-semibold mb-4 justify-center">Detalles del Cliente</h2>
 
 
-                {/*Dos tablas con flex*/}
+                {/*Tabla*/}
                 
-                <div className="flex my-4 justify-center">
+                <div className="my-4 justify-center">
 
                     {seleccionada ? (
                         
-                    <div className="rounded bg-white w-[300px] h-[380]">
+                    <div className="rounded bg-white w-[300px] h-[380] justify-center">
 
                         <div className="flex border-b border-[#949494]">
                         <p className="text-lg ml-3 mb-4 mt-3 font-bold">Nombre:</p>
@@ -366,55 +363,17 @@ useEffect(() => {
 
                     </div>
                     ) : null}
-                
-                    {/*Tabla dos*/}
-                    {seleccionada ? (
-                        
-                    <div className="ml-5 rounded bg-white w-[300px] h-[380]">
-
-                        <div className="flex border-b border-[#949494]">
-                        <p className="text-lg ml-3 mb-4 mt-3 font-bold">Nombre:</p>
-                        <p className="text-base ml-2 mt-4 " >{seleccionada.cliente.nombre}</p>    
-                        </div>
-
-                        <div className="flex border-b border-[#949494] mt-2">
-                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Teléfono:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.telefono}</p>    
-                        </div>
-
-                        <div className="flex border-b border-[#949494] mt-2">
-                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Email:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.email}</p>    
-                        </div>
-
-                        <div className="flex border-b border-[#949494] mt-2">
-                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Rut:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.rut}</p>    
-                        </div>
-
-                        <div className="flex border-b border-[#949494] mt-2">
-                        <p className="text-lg ml-3 mb-1 mt-3 font-bold">Razón Social:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.razon_social}</p>    
-                        </div>
-
-                    </div>
-                    ) : null}
+                    
                 </div>
                 
 
                 {/*Botones Cancelar y guardar*/}
-                <div className="flex justify-end">
+                <div className="flex justify-center">
                 <button
-                    className="px-28 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
+                    className="px-26 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
                     onClick={() => setMostrarModal(false)}
                 >
-                    Cancelar
-                </button>
-                 <button
-                    className="px-28 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FF9243]"
-                    onClick={() => setMostrarModal(false)}
-                >
-                    Guardar
+                    Salir
                 </button>
                 </div>
 
@@ -479,7 +438,7 @@ useEffect(() => {
 
                     <div className="flex my-2 text-base text-black">
                         <p>Rut:{seleccionada.cliente.rut}</p>
-                        
+                        {/*TIpo Cliente*/}
                         <p className="ml-8">{seleccionada.cliente.email}</p>
                     </div>
 
