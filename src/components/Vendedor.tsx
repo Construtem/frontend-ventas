@@ -1,10 +1,43 @@
 'use client'
 
-import { useState } from "react";
+import { useEffect, useState } from 'react';
 
 export default function Vendedor() {
 
 const [tiendaSeleccionada, setTiendaSeleccionada] = useState("Nombre tienda");
+const [sucursales, setSucursales] = useState<Sucursales[]>([]);
+
+
+interface Sucursales{
+        id: number,
+        nombre: string,
+        telefono: string,
+        direccion: string,
+        comuna: string,
+        ciudad: string,
+        tipo_id: number,
+        tipo: {
+            id: number,
+            nombre: string,
+        }, 
+    }
+
+
+useEffect (() => {
+    const fetchSucursales = async () => {
+        try {
+            const response = await fetch("http://localhost:8080/api/sucursales");
+            if (!response.ok) throw new Error("Erro al obtener sucursales");
+            const SucursalesData = await response.json();
+            setSucursales(SucursalesData);
+            console.log("Sucursales obtenidas: ", SucursalesData);
+        }   catch (error) {
+            console.error("Error al obtener sucursales: ", error)
+        }
+    };
+    fetchSucursales();
+}, []);
+
 
     return (
         <div className="bg-white border border-gray-300 p-4 mx-auto rounded-lg w-[500px] ml-30 mb-4">
@@ -21,11 +54,14 @@ const [tiendaSeleccionada, setTiendaSeleccionada] = useState("Nombre tienda");
                     <select
                         value={tiendaSeleccionada}
                         onChange={(e) => setTiendaSeleccionada(e.target.value)}
-                        className="ml-3 mb-1 px-2 py-1 text-black rounded"
+                        className="ml-3 mb-1 px-2 py-1 text-black rounded-sm"
                     >
-                        <option value="Tienda A">Nombre tienda</option>
-                        <option value="Tienda B">Tienda A</option>
-                        <option value="Tienda B">Tienda B</option>
+                        <option value="">Sucursales</option>
+                        {sucursales.map((sucursal) => (
+                            <option key={sucursal.id} value={sucursal.id}>
+                                {sucursal.nombre} - {sucursal.ciudad}
+                            </option>
+                        ))}
                     </select>
                 </div>
 
