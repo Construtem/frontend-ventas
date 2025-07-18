@@ -15,7 +15,6 @@ export default function Clientee() {
     const [busquedaHistorial, setBusquedaHistorial] = useState('');
     //const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
-    const direcciones: DirCliente[] = [];
 
 
 interface Cotizacion{
@@ -42,21 +41,6 @@ interface Cotizacion{
         total_items: number,
         total_precio: number
     }   
-
-interface Cliente {
-  id: number;
-  nombre: string;
-  telefono?: string;
-  email?: string;
-  razon_social?: string;
-  rut: string;
-  tipo_id: number;
-  tipo_cliente?: {
-    id: number;
-    nombre: string;
-  };
-  direcciones?: DirCliente[];
-}
 
 const [nuevoCliente, setNuevoCliente] = useState({
     nombre: "",
@@ -124,18 +108,6 @@ useEffect(() => {
   fetchCotizaciones();
 }, []);
 
-
-{/*useEffect(() => {
-    const fetchClientes = async () => {
-        try {
-            const data = await clienteService.obtenerClientes();
-            setClientes(data);
-        }   catch (error) {
-            console.error("Error clientes: ", error);
-        }
-    };
-    fetchClientes();
-}, []);*/}
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
     const termino = busqueda.toLowerCase();
@@ -199,7 +171,6 @@ useEffect(() => {
                             <tbody>
                                 
                             {cotizaciones
-                            .filter((c) => c.cliente.rut === seleccionada.cliente.rut)
                             .filter((c) =>
                                 busquedaHistorial.trim() === ''
                                 ? true
@@ -438,7 +409,8 @@ useEffect(() => {
 
                     <div className="flex my-2 text-base text-black">
                         <p>Rut:{seleccionada.cliente.rut}</p>
-                        {/*TIpo Cliente*/}
+                        {/*Tipo Cliente*/}
+                        {/*<p>{seleccionada.tipo_id}</p>*/}
                         <p className="ml-8">{seleccionada.cliente.email}</p>
                     </div>
 
