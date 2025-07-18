@@ -4,8 +4,8 @@ import React from 'react'
 import ProductTable from '@/components/ProductTable'
 import Cliente from '@/components/Cliente';
 import Cotizacion from '@/components/Cotizacion';
-import HistorialCotizaciones from '@/components/HistorialCotizaciones'
-import PanelTotals from '@/components/PanelTotals'
+//import HistorialCotizaciones from '@/components/HistorialCotizaciones'
+//import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
 import Bienvenida from "@/components/Bienvenida";
 
@@ -33,7 +33,7 @@ const Home: NextPage = () => {
                     </div>
                 <div className="flex flex-col">
                     <div className="flex w-full h-full bg-red-600">
-                        <h1> aqui dentro del div de arriba va el componente de productos </h1>
+                        <ProductTable />
                         {/******** AQUÍ IRÁ LA CARD DEL COSTO DE LA COTIZACIÓN *********/}
                     </div>
                 </div>
