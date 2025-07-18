@@ -102,7 +102,7 @@ export const clients: Client[] = [
 export const addresses: Address[] = [
     {
         id: 'a1',
-        clienteId: 'c1',
+        clientId: 'c1',
         nombre: 'Casa Principal',
         direccion: 'abc abc 2921',
         comuna: 'Ñuñoa',
@@ -110,7 +110,7 @@ export const addresses: Address[] = [
     },
         {
         id: 'a2',
-        clienteId: 'c2',
+        clientId: 'c2',
         nombre: 'Casa Azul',
         direccion: 'abc abc 482',
         comuna: 'Ñuñoa',
@@ -118,7 +118,7 @@ export const addresses: Address[] = [
     },
     {
         id: 'a2',
-        clienteId: 'c1',
+        clientId: 'c1',
         nombre: 'Oficina Central',
         direccion: 'Av. Providencia 1234',
         comuna: 'Providencia',
@@ -144,7 +144,7 @@ export const products: Product[] = [
 export const quotations: Quotation[] = [
     {
         id: 'q1',
-        clienteId: 'c1',
+        clientId: 'c1',
         secExterna: '123403',
         nombre: 'Cotización ejemplo',
         descripcion:
@@ -163,7 +163,7 @@ export const quotations: Quotation[] = [
     },
     {
         id: 'q2',
-        clienteId: 'c1',
+        clientId: 'c1',
         secExterna: '123404',
         nombre: 'Segunda cotización',
         descripcion: 'Cambio de diseño en la fachada del local.',
