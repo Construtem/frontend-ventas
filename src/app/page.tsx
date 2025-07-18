@@ -24,24 +24,18 @@ const Home: NextPage = () => {
     return (
         <div className="min-h-screen bg-gray-100">
             <div className="container mx-auto py-8 pt-[66px]">
-                <div className='ml-30 flex'>
-                            </div>
-                
-                        <div className='flex'>
+                <div className='flex'>
                         <div className={"flex flex-col gap-4"}>
                             <Bienvenida/>
                             <Cliente  />
                         </div>
-                            {
-
-                            /*
-
-                        <div>
-                            <Cotizacion />
-                        </div>
-                            */
-                            }
                     </div>
+                <div className="flex flex-col">
+                    <div className="flex w-full h-full bg-red-600">
+                        <h1> aqui dentro del div de arriba va el componente de productos </h1>
+                        {/******** AQUÍ IRÁ LA CARD DEL COSTO DE LA COTIZACIÓN *********/}
+                    </div>
+                </div>
                 {/*
 
                 <div className="flex gap-4 mb-8 max-w-7xl mx-auto">
