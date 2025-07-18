@@ -3,16 +3,18 @@
 
 import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
-import {clienteService , cotizacionService, CotizacionSimplificada} from '@/services/apiService';
+import {clienteService , Cliente, cotizacionService, CotizacionSimplificada, DirCliente} from '@/services/apiService';
     
-export default function Cliente() {
+export default function Clientee() {
     const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [cotizaciones, setCotizaciones] = useState<CotizacionSimplificada[]>([]);
     const [seleccionada, setSeleccionada] = useState<CotizacionSimplificada | null>(null);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
+    const direcciones: DirCliente[] = [];
 
 
 interface Cotizacion{
@@ -30,11 +32,30 @@ interface Cotizacion{
             email: string,
             rut: string,
             razon_social: string,
-        },
-        items: string,
+        }; 
+        items: Array<{
+            sku: string;
+            nombre: string;
+            cantidad: number;
+        }>;
         total_items: number,
         total_precio: number
     }   
+
+interface Cliente {
+  id: number;
+  nombre: string;
+  telefono?: string;
+  email?: string;
+  razon_social?: string;
+  rut: string;
+  tipo_id: number;
+  tipo_cliente?: {
+    id: number;
+    nombre: string;
+  };
+  direcciones?: DirCliente[];
+}
 
 const [nuevoCliente, setNuevoCliente] = useState({
     nombre: "",
@@ -102,6 +123,18 @@ useEffect(() => {
   fetchCotizaciones();
 }, []);
 
+
+useEffect(() => {
+    const fetchClientes = async () => {
+        try {
+            const data = await clienteService.obtenerClientes();
+            setClientes(data);
+        }   catch (error) {
+            console.error("Error clientes: ", error);
+        }
+    };
+    fetchClientes();
+}, []);
     
     const cotizacionesFiltradas = cotizaciones.filter((coti) => {
     const termino = busqueda.toLowerCase();
@@ -420,7 +453,7 @@ useEffect(() => {
 
             {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
             {busqueda.trim() !== "" && (
-                <ul className="border rounded w-[420] max-h-[20] overflow-y-auto">
+                <ul className="border rounded w-[420] max-h-[50] overflow-y-auto">
                     {cotizacionesFiltradas.map((coti, index) => (
                     <li 
                         key={index} 
@@ -446,7 +479,7 @@ useEffect(() => {
 
                     <div className="flex my-2 text-base text-black">
                         <p>Rut:{seleccionada.cliente.rut}</p>
-                        <p className="ml-8">Tipo Cliente</p>
+                        
                         <p className="ml-8">{seleccionada.cliente.email}</p>
                     </div>
 
