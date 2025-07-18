@@ -22,13 +22,14 @@ const Home: NextPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-gray-100">
+        <div className="min-h-screen bg-gray-100 px-20px lg:px-0">
             <div className="container mx-auto py-8 pt-[66px]">
-                <div className='flex'>
-                        <div className={"flex flex-col gap-4"}>
+                <div className='flex justify-center gap-[40px] flex-col lg:flex-row '>
+                        <div className={"flex flex-col gap-4 px-[40px] sm:px-[0px]"}>
                             <Bienvenida/>
-                            <Cliente  />
+                            <Cliente/>
                         </div>
+                    <Cotizacion/>
                     </div>
                 <div className="flex flex-col">
                     <div className="flex w-full h-full bg-red-600">

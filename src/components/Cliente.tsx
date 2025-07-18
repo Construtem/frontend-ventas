@@ -551,8 +551,8 @@ import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { useQuery } from '@tanstack/react-query'
 import { clienteService, Cliente as ClienteType } from '@/services/apiService'
 import {useMemo, useState} from "react";
-import Modal from "@/components/Modal/Modal";
 import {ClienteModal} from "@/components/Modal/ClienteModal";
+import Button from "@/components/Button";
 
 export default function Cliente() {
     const { state, dispatch } = useCotizacionFlow()
@@ -583,7 +583,7 @@ export default function Cliente() {
 
     return (
         <div className="bg-white px-[40px] py-[10px] rounded-[10px]
-                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] min-h-[404px] min-w-[504px]">
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] lg:min-h-[404px] lg:min-w-[504px]">
             <div className="flex w-full gap-[10px] flex-col">
                 <h2 className={"font-semibold font-montserrat text-[24px]"}>
                     Seleccionar cliente
@@ -655,24 +655,23 @@ export default function Cliente() {
 
                     <div className="flex flex-col gap-[20px]">
                         <h2 className="text-[24px] font-semibold">{clienteSeleccionado.nombre}</h2>
-                    <div className="flex gap-[20px]">
+                    <div className="flex gap-[20px] flex-wrap">
                         <p className={"font-medium font-montserrat"}>RUT: {clienteSeleccionado.rut}</p>
                         <p className={"font-medium font-montserrat"}>Tipo: {clienteSeleccionado.tipo_id===1?'Persona':'Empresa'}</p>
                         <p className={"font-medium font-montserrat"}>{clienteSeleccionado.email ?? '—'}</p>
                     </div>
-                        <div className="flex gap-[20px] justify-between">
-                            <button onClick={() => setShowCliente(true)}
-                                className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear Nuevo Cliente
-                            </button>
+                        <div className="flex gap-[20px] sm:justify-between justify-center flex-wrap">
+                            <Button onClick={() => setShowCliente(true)}
+                                className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}
+                                label={'Crear Cliente'}
+                                />
                             <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
-                            <button
-                                className={'bg-[#F59243] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#ed8f43]'}>Ver
-                                Historial
-                            </button>
-                            <button
-                                className={'bg-teal-500 font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-teal-550'}>Ver
-                                Detalles
-                            </button>
+                            <Button
+                                onClick={() => {console.log('test')}}
+                                label="Ver Historial"
+                                className={'bg-[#F59243] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#ed8f43]'}
+                            />
+                            <Button onClick={()=>{console.log('se dio clic')}} label={'Ver Detalles'} className={'bg-teal-500 font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-teal-550'}/>
                         </div>
 
                     </div>
@@ -688,10 +687,8 @@ export default function Cliente() {
                             Usa el buscador para encontrar un cliente existente<br/>
                             o crea uno nuevo haciendo clic en el botón.
                         </p>
-                        <button onClick={() => setShowCliente(true)}
-                            className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}>Crear Nuevo
-                            Cliente
-                        </button>
+                        <Button onClick={() => setShowCliente(true)}
+                            className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'} label={'Crear Nuevo Cliente'}/>
                         <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
                     </div>
 

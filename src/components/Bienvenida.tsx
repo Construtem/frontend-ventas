@@ -21,17 +21,17 @@ export default function Bienvenida() {
 
     return (
         <div>
-            <h1 className="font-semibold font-montserrat text-[32px]">
+            <h1 className="text-center sm:text-start font-semibold font-montserrat text-[32px]">
                 Bienvenido
             </h1>
 
             <div className="bg-white px-[40px] py-[10px] rounded-[10px]
-                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[10px]">
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[10px] items-center sm:items-start">
                 <h2 className="font-semibold font-montserrat text-[24px]">
                     Nicolás Jiménez
                 </h2>
 
-                <div className="flex gap-[20px] items-baseline">
+                <div className="flex gap-[20px] flex-wrap items-baseline justify-center sm:justify-start">
                     <p className="font-montserrat">20.474.207-3</p>
                     <select
                         className="border rounded px-2 py-1"
