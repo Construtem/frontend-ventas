@@ -1,127 +1,187 @@
 'use client'
+import React, { useMemo, useState } from 'react'
+import { useQuery }                 from '@tanstack/react-query'
+import Button                       from '@/components/Button'
+import { useCotizacionFlow }        from '@/contexts/CotizacionFlow'
+import {
+    clienteService,
+    DBCotizacion,
+}                                    from '@/services/apiServices'
+import CotizacionDetalleModal        from '@/components/Modal/CotizacionDetalleModal'
 
-/*
-export default function Cotizacion() {
+export default function CotizacionCard () {
+    /* 1️⃣  Acceso al flujo global */
+    const { state, dispatch } = useCotizacionFlow()
+    const rutCliente           = state.clienteRut
+    const cotizacionId         = state.cotizacionId
+    const isEditing            = state.isEditing /* por si luego activas modo edición */
 
+    /* 2️⃣  Consulta del historial */
+    const {
+        data: historial = [],
+        isLoading,
+        isError,
+        error,
+    } = useQuery<DBCotizacion[]>({
+        queryKey: ['historial', rutCliente],
+        queryFn:   () => clienteService.obtenerHistorialCotizaciones(rutCliente!),
+        enabled:   !!rutCliente,
+    })
+
+    /* 3️⃣  Obtener cotización actual según id del flujo */
+    const cotizacionActual = useMemo(
+        () => historial.find(c => c.id === cotizacionId) ?? null,
+        [historial, cotizacionId]
+    )
+
+    /* 4️⃣  Estado para abrir/cerrar modal */
+    const [showDetail, setShowDetail] = useState(false)
+
+    /* Helper moneda */
+    const money = (v:number) => `$${v.toLocaleString('es-CL')}`
+
+    /* 5️⃣  UI */
     return (
-        <div className="mb-4 ml-7 bg-white border border-gray-300 rounded-lg w-[770]">
+        <>
+            <div className="max-w-[600px] px-6 sm:px-0 w-full">
+                {/* ─────────────── Encabezado ─────────────── */}
+                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full">
+                    <h1 className="font-montserrat font-semibold text-2xl">
+                        Detalle cotización
+                    </h1>
 
-            <div className="ml-8 mr-8">
-            
-                <div className="flex mt-3">
+                    {/* Selector + botón “Nueva” */}
+                    <div className="flex gap-[10px]">
+                        {/* Mostrar select solo si hay historial */}
+                        {historial.length > 0 && (
+                            <select
+                                disabled={isLoading}
+                                className="border rounded px-2 py-1 min-w-[240px]"
+                                value={cotizacionId ?? ''}
+                                onChange={e =>
+                                    dispatch({ type: 'SET_QUOTE', payload: Number(e.target.value) })
+                                }
+                            >
+                                <option value="">Seleccionar cotización</option>
+                                {historial.map(c => (
+                                    <option key={c.id} value={c.id}>
+                                        #{c.id} — {new Date(c.fecha_crea).toLocaleDateString()}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
 
-                    <div className="mb-2 text-lg text-[#5B83C5] font-bold flex gap-2">
-                        Cotización #123456
+                        <Button
+                            label="+ Nueva"
+                            className="bg-green-600 hover:bg-green-700 text-white"
+                            onClick={() => dispatch({ type: 'START_NEW_QUOTE' })}
+                        />
                     </div>
+                </header>
 
-                    <div className="ml-107">
-                    <button className="px-3 py-1 mr-2 font-bold text-black rounded bg-[#F1F6EF]">
-                        Aprobada
-                    </button>
-                    </div>
+                {/* ─────────────── Estados intermedios ─────────────── */}
+                {isLoading && <p className="text-center text-gray-500 py-10">Cargando…</p>}
 
-                </div>        
+                {isError && (
+                    <p className="text-center text-rose-600 py-10">
+                        {(error as Error).message}
+                    </p>
+                )}
 
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="">
-                            <th className="border-t border-[#D1D5DC] p-2">Nombre</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Nombre cotización</td>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                        <tr>
-                            <th className="border-t border-[#D1D5DC] p-2">Descripción</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Et optio adipisci, a fugiat nam eum quo minima iusto facilis, nobis maiores quas, aliquid hic dolorum accusamus laudantium quasi nemo ipsum!</td>                                                      
-                        </tr>
-                        <tr>
-                            <th className="border-t border-[#D1D5DC] p-2">Tipo de Envío</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Retiro tienda</td>
-                        </tr>
-                        <tr>
-                            <th className="border-t border-[#D1D5DC] p-2">Dirección</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Dirección de ejemplo</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div className="my-7 flex justify-end ">
-                <button className="font-bold px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
-                        onClick={() => {}}>
-                        Editar información
-                </button>
-                </div>
+                {!isLoading && rutCliente && !historial.length && (
+                    <p className="text-center text-gray-500 py-10">
+                        Este cliente aún no tiene cotizaciones.
+                    </p>
+                )}
 
-            </div>
+                {/* ─────────────── Card detalle (lectura) ─────────────── */}
+                {!isEditing && cotizacionActual && (
+                    <article className="bg-white rounded shadow px-8 py-6 space-y-4">
+                        <header className="flex justify-between flex-wrap gap-4">
+                            <h2 className="text-2xl font-semibold text-sky-600">
+                                Cotización #{cotizacionActual.id}
+                            </h2>
 
-        </div>
-    );
-}
-
-*/
-
-const ElementosCotizacion = [
-    {
-    label:'Nombre',
-    value: 'Nombre cotización'
-},
-    {
-    label:'Descripción',
-    value: 'Lorem ipsum dolor sit amet consectetur, adipisicing elit. Et optio adipisci, a fugiat nam eum quo minima iusto facilis, nobis maiores quas, aliquid hic dolorum accusamus laudantium quasi nemo ipsum!'
-},
-    {
-    label:'Tipo de Envío',
-    value: 'Retiro tienda'
-},
-    {
-    label:'Dirección',
-    value: 'Avenida Siempre Viva 123, Springfield, Santiago'
-}
-]
-
-
-import React from "react";
-
-export default function Cotizacion() {
-    return    (
-        <div className={'max-w-[800px] px-[40px] sm:px-[0px]'}>
-            <div className={'flex gap-5 items-baseline flex-wrap justify-center sm:justify-start py-[20px] sm:py-[5px]'}>
-            <h1 className="font-semibold font-montserrat text-[32px]">
-                Detalle cotización
-            </h1>
-                <div className={'flex gap-5 h-fit'}>
-            <select className='border-[1px]'>
-                <option>
-                    Seleccionar cotización
-                </option>
-            </select>
-                </div>
-            </div>
-
-            <div className="bg-white px-[40px] py-10 rounded-[10px]
-                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col">
-                <div className="flex justify-center py-[10px] flex-wrap sm:justify-between gap-[10px]">
-                    <h2 className={'text-3xl font-medium text-center'}>Cotizacion #992320</h2>
-                    <div className="bg-[#F1F6EF] p-2.5 rounded-[5px]">
-                        <h3 className={'font-montserrat font-bold text-xl'}>Aprobada</h3>
-                    </div>
-                </div>
-                    <div className="flex justify-between border-y-1 border-[#DFDFDF] flex-col">
-                        {ElementosCotizacion.map((item, index) => (
-                            <div
-                                key={index}
-                                className={`flex border-y border-[#DFDFDF] py-[5px] ${
-                                    index === 0 ? 'border-t-1' : ''
+                            <span
+                                className={`px-4 py-1 rounded text-sm font-bold ${
+                                    cotizacionActual.estado_pago === 'pagado'
+                                        ? 'bg-emerald-50 text-emerald-700'
+                                        : 'bg-yellow-50 text-yellow-700'
                                 }`}
                             >
-                                <span className="text-gray-600">{item.label}:</span>
-                                <span className="font-semibold">{item.value}</span>
-                            </div>
-                        ))}
+                {cotizacionActual.estado_pago
+                    ? cotizacionActual.estado_pago[0].toUpperCase() +
+                    cotizacionActual.estado_pago.slice(1)
+                    : 'Pendiente'}
+              </span>
+                        </header>
 
-                    </div>
+                        {/* Tabla de atributos */}
+                        <dl className="divide-y divide-gray-200">
+                            <DetalleLinea label="Descripción" value={cotizacionActual.descripcion ?? '—'} />
+
+                            <DetalleLinea
+                                label="Tipo de envío"
+                                value={
+                                    cotizacionActual.tipo_despacho.toLowerCase() === 'a domicilio'
+                                        ? 'A domicilio'
+                                        : 'Retiro en tienda'
+                                }
+                            />
+
+                            <DetalleLinea
+                                label="Costo de envío"
+                                value={money(cotizacionActual.costo_envio)}
+                            />
+
+                            {/* Ejemplo si incluyes dirección simple en la API */}
+                            {'direccion existe'=='direccion existe' && (
+                                <DetalleLinea label="Dirección" value={'direccion demo 123, comuna'} />
+                            )}
+                        </dl>
+
+                        <footer className="flex justify-end pt-4">
+                            <Button
+                                label="Ver detalle"
+                                className="bg-sky-600 hover:bg-sky-700 text-white"
+                                onClick={() => setShowDetail(true)}
+                            />
+                        </footer>
+                    </article>
+                )}
+
+                {/* ─────────────── Modo edición / creación — placeholder ─────────────── */}
+                {isEditing && (
+                    <p className="text-center text-gray-500 py-10">
+                        Formulario de cotización (en construcción)…{/* reemplázalo cuando corresponda */}
+                    </p>
+                )}
             </div>
 
+            {/* ─────────────── Modal detalle ─────────────── */}
+            {cotizacionActual && (
+                <CotizacionDetalleModal
+                    open={showDetail}
+                    onClose={() => setShowDetail(false)}
+                    data={cotizacionActual}
+                />
+            )}
+        </>
+    )
+}
+
+/* Sub-componente para línea de detalle */
+function DetalleLinea ({
+                           label,
+                           value,
+                       }: {
+    label: string
+    value: React.ReactNode
+}) {
+    return (
+        <div className="py-3 grid grid-cols-[140px_1fr] gap-4">
+            <dt className="text-gray-600">{label}:</dt>
+            <dd className="font-medium">{value}</dd>
         </div>
     )
 }

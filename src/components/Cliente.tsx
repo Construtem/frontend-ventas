@@ -182,7 +182,7 @@ const guardarCliente = async () => {
                             </tbody>
                         </table>
                             <button
-                                className="ml-167 mt-5 px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
+                                className="ml-167 mt-5 px-17 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
                                 onClick={() => setMostrarModal_His(false)}
                             >
                                 Salir
@@ -202,7 +202,7 @@ const guardarCliente = async () => {
                     <p className="ml-1 mb-1 mt-2">Datos cliente</p>
                     <p className="ml-37 mb-1 mt-2">Direcciones</p>
                     <button className="w-7 h-7 mt-2 ml-2 items-center gap-3 text-white rounded-full justify-center
-                            text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
+                            text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41]"
                             onClick={() => []}>
                     +
                     </button>
@@ -309,13 +309,13 @@ const guardarCliente = async () => {
                 </div>
                 <div className="flex justify-end">
                 <button
-                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C] cursor-pointer"
+                    className="px-25 py-2 border border-white bg-[#0B1631] text-white rounded hover:bg-[#15295C]"
                     onClick={() => setAñadirCliente(false)}
                 >
                     Cancelar
                 </button>
                 <button
-                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FFB04A] cursor-pointer"
+                    className="px-25 py-2 ml-3 bg-[#F59243] text-white rounded hover:bg-[#FFB04A]"
                     onClick={guardarCliente}>
                     Guardar
                 </button>
@@ -485,7 +485,7 @@ const guardarCliente = async () => {
                 <div>
 
                 <button className="w-7 h-7 ml-2 items-center gap-3 text-white rounded-full justify-center
-                                   text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41] cursor-pointer"
+                                   text-xl font-bold bg-[#4CAF50] hover:bg-[#3E8F41]"
                                    onClick={() => setAñadirCliente(true)}>
                     +
                 </button>
@@ -497,7 +497,7 @@ const guardarCliente = async () => {
                     {cotizacionesFiltradas.map((coti, index) => (
                     <li
                         key={index}
-                        className="p-2 border-b hover:bg-gray-50 cursor-pointer"
+                        className="p-2 border-b hover:bg-gray-50"
                         onClick={() => {
                             setSeleccionada(coti);
                             setBusqueda("");
@@ -527,12 +527,12 @@ const guardarCliente = async () => {
 
             <div className="flex justify-end mt-7">
 
-                <button className="box-shadow px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F] cursor-pointer"
+                <button className="box-shadow px-3 py-1 mr-4 text-white rounded bg-[#F59243] hover:bg-[#E6893F]"
                 onClick={() => setMostrarModal_His(true)}>
                 Ver historial
                 </button>
 
-                <button className="box-shadow px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
+                <button className="box-shadow px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399]"
                 onClick={() => setMostrarModal(true)}>
                 Ver detalle
                 </button>
@@ -583,13 +583,12 @@ export default function Cliente() {
 
     return (
         <div className="bg-white px-[40px] py-[10px] rounded-[10px]
-                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] lg:min-h-[404px] lg:min-w-[504px]">
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] lg:min-h-[466px] lg:min-w-[504px]">
             <div className="flex w-full gap-[10px] flex-col">
                 <h2 className={"font-semibold font-montserrat text-[24px]"}>
                     Seleccionar cliente
                 </h2>
-                <div className="flex items-center w-full gap-[10px]">
-
+                <div className="flex items-center w-full flex-col items-end">
                 {/* WRAPPER RELATIVE */}
                 <div className="relative flex items-center rounded-[10px]
                         px-4 py-2 w-full border-[#E2E2E2] shadow-sm">
@@ -615,7 +614,7 @@ export default function Cliente() {
                         type="text"
                         placeholder="Nombre o RUT"
                         value={search}
-                        onChange={(e) => setSearch(e.target.value)}
+                        onChange={state.sucursalId?(e) => setSearch(e.target.value):()=>{return null}}
                         className="outline-none w-full placeholder-gray-500 text-gray-800"
                     />
 
@@ -634,7 +633,7 @@ export default function Cliente() {
                                             dispatch({type: 'SET_CLIENT', payload: c.rut})
                                             setSearch('')
                                         }}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer
+                                        className="px-4 py-2 hover:bg-gray-100
                                flex justify-between"
                                     >
                                         <span className="font-medium">{c.nombre}</span>
@@ -643,12 +642,15 @@ export default function Cliente() {
                                 ))
                             ) : (
                                 <li className="p-4 text-center text-gray-500">
-                                    No se encontraron clientes
+                                    {!state.sucursalId?
+                                        'Selecciona una sucursal primero'
+                                    :'No se encontraron clientes'}
                                 </li>
                             )}
                         </ul>
                     )}
                 </div>
+                    <span className={`text-red-400 font-light ${state.sucursalId?'hidden':'inline'}`}>Seleccionar una sucursal primero *</span>
             </div>
             </div>
             {clienteSeleccionado ? (
@@ -662,16 +664,16 @@ export default function Cliente() {
                     </div>
                         <div className="flex gap-[20px] sm:justify-between justify-center flex-wrap">
                             <Button onClick={() => setShowCliente(true)}
-                                className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'}
+                                className={'bg-[#2563B6] text-white hover:bg-[#2a74d9]'}
                                 label={'Crear Cliente'}
                                 />
                             <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
                             <Button
                                 onClick={() => {console.log('test')}}
                                 label="Ver Historial"
-                                className={'bg-[#F59243] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#ed8f43]'}
+                                className={'bg-[#F59243] text-white hover:bg-[#ed8f43]'}
                             />
-                            <Button onClick={()=>{console.log('se dio clic')}} label={'Ver Detalles'} className={'bg-teal-500 font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-teal-550'}/>
+                            <Button onClick={()=>{console.log('se dio clic')}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
                         </div>
 
                     </div>
@@ -688,7 +690,7 @@ export default function Cliente() {
                             o crea uno nuevo haciendo clic en el botón.
                         </p>
                         <Button onClick={() => setShowCliente(true)}
-                            className={'bg-[#2563B6] font-bold text-white p-[12px] rounded-[6px] shadow-[0_1px_3px_0.4px_rgba(0,0,0,0.25)] cursor-pointer hover:bg-[#2a74d9]'} label={'Crear Nuevo Cliente'}/>
+                            className={'bg-[#2563B6] text-white hover:bg-[#2a74d9]'} label={'Crear Nuevo Cliente'}/>
                         <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
                     </div>
 
