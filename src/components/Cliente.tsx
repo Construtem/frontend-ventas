@@ -13,7 +13,6 @@ export default function Clientee() {
     const [cotizaciones, setCotizaciones] = useState<CotizacionSimplificada[]>([]);
     const [seleccionada, setSeleccionada] = useState<CotizacionSimplificada | null>(null);
     const [busquedaHistorial, setBusquedaHistorial] = useState('');
-    //const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
 
 
