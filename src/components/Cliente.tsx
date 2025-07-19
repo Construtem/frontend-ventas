@@ -11,8 +11,9 @@ export default function Clientee() {
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
     const [cotizaciones, setCotizaciones] = useState<CotizacionSimplificada[]>([]);
-    const [seleccionada, setSeleccionada] = useState<CotizacionSimplificada | null>(null);
+    const [clienteSeleccionado, setClienteSeleccionado] = useState<Cliente | null>(null);
     const [busquedaHistorial, setBusquedaHistorial] = useState('');
+    const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
 
 
@@ -40,6 +41,20 @@ interface Cotizacion{
         total_items: number,
         total_precio: number
     }   
+
+interface Cliente {
+  nombre: string;
+  telefono?: string;
+  email?: string;
+  razon_social?: string;
+  rut: string;
+  tipo_id: number;
+  tipo_cliente?: {
+    id: number;
+    nombre: string;
+  };
+  direcciones?: DirCliente[];
+}
 
 const [nuevoCliente, setNuevoCliente] = useState({
     nombre: "",
@@ -99,6 +114,7 @@ useEffect(() => {
   const fetchCotizaciones = async () => {
     try {
       const data = await cotizacionService.obtenerCotizacionesSimplificadas();
+      console.log("Cotizaciones:", data);
       setCotizaciones(data);
     } catch (error) {
       console.error("Error cotizaciones:", error);
@@ -107,12 +123,26 @@ useEffect(() => {
   fetchCotizaciones();
 }, []);
 
+useEffect(() => {
+  const fetchClientes = async () => {
+    try {
+      const data = await clienteService.obtenerClientes();
+      setClientes(data);
+    } catch (error) {
+      console.error("Error cotizaciones:", error);
+    }
+  };
+  fetchClientes();
+}, []);
+
+
+
     
-    const cotizacionesFiltradas = cotizaciones.filter((coti) => {
+    const clientesFiltrados = clientes.filter((cliente) => {
     const termino = busqueda.toLowerCase();
     return (
-        coti.cliente?.nombre.toLowerCase().includes(termino) ||
-        coti.cliente?.rut.toLowerCase().includes(termino)
+        cliente.nombre.toLowerCase().includes(termino) ||
+        cliente.rut.toLowerCase().includes(termino)
     );
     });
 
@@ -169,23 +199,36 @@ useEffect(() => {
                             </thead>
                             <tbody>
                                 
-                            {cotizaciones
-                            .filter((c) =>
-                                busquedaHistorial.trim() === ''
-                                ? true
-                                : c.id === Number(busquedaHistorial)
-                            )
-                            .map((c) => (
+                            {(() => {
+                            const cotizacionesFiltradas = cotizaciones.filter((c) => {
+                            if (!clienteSeleccionado) return false;
+                            const perteneceCliente = c.cliente.rut === clienteSeleccionado.rut;
+                            const coincideBusqueda =
+                                busquedaHistorial.trim() === '' || c.id === Number(busquedaHistorial);
+                            return perteneceCliente && coincideBusqueda;
+                            });
+
+                            if (cotizacionesFiltradas.length === 0) {
+                            return (
+                                <tr>
+                                <td colSpan={7} className="bg-white text-center text-gray-500 py-4">
+                                    No hay cotizaciones para este cliente.
+                                </td>
+                                </tr>
+                            );
+                            }
+                            return cotizacionesFiltradas.map((c) => (
                                 <tr key={c.id} className="text-center bg-white">
                                 <td className="border-t p-2">{c.id}</td>
                                 <td className="border-t p-2">{c.nombre}</td>
-                                <td className="border-t p-2">{c.fecha_crea}</td>
+                                <td className="border-t p-2">{new Date(c.fecha_crea).toLocaleDateString()}</td>
                                 <td className="border-t p-2">{c.total_items}</td>
                                 <td className="border-t p-2">${c.total_precio}</td>
                                 <td className="border-t p-2">{c.estado}</td>
                                 <td className="border-t p-2">✏️</td>
                                 </tr>
-                            ))}
+                            ));
+                            })()}
                             </tbody>        
                         </table>  
                             <button
@@ -302,33 +345,33 @@ useEffect(() => {
                 
                 <div className="my-4 justify-center">
 
-                    {seleccionada ? (
+                    {clienteSeleccionado ? (
                         
                     <div className="rounded bg-white w-[300px] h-[380] justify-center">
 
                         <div className="flex border-b border-[#949494]">
                         <p className="text-lg ml-3 mb-4 mt-3 font-bold">Nombre:</p>
-                        <p className="text-base ml-2 mt-4 " >{seleccionada.cliente.nombre}</p>    
+                        <p className="text-base ml-2 mt-4 " >{clienteSeleccionado.nombre}</p>    
                         </div>
 
                         <div className="flex border-b border-[#949494] mt-2">
                         <p className="text-lg ml-3 mb-1 mt-3 font-bold">Teléfono:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.telefono}</p>    
+                        <p className="text-base ml-2 mt-4" >{clienteSeleccionado.telefono}</p>    
                         </div>
 
                         <div className="flex border-b border-[#949494] mt-2">
                         <p className="text-lg ml-3 mb-1 mt-3 font-bold">Email:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.email}</p>    
+                        <p className="text-base ml-2 mt-4" >{clienteSeleccionado.email}</p>    
                         </div>
 
                         <div className="flex border-b border-[#949494] mt-2">
                         <p className="text-lg ml-3 mb-1 mt-3 font-bold">Rut:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.rut}</p>    
+                        <p className="text-base ml-2 mt-4" >{clienteSeleccionado.rut}</p>    
                         </div>
 
                         <div className="flex border-b border-[#949494] mt-2">
                         <p className="text-lg ml-3 mb-1 mt-3 font-bold">Razón Social:</p>
-                        <p className="text-base ml-2 mt-4" >{seleccionada.cliente.razon_social}</p>    
+                        <p className="text-base ml-2 mt-4" >{clienteSeleccionado.razon_social}</p>    
                         </div>
 
                     </div>
@@ -383,34 +426,33 @@ useEffect(() => {
             {/*Mostrar opciones de la barra fuera del flex para que quede abajo*/}
             {busqueda.trim() !== "" && (
                 <ul className="border rounded w-[420] max-h-[50] overflow-y-auto">
-                    {cotizacionesFiltradas.map((coti, index) => (
+                    {clientesFiltrados.map((cliente, index) => (
                     <li 
                         key={index} 
                         className="p-2 border-b hover:bg-gray-50 cursor-pointer" 
                         onClick={() => {
-                            setSeleccionada(coti);
+                            setClienteSeleccionado(cliente);
                             setBusqueda("");
                         }}>
                         <div className="flex">
-                        <h1>{coti.cliente?.nombre}</h1> <div className="ml-1 text-gray-500">({coti.cliente?.rut})</div></div>
+                        <h1>{cliente.nombre}</h1> <div className="ml-1 text-gray-500">({cliente.rut})</div></div>
                     </li>
                     ))}
                 </ul>
             )}
 
             {/*Muestra los datos del cliente seleccionado*/}
-            {seleccionada && (
+            {clienteSeleccionado  && (
                 <div className="mt-4 ml-2">
 
                     <div className="text-xl font-bold text-black">
-                        {seleccionada.cliente.nombre}
+                        {clienteSeleccionado.nombre}
                     </div>
 
                     <div className="flex my-2 text-base text-black">
-                        <p>Rut:{seleccionada.cliente.rut}</p>
-                        {/*Tipo Cliente*/}
-                        {/*<p>{seleccionada.tipo_id}</p>*/}
-                        <p className="ml-8">{seleccionada.cliente.email}</p>
+                        <p>Rut:{clienteSeleccionado.rut}</p>
+                        <p className="ml-8">{clienteSeleccionado.tipo_id === 1 ? "persona" : clienteSeleccionado.tipo_id === 2 ? "empresa" : "desconocido"}</p>
+                        <p className="ml-8">{clienteSeleccionado.email}</p>
                     </div>
 
                 </div>
