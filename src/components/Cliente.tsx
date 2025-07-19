@@ -3,10 +3,10 @@
 
 import { FaSearch } from "react-icons/fa";
 import { useEffect, useState } from 'react';
-import {clienteService , Cliente, cotizacionService, CotizacionSimplificada, DirCliente} from '@/services/apiService';
+import {clienteService , cotizacionService, CotizacionSimplificada, DirCliente} from '@/services/apiService';
     
 export default function Clientee() {
-    const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
+    //const apiVentasUrl = process.env.NEXT_PUBLIC_API_VENTAS || "https://api-ventas.tssw.cl";
     const [mostrarModal, setMostrarModal] = useState(false);
     const [MostrarModal_His, setMostrarModal_His] =useState(false);
     const [AñadirCliente, setAñadirCliente] = useState(false);
@@ -16,31 +16,6 @@ export default function Clientee() {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [busqueda, setBusqueda] = useState("");
 
-
-interface Cotizacion{
-        id: number,
-        fecha_crea: string,
-        estado: 'aprobada' | 'rechazada' | 'pendiente' | string,
-        costo_envio: number,
-        user_id: string,
-        nombre: string,
-        tipo_despacho: string,
-        descripcion: string,
-        cliente: {
-            nombre: string,
-            telefono: string,
-            email: string,
-            rut: string,
-            razon_social: string,
-        }; 
-        items: Array<{
-            sku: string;
-            nombre: string;
-            cantidad: number;
-        }>;
-        total_items: number,
-        total_precio: number
-    }   
 
 interface Cliente {
   nombre: string;
@@ -212,7 +187,7 @@ useEffect(() => {
                             return (
                                 <tr>
                                 <td colSpan={7} className="bg-white text-center text-gray-500 py-4">
-                                    No hay cotizaciones para este cliente.
+                                    No hay cotizaciones.
                                 </td>
                                 </tr>
                             );
