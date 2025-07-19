@@ -8,8 +8,8 @@ export function ModalHeader({ title, onClose }: { title: string, onClose: () => 
 }
 
 export function ModalBody({ children }: { children: React.ReactNode }) {
-    return <div className="p-6 bg-[#091127]">{children}</div>
+    return <div className="p-6 bg-white overflow-auto">{children}</div>
 }
 export function ModalFooter({ children }: { children: React.ReactNode }) {
-    return <div className="bg-[#091127] px-6 py-4 border-t flex justify-end gap-2">{children}</div>
+    return <div className=" px-6 py-4 border-t flex justify-end gap-2">{children}</div>
 }

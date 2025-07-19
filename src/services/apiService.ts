@@ -38,6 +38,8 @@ export interface Cliente {
 
 // Tipos para productos del inventario
 export interface Producto {
+  descuento_sucursal: number;
+    stock_sucursal: number;
   sku: string;
   nombre: string;
   descripcion: string;

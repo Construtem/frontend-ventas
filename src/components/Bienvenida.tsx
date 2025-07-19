@@ -37,7 +37,7 @@ export default function Bienvenida() {
                         className="border rounded px-2 py-1"
                         value={state.sucursalId ?? ''}
                         onChange={(e) =>
-                            dispatch({ type: 'SET_STORE', payload: e.target.value })
+                            dispatch({ type: 'SET_STORE', payload: Number(e.target.value) })
                         }
                     >
                         <option value="" disabled>

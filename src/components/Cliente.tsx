@@ -662,17 +662,12 @@ export default function Cliente() {
                         <p className={"font-medium font-montserrat"}>Tipo: {clienteSeleccionado.tipo_id===1?'Persona':'Empresa'}</p>
                         <p className={"font-medium font-montserrat"}>{clienteSeleccionado.email ?? '—'}</p>
                     </div>
-                        <div className="flex gap-[20px] sm:justify-between justify-center flex-wrap">
+                        <div className="flex gap-[20px] justify-center flex-wrap">
                             <Button onClick={() => setShowCliente(true)}
                                 className={'bg-[#2563B6] text-white hover:bg-[#2a74d9]'}
                                 label={'Crear Cliente'}
                                 />
                             <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
-                            <Button
-                                onClick={() => {console.log('test')}}
-                                label="Ver Historial"
-                                className={'bg-[#F59243] text-white hover:bg-[#ed8f43]'}
-                            />
                             <Button onClick={()=>{console.log('se dio clic')}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
                         </div>
 

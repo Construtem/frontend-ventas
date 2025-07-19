@@ -18,7 +18,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
                 onClick={onClose}
             />
             {/* Contenido */}
-            <div className="relative bg-white rounded-lg shadow-lg max-w-[90vw] max-h-[90vh] overflow-auto">
+            <div className="relative bg-white rounded-lg shadow-lg max-w-[90vw] max-h-[90vh] overflow-hidden">
                 {children}
             </div>
         </div>,

@@ -60,11 +60,11 @@ export default function Cotizacion () {
     /* ─────────── Render ─────────── */
     return (
         <>
-            <div className="px-6 sm:px-0 w-[100%] sm:w-[100%]
+            <div className="px-[40px] sm:px-0 w-[100%] sm:w-[100%]
             ">
                 {/* encabezado */}
-                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full">
-                    <h1 className="font-montserrat font-semibold text-2xl">
+                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full items-center">
+                    <h1 className="font-montserrat font-semibold text-[32px]">
                         Detalle cotización
                     </h1>
 
@@ -89,7 +89,7 @@ export default function Cotizacion () {
 
                         <Button
                             label="+ Nueva"
-                            className="bg-green-600 hover:bg-green-700 text-white"
+                            className="bg-[#F59243] hover:bg-[#d98543] text-white"
                             onClick={() => dispatch({ type: 'START_NEW_QUOTE' })}
                         />
                     </div>
@@ -100,12 +100,6 @@ export default function Cotizacion () {
                 {isError && (
                     <p className="text-center text-rose-600 py-10">{(error as Error).message}</p>
                 )}
-                {!isLoading && clienteRut && allQuotes.length === 0 && (
-                    <p className="text-center text-gray-500 py-10">
-                        Este cliente aún no tiene cotizaciones.
-                    </p>
-                )}
-
                 {/* modos */}
                 {(!isCreating && !isEditing && cotizacionActual) && (
                     <CotizacionView
@@ -113,6 +107,11 @@ export default function Cotizacion () {
                         onSeeDetail={() => dispatch({ type: 'OPEN_MODAL' })}
                     />
                 )}
+                {!isLoading && clienteRut && allQuotes.length === 0 ?(
+                    <p className="text-center text-gray-500">
+                        No hay cotizaciones disponibles. Crea una nueva.
+                    </p>
+                ) : null}
 
                 {(isCreating || isEditing) && draftQuote && (
                     <CotizacionForm

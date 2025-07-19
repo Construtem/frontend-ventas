@@ -28,7 +28,7 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
 
             <ModalBody>
                 {/* Cabecera rápida */}
-                <section className='grid grid-cols-2 gap-4 text-white'>
+                <section className='grid grid-cols-2 gap-4 '>
                     <div>
                         <p><span className='font-semibold'>Estado:</span> {estado}</p>
                         <p><span
@@ -39,7 +39,9 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                             className='font-semibold'>Tipo envío:</span> {tipo_despacho && 2 ? 'A domicilio' : 'Retiro en tienda'}
                         </p>
                         <p><span className='font-semibold'>Costo envío:</span> {money(costo_envio)}</p>
+                        {data.direccion&&(
                         <p><span className='font-semibold'>Dirección:</span> {`${data.direccion?.direccion}, ${data.direccion?.comuna}, ${data.direccion?.ciudad}`}</p>
+                        )}
                     </div>
 
                     <div>
@@ -56,15 +58,15 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
 
                 {/* Descripción */}
                 {descripcion && (
-                    <p className='mt-4 text-white/90'>
+                    <p className='mt-4 /90'>
                         <span className='font-semibold'>Descripción:&nbsp;</span>{descripcion}
                     </p>
                 )}
 
                 {/* Tabla de ítems */}
-                <h3 className='mt-6 font-semibold text-lg text-white'>Productos</h3>
+                <h3 className='mt-6 font-semibold text-lg '>Productos</h3>
                 <div className='overflow-x-auto mt-2'>
-                    <table className='min-w-full text-sm text-white'>
+                    <table className='min-w-full text-sm '>
                         <thead>
                         <tr className='border-b border-white/20'>
                             <th className='py-2 text-left'>SKU</th>
@@ -89,7 +91,7 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                 </div>
 
                 {/* Totales */}
-                <div className='mt-4 grid grid-cols-2 gap-4 text-white'>
+                <div className='mt-4 grid grid-cols-2 gap-4 '>
                     <p><span className='font-semibold'>Total ítems:</span> {total_items}</p>
                     <p className='text-right'><span className='font-semibold'>Subtotal:</span> {money(total_precio)}</p>
                     <p><span className='font-semibold'>Costo envío:</span> {money(costo_envio)}</p>
@@ -100,9 +102,8 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
             <ModalFooter>
                 <Button
                     label='Cerrar'
-                    className='bg-sky-600 hover:bg-sky-700 text-white'
-                    onClick={()=>onClose
-                    }
+                    className='bg-[#1b5be7] hover:bg-[#1e4fbb] text-white'
+                    onClick={onClose}
                 />
             </ModalFooter>
         </Modal>

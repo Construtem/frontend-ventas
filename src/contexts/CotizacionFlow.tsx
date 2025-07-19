@@ -1,5 +1,5 @@
-
 // src/contexts/CotizacionFlow.tsx
+'use client'
 import React, {
     createContext,
     useReducer,
@@ -8,116 +8,118 @@ import React, {
 } from 'react'
 
 import {
-    DBCotizacion, DraftItem,
+    DBCotizacion,
+    DraftItem,
+    DraftProducto,       // ← nuevo tipo
 } from '@/services/apiServices'
 
-/* ──────────────────────────────────────────────────────────
- * 2.  Shape del estado global del flujo
- * ──────────────────────────────────────────────────────────*/
+/* ──────────────────────────────────────────────
+ * 1.  STATE
+ * ──────────────────────────────────────────── */
 export type CotizacionState = {
-    /* Paso 1: tienda */
-    sucursalId: string | null
-    items: DraftItem[] // items de la cotización en edición
-    /* Paso 2: cliente */
+    /* Paso 1 – Sucursal elegida                   */
+    sucursalId: number | null                    // ← era string | null
+
+    /* Productos seleccionados (tabla de productos)*/
+    productos: DraftProducto[]                   // ← nuevo
+
+    /* Paso 2 – Cliente                            */
     clienteRut: string | null
 
-    /* Paso 3: cotización */
-    cotizacionId: number | null      // cotización elegida (o nueva)
+    /* Paso 3 – Cotización (existing / draft)      */
+    cotizacionId: number | null
+    items:       DraftItem[]                     // items del formulario de cotización
 
-    /* Paso 4: dirección de despacho (opcional) */
+    /* Paso 4 – Dirección                          */
     direccionId: number | null
 
-    /* Bandeja de edición / creación */
-    isEditing: boolean               // true cuando el card está en modo edit / new
-    draft: Partial<DBCotizacion> | null
+    /* Bandeja de edición / creación de cotización */
+    isEditing:   boolean
+    isCreating:  boolean
+    draftQuote:  Partial<DBCotizacion> | null
+    localQuotes: DBCotizacion[]
+    showModal:   boolean
 
-    /* Modal de creación de cliente */
+    /* Modal crear cliente                         */
     isCreatingClient: boolean
-    // Para las cotizaciones
-    localQuotes : DBCotizacion[]        // <─  cotizaciones “tmp”
-    isCreating  : boolean
-    draftQuote  : Partial<DBCotizacion> | null
-    showModal   : boolean
 }
 
-/* ──────────────────────────────────────────────────────────
- * 3.  Actions
- * ──────────────────────────────────────────────────────────*/
+/* ──────────────────────────────────────────────
+ * 2.  ACTIONS
+ * ──────────────────────────────────────────── */
 export type CotizacionAction =
-    | { type: 'SET_STORE';            payload: string }
-    | { type: 'RESET_AFTER_STORE' }
+    | { type:'SET_STORE';                 payload:number }           // número de sucursal
+    | { type:'RESET_AFTER_STORE' }
 
-    | { type: 'SET_CLIENT';           payload: string }
+    | { type:'SET_CLIENT';                payload:string }
 
-    | { type: 'SET_ADDRESS';          payload: number }
+    | { type:'SET_ADDRESS';               payload:number }
 
-    | { type: 'SET_QUOTE';            payload: number }   // seleccionar del select
-    | { type: 'START_NEW_QUOTE' }                         // clic en "+"
-    | { type: 'START_EDIT_QUOTE';     payload: DBCotizacion }
-    | { type:'SAVE_DRAFT_OK';   payload: DBCotizacion }
-    | { type: 'UPDATE_DRAFT';         payload: Partial<DBCotizacion> }
-    | { type: 'CANCEL_EDIT_QUOTE' }
+    | { type:'SET_QUOTE';                 payload:number }
+    | { type:'START_NEW_QUOTE' }
+    | { type:'START_EDIT_QUOTE';          payload:DBCotizacion }
+    | { type:'UPDATE_DRAFT';              payload:Partial<DBCotizacion> }
+    | { type:'SAVE_DRAFT_OK';             payload:DBCotizacion }
+    | { type:'CANCEL_EDIT_QUOTE' }
     | { type:'CANCEL_NEW_QUOTE' }
-    | { type: 'SAVE_QUOTE_SUCCESS';   payload: number }   // backend devuelve id
+    | { type:'SAVE_QUOTE_SUCCESS';        payload:number }
+
     | { type:'OPEN_MODAL' }
     | { type:'CLOSE_MODAL' }
-    | { type: 'OPEN_CREATE_CLIENT_MODAL' }
-    | { type: 'CLOSE_CREATE_CLIENT_MODAL' }
 
-/* ──────────────────────────────────────────────────────────
- * 4.  Estado inicial
- * ──────────────────────────────────────────────────────────*/
+    | { type:'OPEN_CREATE_CLIENT_MODAL' }
+    | { type:'CLOSE_CREATE_CLIENT_MODAL' }
+
+    /* Tabla de productos (nuevo flujo) */
+    | { type:'ADD_PRODUCT';               payload:DraftProducto }
+    | { type:'UPDATE_PRODUCT';            payload:DraftProducto }
+    | { type:'REMOVE_PRODUCT';            payload:string }           // sku
+
+/* ──────────────────────────────────────────────
+ * 3.  INITIAL STATE
+ * ──────────────────────────────────────────── */
 const initialState: CotizacionState = {
-    sucursalId:        null,
-    clienteRut:        null,
-    cotizacionId:      null,
-    direccionId:       null,
-    items:             [], // items de la cotización en edición
-    localQuotes:       [],
-    isCreating:        false,
-    isCreatingClient: false,
-    draftQuote:        null,
-    showModal:         false,
-    // edición / creación de cotización
-    isEditing:         false,
-    draft:             null,
+    sucursalId:       null,
+    productos:        [],
 
+    clienteRut:       null,
+    cotizacionId:     null,
+    direccionId:      null,
+
+    items:            [],
+
+    isEditing:        false,
+    isCreating:       false,
+    draftQuote:       null,
+    localQuotes:      [],
+    showModal:        false,
+
+    isCreatingClient: false,
 }
 
-/* ──────────────────────────────────────────────────────────
- * 5.  Reducer
- * ──────────────────────────────────────────────────────────*/
-function cotizacionReducer(
+/* ──────────────────────────────────────────────
+ * 4.  REDUCER
+ * ──────────────────────────────────────────── */
+function cotizacionReducer (
     state: CotizacionState,
     action: CotizacionAction,
 ): CotizacionState {
     switch (action.type) {
-        /* ───────────── Paso 1 • Sucursal ───────────────────────── */
+        /* ─── Paso 1 :  Sucursal ─────────────────── */
         case 'SET_STORE':
             return {
-                ...state,
+                ...initialState,                // limpia todo
                 sucursalId: action.payload,
-
-                // reset de todo lo dependiente
-                clienteRut:   null,
-                cotizacionId: null,
-                direccionId:  null,
-                isEditing:    false,
-                isCreating:   false,
-                draftQuote:   null,
-                localQuotes:  [],
             }
 
         case 'RESET_AFTER_STORE':
             return { ...initialState, sucursalId: state.sucursalId }
 
-        /* ───────────── Paso 2 • Cliente ────────────────────────── */
+        /* ─── Paso 2 :  Cliente ──────────────────── */
         case 'SET_CLIENT':
             return {
                 ...state,
-                clienteRut: action.payload,
-
-                // limpio cotización / dirección / ediciones
+                clienteRut:   action.payload,
                 cotizacionId: null,
                 direccionId:  null,
                 isEditing:    false,
@@ -125,130 +127,116 @@ function cotizacionReducer(
                 draftQuote:   null,
             }
 
-        /* ───────────── Paso 3 • Dirección ─────────────────────── */
+        /* ─── Paso 3 :  Dirección ────────────────── */
         case 'SET_ADDRESS':
             return { ...state, direccionId: action.payload }
 
-        /* ───────────── Seleccionar cotización existente ───────── */
+        /* ─── Seleccionar / crear / editar quote ─── */
         case 'SET_QUOTE':
-            return {
-                ...state,
-                cotizacionId: action.payload,
-                isEditing:    false,
-                isCreating:   false,
-                draftQuote:   null,
-            }
+            return { ...state, cotizacionId: action.payload, isEditing:false, isCreating:false }
 
-        /* ───────────── Crear nueva (solo local) ───────────────── */
         case 'START_NEW_QUOTE':
             return {
                 ...state,
-                cotizacionId: null,
-                isCreating:   true,
-                isEditing:    false,
-                draftQuote:   {
-                    descripcion:   '',
+                isCreating:true,
+                draftQuote:{
+                    descripcion:'',
                     tipo_despacho:'retiro',
-                    costo_envio:  0,
-                }, // borrador inicial
+                    costo_envio:0,
+                },
             }
 
         case 'CANCEL_NEW_QUOTE':
-            return {
-                ...state,
-                isCreating: false,
-                draftQuote: null,
-            }
+            return { ...state, isCreating:false, draftQuote:null }
 
-        /* ───────────── Editar existente ───────────────────────── */
         case 'START_EDIT_QUOTE': {
-            /* ── 1.  Normalizar items del payload ─────────────────────────── */
-            const draftItems: DraftItem[] =
-                action.payload.items?.map(i => ({
-                    sku:        i.producto_id           ?? i.sku,                   // nunca vacío
-                    nombre:     i.producto?.nombre      ?? i.producto2?.nombre
-                        ?? i.nombre              ?? '',
-                    sucursalId: i.sucursal_id,
-                    sucursal:   i.sucursal?.nombre      ?? i.sucursal2?.nombre
-                        ?? '',
-                    cantidad:   i.cantidad,
-                    precio:     i.producto?.precio      ?? i.producto2?.precio
-                        ?? i.precio_unitario     ?? 0,
-                    descuento:  i.descuento             ?? 0,
-                })) ?? [];
+            const draftItems: DraftItem[] = action.payload.items?.map(i => ({
+                sku:        i.producto_id ?? i.sku,
+                nombre:     i.producto?.nombre ?? i.producto2?.nombre ?? i.nombre ?? '',
+                sucursalId: i.sucursal_id,
+                sucursal:   i.sucursal?.nombre ?? i.sucursal2?.nombre ?? '',
+                cantidad:   i.cantidad,
+                precio:     i.producto?.precio ?? i.producto2?.precio ?? i.precio_unitario ?? 0,
+                descuento:  i.descuento ?? 0,
+            })) ?? []
 
-            /* ── 2.  Devolver el nuevo estado ────────────────────────────────*/
             return {
                 ...state,
-
-                /* Selección / modo edición */
                 cotizacionId: action.payload.id,
                 isEditing:    true,
-
-                /* Guarda la cotización completa como borrador bruto (por si la necesitas) */
-                draft:        action.payload,
-
-                /* Borrador “plano” de items para el formulario */
+                draftQuote:   action.payload,
                 items:        draftItems,
-
-                /* Re-calcula totales y los fusiona */
                 ...calcTotals(draftItems),
-            };
+            }
         }
 
-
-        /* ───────────── Borrador (crear / editar) ──────────────── */
         case 'UPDATE_DRAFT':
-            return {
-                ...state,
-                draftQuote: { ...state.draftQuote, ...action.payload },
-            }
+            return { ...state, draftQuote:{...state.draftQuote, ...action.payload} }
 
-        /* ───────────── Guardar borrador local ─────────────────── */
         case 'SAVE_DRAFT_OK':
             return {
                 ...state,
-                localQuotes: [action.payload, ...state.localQuotes],
+                localQuotes:[action.payload, ...state.localQuotes],
                 cotizacionId: action.payload.id,
-                isCreating:   false,
-                isEditing:    false,
-                draftQuote:   null,
+                isCreating:false,
+                isEditing:false,
+                draftQuote:null,
             }
 
-        /* ───────────── Modal de detalle ───────────────────────── */
-        case 'OPEN_MODAL':
-            return { ...state, showModal: true }
+        case 'CANCEL_EDIT_QUOTE':
+            return { ...state, isEditing:false, draftQuote:null }
 
-        case 'CLOSE_MODAL':
-            return { ...state, showModal: false }
+        /* ─── Modal detalle ──────────────────────── */
+        case 'OPEN_MODAL':  return { ...state, showModal:true  }
+        case 'CLOSE_MODAL': return { ...state, showModal:false }
 
-        /* ───────────── Crear cliente (ya los tenías) ──────────── */
-        case 'OPEN_CREATE_CLIENT_MODAL':
-            return { ...state, isCreatingClient: true }
+        /* ─── Modal crear cliente ─────────────────── */
+        case 'OPEN_CREATE_CLIENT_MODAL':  return { ...state, isCreatingClient:true }
+        case 'CLOSE_CREATE_CLIENT_MODAL': return { ...state, isCreatingClient:false }
 
-        case 'CLOSE_CREATE_CLIENT_MODAL':
-            return { ...state, isCreatingClient: false }
+        /* ─── Tabla de productos (nuevo) ─────────── */
+        case 'ADD_PRODUCT': {
+            /* si ya existe ese SKU lo sustituimos */
+            const ya = state.productos.find(p => p.sku === action.payload.sku)
+            const productos = ya
+                ? state.productos.map(p => p.sku === ya.sku ? action.payload : p)
+                : [...state.productos, action.payload]
 
-        /* ───────────── Default ───────────────────────────────── */
+            return { ...state, productos }
+        }
+
+        case 'UPDATE_PRODUCT':
+            return {
+                ...state,
+                productos: state.productos.map(p =>
+                    p.sku === action.payload.sku ? action.payload : p),
+            }
+
+        case 'REMOVE_PRODUCT':
+            return {
+                ...state,
+                productos: state.productos.filter(p => p.sku !== action.payload),
+            }
+
+        /* ─── Default ────────────────────────────── */
         default:
             return state
     }
 }
 
-/* ──────────────────────────────────────────────────────────
- * 6.  Contexto y provider
- * ──────────────────────────────────────────────────────────*/
+/* ──────────────────────────────────────────────
+ * 5.  CONTEXT & PROVIDER
+ * ──────────────────────────────────────────── */
 const CotizacionContext = createContext<{
     state: CotizacionState
     dispatch: React.Dispatch<CotizacionAction>
 }>({
     state: initialState,
-    dispatch: () => null,
+    dispatch: () => undefined,
 })
 
 export function CotizacionProvider ({ children }: { children: ReactNode }) {
     const [state, dispatch] = useReducer(cotizacionReducer, initialState)
-
     return (
         <CotizacionContext.Provider value={{ state, dispatch }}>
             {children}
@@ -256,26 +244,22 @@ export function CotizacionProvider ({ children }: { children: ReactNode }) {
     )
 }
 
-/* ──────────────────────────────────────────────────────────
- * 7.  Hook de conveniencia
- * ──────────────────────────────────────────────────────────*/
+/* ──────────────────────────────────────────────
+ * 6.  HOOK
+ * ──────────────────────────────────────────── */
 export function useCotizacionFlow () {
     return useContext(CotizacionContext)
 }
 
-function calcTotals(items: DraftItem[]) {
-    const subtotal = items.reduce(
-        (s, it) => s + it.precio * it.cantidad,
-        0,
-    );
-    const descuentoTotal = items.reduce(
-        (s, it) => s + it.descuento * it.cantidad,
-        0,
-    );
+/* ──────────────────────────────────────────────
+ * 7.  Helpers
+ * ──────────────────────────────────────────── */
+function calcTotals (items: DraftItem[]) {
+    const subtotal        = items.reduce((s, i) => s + i.precio * i.cantidad, 0)
+    const descuentoTotal  = items.reduce((s, i) => s + i.descuento * i.cantidad, 0)
     return {
         subtotal,
         descuentoTotal,
         total: subtotal - descuentoTotal,
-    };
+    }
 }
-

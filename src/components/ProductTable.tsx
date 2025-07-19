@@ -1,7 +1,8 @@
 'use client'
 import React, { useState } from 'react'
 import { useSucursales } from '@/hooks/useSucursales'
-import { ProductoModal } from '@/components/Modal/ProductoModal'
+import {ProductoModal}  from '@/components/Modal/ProductoModal'
+import Button from "@/components/Button";
 
 interface ProductTableProps {
     quotationId?: string
@@ -110,7 +111,8 @@ const ProductTable: React.FC<ProductTableProps> = () => {
 
     return (
         <>
-            <div className="bg-white border border-gray-300 p-4 max-w-5xl mx-auto rounded-lg shadow-md">
+            <div className="bg-white  p-4 rounded-[10px] w-full
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
                 {/* Mostrar errores */}
                 {errorSucursales && (
                     <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
@@ -119,21 +121,18 @@ const ProductTable: React.FC<ProductTableProps> = () => {
                 )}
 
                 {/* Header */}
-                <div className="mb-9">
-                    <div className="flex items-center gap-2 mb-2">
-                        <h2 className="text-xl font-bold text-black font-montserrat">
+                <div className="mb-9 flex flex-col gap-[20px] sm:items-baseline items-center ">
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-xl font-semibold text-black font-montserrat text-[24px]">
                             Productos
                         </h2>
                     </div>
                     <div>
-                        <button
-                            className="flex items-center font-montserrat text-[18px] justify-center cursor-pointer"
-                            style={{color: '#084AB9'}}
-                            title="Agregar producto"
+                        <Button
+                            label="Agregar Producto"
+                            className="bg-[#084AB9] hover:bg-[#0A4CC1] text-white font-montserrat text-[18px] px-4 py-2 rounded"
                             onClick={() => setIsModalOpen(true)}
-                        >
-                            + Agregar Producto
-                        </button>
+                        />
                     </div>
                 </div>
 
@@ -200,9 +199,6 @@ const ProductTable: React.FC<ProductTableProps> = () => {
             <ProductoModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                productosEnCotizacion={productosEnCotizacion}
-                onAgregarProductos={handleAgregarProductos}
-                onEliminarProducto={handleEliminarProducto}
             />
         </>
     )

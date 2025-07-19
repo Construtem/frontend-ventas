@@ -59,7 +59,7 @@ export const historialCotizaciones: HistorialRow[] = [
 
 export default function CotizacionesCreadas() {
     return (
-        <div className="bg-white px-[40px] py-[40px] rounded-[10px]
+        <div className="bg-white px-[40px] py-[40px] rounded-[10px] overflow-auto
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[10px] items-center sm:items-start
                       w-full
 

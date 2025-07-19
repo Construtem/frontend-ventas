@@ -25,9 +25,9 @@ const DetalleLinea = ({
 }) => (
     <div className={`flex w-full ${className}`}>
         <div className={`w-fit  sm:min-w-[200px] ${classNameLabel} `}>
-        <dt className="text-gray-600">{label}</dt>
+        <span className="text-gray-600">{label}</span>
         </div>
-        <dd className={'w-full'}>{children}</dd>
+        <div className={'w-full'}>{children}</div>
     </div>
 )
 
@@ -104,7 +104,7 @@ export function CotizacionForm ({
     }
 
     return (
-        <article className="bg-white rounded-[10px] shadow px-8 py-6 space-y-4 min-h-[472px]
+        <article className="bg-white rounded-[10px] shadow px-8 py-6 space-y-4 lg:min-h-[550px]
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
             <header className="flex justify-between">
                 <h2 className="text-2xl font-semibold text-sky-600">
@@ -132,18 +132,21 @@ export function CotizacionForm ({
                     </select>
                 </DetalleLinea>
 
-                <DetalleLinea label="Dirección de despacho" className={'flex-wrap xl:flex-nowrap'}>
+                <DetalleLinea label="Dirección de despacho" className={'flex-wrap xl:flex-nowrap flex items-baseline'}>
                     <div className={'flex gap-[5px] flex-wrap gap-4 flex-col max-w-fit'}>
-                        <select className="border rounded px-2 py-1 max-w-fit">
-                        {/* Aquí se deberían listar las direcciones del cliente */}
-                        {direccion.map((dir) => (
-                            <option key={dir.id} value={dir.id}>
-                                {`${dir.direccion}, ${dir.comuna}, ${dir.ciudad}`}
-                            </option>
-                        ))}
-                        {/* Ejemplo de opciones estáticas, reemplazar con datos reales */}
-                    </select>
-
+                        {/* Select de direcciones */}
+                        {direccion.length > 0 && (
+                            <select
+                                className="border rounded px-2 py-1 max-w-fit"
+                                defaultValue={direccion[0].id}  /* opcional: selección inicial */
+                            >
+                                {direccion.map(dir => (
+                                    <option key={dir.id} value={dir.id}>
+                                        {`${dir.direccion}, ${dir.comuna}, ${dir.ciudad}`}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                         {mostrarInputsNewDireccion && (
                             <div className="mt-4 flex flex-col gap-2">
                                 <DetalleLinea label={'Dirección:'}>

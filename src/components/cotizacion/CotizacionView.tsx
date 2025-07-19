@@ -31,10 +31,10 @@ export function CotizacionView ({
     onSeeDetail: () => void
 }) {
     return (
-        <article className="bg-white rounded-[10px] shadow px-8 py-6">
+        <article className="bg-white rounded-[10px] shadow px-8 py-6 lg:h-[550px]">
             {/* encabezado */}
             <header className="flex justify-between flex-wrap gap-4">
-                <h2 className="text-2xl font-semibold text-sky-600">
+                <h2 className="text-2xl font-bold">
                     Cotización #{quote.id}
                 </h2>
 

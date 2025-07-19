@@ -9,6 +9,7 @@ import Cotizacion from '@/components/Cotizacion';
 import { quotations } from '@/mocks/mocksDatos'
 import Bienvenida from "@/components/Bienvenida";
 import CotizacionesCreadas from "@/components/CotizacionesCreadas";
+import PanelTotals from "@/components/PanelTotals";
 
 
 
@@ -32,11 +33,14 @@ const Home: NextPage = () => {
                         </div>
                     <Cotizacion/>
                     </div>
-                <div className="flex flex-col">
-                    <div className="flex w-full h-full">
-                        {
+                <div className="flex flex-col gap-[20px] px-[40px] sm:px-0">
+                    <div className="flex w-full lg:flex-row flex-col gap-[20px]">
                         <ProductTable />
-                        }
+                        <PanelTotals
+                        quotation={quotation}
+                        onGuardar={() => console.log('Guardar cotización')}
+                        onPagar={() => console.log('Proceder a pagar')}
+                        />
                     </div>
                         <CotizacionesCreadas/>
                 </div>

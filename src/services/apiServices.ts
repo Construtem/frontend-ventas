@@ -4,26 +4,68 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_VENTAS || 'https://api-ventas.t
 // 1)  TIPOS ─────────────────────────────────────────────────────────────────────
 // -----------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------
+// 1)  TIPOS ─────────────────────────────────────────────────────────────────────
+// -----------------------------------------------------------------------------
+
 /* Cliente devuelto por la API */
 export interface DBCliente {
-    nombre:       string;
-    telefono:     string;
-    email:        string | null;
-    razon_social: string | null;
-    rut:          string;
-    direccion:   DireccionCliente[];
-    comuna:       string | null;
-    ciudad:       string | null;
+    nombre:        string
+    telefono:      string
+    email:         string | null
+    razon_social:  string | null
+    rut:           string
+    direccion:     DireccionCliente[]
+    comuna:        string | null
+    ciudad:        string | null
     /** 1 = Persona | 2 = Empresa (según tu BD) */
-    tipo_id:      number;
+    tipo_id:       number
 }
+
 export interface DireccionCliente {
-    id:number;
-    direccion:       string;
-    comuna: string;
-    ciudad:      string;
-    rut_cliente?:          string;
+    id:        number
+    direccion: string
+    comuna:    string
+    ciudad:    string
+    rut_cliente?: string
 }
+
+/* -------------------------------------------------------------------------- */
+/*  NUEVO: tipos auxiliares para los productos del endpoint inventario        */
+/* -------------------------------------------------------------------------- */
+
+/** Bodega (o sucursal) extra donde también hay stock */
+export interface BodegaInfo {
+    sucursal_id: number
+    nombre:      string
+    tipo_id:     number               // 1 = Bodega, 2 = Tienda, etc. (según tu BD)
+    stock:       number
+    descuento:   number               // % aplicado a esa bodega
+}
+
+/** Producto tal como lo devuelve `/productos/inventario` */
+export interface ProductoInventario {
+    sku:                 string
+    nombre:              string
+    descripcion:         string
+    precio:              number
+    stock_sucursal:      number
+    descuento_sucursal:  number
+    bodegas:             BodegaInfo[] | null
+    total_stock_bodegas: number
+}
+
+/** Resultado que usamos en findSource (identifica el origen elegido) */
+export interface SourceInfo {
+    nombre:    string
+    stock:     number
+    descuento: number
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Drafts para la cotización                                                 */
+/* -------------------------------------------------------------------------- */
+
 export interface DraftItem {
     sku:        string
     nombre:     string
@@ -34,73 +76,89 @@ export interface DraftItem {
     descuento:  number
 }
 
+export interface DraftProducto {
+    /** SKU único                       */ sku: string
+    /** Nombre visible                  */ nombre: string
+    /** Id de la sucursal elegida       */ sucursalId: number
+    /** Nombre “origen” mostrado        */ origen: string
+    /** Stock real en ese origen        */ stock: number
+    /** Descuento % aplicado en origen  */ descuento: number           // 0-100
+    /** Precio unitario base            */ precioUnit: number
+    /** Cantidad elegida                */ cantidad: number
+    /** Precio *después* de descuento   */ netoUnit: number            // precioUnit - %
+    /** Total = netoUnit * cantidad     */ total: number
+}
+
 /* Usuario (vendedor / creador) */
 export interface DBUsuario {
-    email: string;
-    nombre: string;
-    rol_id: number;
+    email:  string
+    nombre: string
+    rol_id: number
 }
 
-/* Producto dentro del ítem */
+/* Producto dentro del ítem de una cotización guardada */
 export interface DBProducto {
-    sku:         string;
-    nombre:      string;
-    descripcion: string;
-    precio:      number;
+    sku:         string
+    nombre:      string
+    descripcion: string
+    precio:      number
 }
 
-/* Sucursal simplificada (viene anidada en el ítem) */
+/* Sucursal simplificada (anidada en el ítem) */
 export interface DBSucursal {
-    id:     number;
-    nombre: string;
+    id:     number
+    nombre: string
 }
 
-/* Ítem de la cotización */
-/* Ítem de la cotización (versión ampliada) */
+/* Ítem de la cotización (versión flexible) */
 export interface CotizacionItem {
     /* ——— claves mínimas ——— */
-    sku: string;
+    sku:           string
     cotizacion_id: number
     producto_id:   string
     sucursal_id:   number
     cantidad:      number
 
     /* ——— objetos anidados que trae la API ——— */
-    producto?:  DBProducto      // original
-    producto2?: DBProducto      // algunas rutas lo llaman “producto2”
+    producto:   DBProducto
+    producto2?: DBProducto       | undefined
 
-    sucursal?:  DBSucursal      // original
-    sucursal2?: DBSucursal      // algunas rutas lo llaman “sucursal2”
+    sucursal?:  DBSucursal       | undefined
+    sucursal2?: DBSucursal       | undefined
 
-    /* ——— campos calculados / planos que también puede traer ——— */
-    nombre?:          string        // nombre de producto en respuestas simplificadas
-    precio_unitario?: number        // precio en algunas rutas
-    precio?:          number        // precio en items de checkout
-    descuento?:       number        // % ó $ de descuento que aplique
+    /* ——— campos planos según la ruta ——— */
+    nombre?:          string     | undefined
+    precio_unitario?: number     | undefined
+    precio?:          number     | undefined
+    descuento?:       number     | undefined
 }
+
 /* Respuesta principal: una cotización */
 export interface DBCotizacion {
-    id:            number;
-    fecha_crea:    string; // ISO 8601
-    direccionId: number | null;
-    estado:        'aprobada' | 'rechazada' | 'pendiente';
-    costo_envio:   number;
-    rut_cliente:   string;
-    user_id:       string;
-    tipo_despacho: string;
-    total:         number;
-    descripcion:   string;
-    direccion?:      DireccionCliente; // opcional, si no se envía dirección
-    /** Vacío = sin registrar | 'pendiente' | 'pagado' (ajusta si tu API envía otros) */
-    estado_pago:   '' | 'pendiente' | 'pagado';
+    id:            number
+    fecha_crea:    string                // ISO 8601
+    direccionId:   number | null
+    estado:        'aprobada' | 'rechazada' | 'pendiente'
+    costo_envio:   number
+    rut_cliente:   string
+    user_id:       string
+    tipo_despacho: string
+    total:         number
+    descripcion:   string
+    direccion?:    DireccionCliente      | undefined
 
-    cliente:  DBCliente;
-    usuario:  DBUsuario;
-    items:    CotizacionItem[];
+    /** '' = sin registrar | 'pendiente' | 'pagado' */
+    estado_pago:   '' | 'pendiente' | 'pagado'
 
-    total_items:  number;
-    total_precio: number;
+    cliente:       DBCliente
+    usuario:       DBUsuario
+    items:         CotizacionItem[]
+
+    total_items:   number
+    total_precio:  number
 }
+
+/* DTO nuevos/ya existentes --------------------------------------------------*/
 export interface NuevaDireccionDTO {
     rut_cliente: string
     direccion:   string
@@ -114,9 +172,22 @@ export interface DireccionCreada {
     comuna:    string
     ciudad:    string
 }
+
 export interface DireccionCreadaMsg {
     [k: string]: string
 }
+
+export interface CreateClientePayload {
+    nombre:       string
+    telefono:     string
+    email?:       string
+    razon_social?: string
+    rut:          string
+    /** 1 = Persona · 2 = Empresa */
+    tipo_id:      1 | 2
+}
+
+
 /**
  * Historial de cotizaciones de un cliente por RUT.
  *
@@ -167,10 +238,70 @@ export const clienteService = {
         // Si no necesitas el mensaje podrías simplemente:
         // return { ok: true } as const
         return res.json()             // => { "direccion creado al rut con rut": "11111111-1" }
+    },
+
+    async crearCliente(
+        payload: CreateClientePayload,
+    ): Promise<{ mensaje: string }> {
+        const res = await fetch(`${API_BASE_URL}/api/clientes`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(payload),
+        });
+
+        if (!res.ok) {
+            throw new Error(`Crear cliente ${res.status}: ${await res.text()}`);
+        }
+        return res.json();                // { "direccion creado al rut con rut": "11111111-1" }
     }
-
-
-
     /* (mantén aquí otros métodos: obtenerClientes(), crearCliente(), etc.) */
 };
 
+
+export interface InventarioResponse {
+    page:             number
+    limit:            number
+    total_items:      number
+    total_pages:      number
+    sucursal_id:      number
+    productos:        ProductoInventario[]
+}
+export interface ProductoInventario {
+    sku:         string
+    nombre:      string
+    descripcion: string
+    precio:      number
+
+    // stock / descuento de la sucursal elegida
+    stock_sucursal:      number
+    descuento_sucursal:  number
+
+    /* Bodegas adicionales que tienen stock de este SKU          */
+    bodegas: {
+        sucursal_id: number
+        nombre:      string
+        tipo_id:     number           // 1 = Bodega, 2 = Tienda  (según tu BD)
+        stock:       number
+        descuento:   number
+    }[] | null
+
+    total_stock_bodegas: number     // suma de stocks de bodegas
+}
+
+
+export async function obtenerProductosInventario (
+    sucursalId: number,
+    page       = 1,
+    limit      = 100,
+): Promise<InventarioResponse> {
+
+    const url = `${API_BASE_URL}/api/productos/inventario` +
+        `?sucursal_id=${sucursalId}&page=${page}&limit=${limit}`
+
+    const res = await fetch(url, { next: { revalidate: 0 } }) // sin cache
+    if (!res.ok) {
+        const msg = await res.text()
+        throw new Error(`Inventario · ${res.status}: ${msg}`)
+    }
+    return res.json() as Promise<InventarioResponse>
+}

@@ -26,7 +26,8 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
     }
 
     return (
-        <div className="bg-white p-2 w-[280px]">
+        <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
             {/* Panel de totales */}
             <div className="space-y-3 mb-4">
                 <div className="flex justify-between items-center">
