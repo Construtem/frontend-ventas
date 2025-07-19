@@ -17,6 +17,15 @@ export interface DBCliente {
     /** 1 = Persona | 2 = Empresa (según tu BD) */
     tipo_id:      number;
 }
+export interface DraftItem {
+    sku:        string
+    nombre:     string
+    sucursalId: number
+    sucursal:   string
+    cantidad:   number
+    precio:     number
+    descuento:  number
+}
 
 /* Usuario (vendedor / creador) */
 export interface DBUsuario {
