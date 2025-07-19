@@ -35,9 +35,7 @@ const Home: NextPage = () => {
                 <div className="flex flex-col">
                     <div className="flex w-full h-full">
                         {
-                            /* Aquí podrías agregar un componente de bienvenida o información adicional
                         <ProductTable />
-                            * */
                         }
                     </div>
                         <CotizacionesCreadas/>
