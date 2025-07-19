@@ -3,6 +3,7 @@ import React, { useState } from 'react'
 import { useSucursales } from '@/hooks/useSucursales'
 import {ProductoModal}  from '@/components/Modal/ProductoModal'
 import Button from "@/components/Button";
+import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
 
 interface ProductTableProps {
     quotationId?: string
@@ -30,25 +31,9 @@ interface Product {
 }
 
  */
-interface ProductoEnCotizacion {
-    sku: string
-    nombre: string
-    descripcion: string
-    precio: number
-    cantidad: number
-    descuento: number
-    stockDisponible: number
-    peso: number
-    proveedor?: {
-        marca: string
-    }
-    sucursalId: number
-}
 
 const ProductTable: React.FC<ProductTableProps> = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [productosEnCotizacion] = useState<ProductoEnCotizacion[]>([])
-    
     // Cargar sucursales
     const { sucursales, error: errorSucursales } = useSucursales()
 
@@ -59,6 +44,8 @@ const ProductTable: React.FC<ProductTableProps> = () => {
             maximumFractionDigits: 0
         })
     }
+    const { state } = useCotizacionFlow()
+    const productosEnCotizacion = state.productos       // ← vienen del contexto
 
     // Función para agregar múltiples productos desde el modal
     /*
@@ -141,34 +128,33 @@ const ProductTable: React.FC<ProductTableProps> = () => {
 
                 {/* Tabla de productos */}
                 <div className="mb-4">
-                    <div className="overflow-x-auto max-h-72" style={{overflowY:'auto'}}>
-                        <table className="w-full text-xs border-collapse">
+                    <div className="overflow-x-auto max-h-72">
+                        <div className="rounded-[10px]  shadow-[0_0_2px_rgba(0,0,0,0.25)] border-b-[2px] border-gray-200">
+                        <table className="w-full text-sm rounded-[10px]  shadow-[0_0_2px_rgba(0,0,0,0.25)] border-b-[2px] border-gray-200 overflow-hidden">
                             <thead>
-                                <tr className="" style={{background:'#F4F5F9'}}>
+                                <tr className="text-left font-semibold text-gray-700 border-b border-gray-200 bg-gray-100" style={{background:'#F4F5F9'}}>
                                     <th className="border border-gray-300 px-3 py-2 text-left">SKU</th>
                                     <th className="border border-gray-300 px-3 py-2 text-left">Nombre</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-left">Descripción</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-left">Precio</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-left">Descuento</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-left">Cantidad</th>
-                                    <th className="border border-gray-300 px-3 py-2 text-left">Sucursal</th>                            
-                                    <th className="border border-gray-300 px-3 py-2 text-left">Total</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-center">Precio</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-center">Descuento</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-center">Cantidad</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-center">Sucursal</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-center">Total</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {productosEnCotizacion.map((row, index) => {
                                     const descuentoDelStock = row.descuento || 0
-                                    const precioConDescuento = row.precio - (descuentoDelStock / 100 * row.precio)
+                                    const precioConDescuento = row.precioUnit - (descuentoDelStock / 100 * row.precioUnit)
                                     const total = precioConDescuento * row.cantidad
-                                    const sucursal = sucursales.find(s => s.id === row.sucursalId)
+                                    const sucursalNombre = sucursales.find(s => s.id === row.sucursalId)?.nombre || row.origen
                                     
                                     return (
                                         <tr key={`${row.sku}-${row.sucursalId}-${index}`} className="">
-                                            <td className="border border-gray-300 px-3 py-2">{row.sku}</td>
-                                            <td className="border border-gray-300 px-3 py-2">{row.nombre}</td>
-                                            <td className="border border-gray-300 px-3 py-2">{row.descripcion}</td>
-                                            <td className="border border-gray-300 px-3 py-2">${formatCurrency(row.precio)}</td>
-                                            <td className="border border-gray-300 px-3 py-2">
+                                             <td className={'text-center text-[18px] font-montserrat border-[1px] border-gray-200 p-[10px] '}>{row.sku}</td>
+                                             <td className={'text-left text-[18px] font-montserrat border-[1px] border-gray-200 p-[10px] '}>{row.nombre}</td>
+                                             <td className={'text-center text-[18px] font-montserrat border-[1px] border-gray-200 p-[10px] '}>${formatCurrency(row.precioUnit)}</td>
+                                             <td className={'text-center text-[18px] font-montserrat border-[1px] border-gray-200 p-[10px] '}>
                                                 {descuentoDelStock > 0 ? (
                                                     <span className="text-green-600 font-semibold">
                                                         -{formatCurrency(descuentoDelStock)}%
@@ -177,9 +163,9 @@ const ProductTable: React.FC<ProductTableProps> = () => {
                                                     <span className="text-gray-400">Sin descuento</span>
                                                 )}
                                             </td>
-                                            <td className="border border-gray-300 px-3 py-2">{row.cantidad}</td>
-                                            <td className="border border-gray-300 px-3 py-2">{sucursal?.nombre || 'N/A'}</td>
-                                            <td className="border border-gray-300 px-3 py-2 font-semibold">
+                                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-x-[1px] border-gray-200 p-[10px] '}>{row.cantidad}</td>
+                                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-x-[1px] border-gray-200 p-[10px] '}>{sucursalNombre}</td>
+                                            <td className="border border-gray-300 px-3 py-2 font-semibold text-center">
                                                 ${formatCurrency(total)}
                                             </td>
                                         </tr>
@@ -194,6 +180,7 @@ const ProductTable: React.FC<ProductTableProps> = () => {
                                 )}
                             </tbody>
                         </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -201,7 +188,10 @@ const ProductTable: React.FC<ProductTableProps> = () => {
             {/* Modal usando la nueva estructura */}
             <ProductoModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
+                onClose={() => {
+                    console.log('los productos son ', state.sucursalId)
+                    setIsModalOpen(false)
+                }}
             />
         </>
     )

@@ -1,168 +1,219 @@
 'use client'
-import Modal from '@/components/Modal/Modal';
-import { ModalBody, ModalFooter, ModalHeader } from '@/components/Modal/ModalsParts';
-import Button from '@/components/Button';
-import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
-import {obtenerProductosInventario, } from "@/services/apiServices";
-import {useEffect, useState} from "react";
+import { useEffect, useState }   from 'react'
+import Modal                     from '@/components/Modal/Modal'
+import { ModalHeader, ModalBody, ModalFooter } from '@/components/Modal/ModalsParts'
+import Button                    from '@/components/Button'
+import { useCotizacionFlow }     from '@/contexts/CotizacionFlow'
 
+import {
+    obtenerProductosInventario,
+    ProductoInventario,
+}                                from '@/services/apiServices'
+
+import { toDraft }               from '@/utils/helpers/productMapper'
+
+/* ────────────────────────────────────────────────────────────────── */
 interface ProductoModalProps {
-    isOpen: boolean;
-    onClose: () => void;
+    isOpen : boolean
+    onClose: () => void
 }
-interface Bodega {
-    sucursal_id: number;
-    nombre: string;
-    tipo_id: number;
-    stock: number;
-    descuento: number;
-}
+/* ────────────────────────────────────────────────────────────────── */
+export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
+    /* contexto global (flujo de cotización) -------------------------- */
+    const { state, dispatch } = useCotizacionFlow()
+    const sucursalId          = state.sucursalId          // tienda principal
 
-interface Producto {
-    sku: string;
-    nombre: string;
-    descripcion: string;
-    precio: number;
-    stock_sucursal: number;
-    descuento_sucursal: number;
-    bodegas: Bodega[] | null;
-    total_stock_bodegas: number;
-}
+    /* estado local (productos, selecciones) -------------------------- */
+    const [rows,      setRows]      = useState<ProductoInventario[]>([])
+    const [selOrigen, setSelOrigen] = useState<Record<string, string>>({})
+    const [selQty,    setSelQty]    = useState<Record<string, number>>({})
 
-export function ProductoModal({ 
-    isOpen, 
-    onClose,
-}: ProductoModalProps) {
-
-    const { state }   = useCotizacionFlow()
-    const { sucursalId } = state
-    const [productos, setProductos] = useState<Producto[]>([]);
-    const [origenSeleccionado, setOrigenSeleccionado] = useState<Record<string, string>>({});
-
-
-    /* ── fetch ───────────────────────────────────────── */
-    async function fetchInv () {
+    /* fetch inventario al cambiar de sucursal ------------------------ */
+    useEffect(() => {
         if (!sucursalId) return
-        try {
-            const respuesta = await obtenerProductosInventario(sucursalId, 1, 100)
-            setProductos((respuesta.productos))
-        }
-        catch (error) {
-            console.error('Error al obtener el inventario:', error)
-        }}
-        useEffect(() => { fetchInv() }, [sucursalId])
+        obtenerProductosInventario(sucursalId, 1, 100)
+            .then(r => {
+                setRows(r.productos)
+                /* reset de selecciones si cambia tienda */
+                setSelOrigen({})
+                setSelQty({})
+            })
+            .catch(e => console.error('[Inventario]', e))
+    }, [sucursalId])
 
-    // Función para cerrar el modal y limpiar estado
-    const handleClose = () => {
-        onClose()
-    }
-
-    function obtenerDatosPorOrigen(producto: Producto, origen: string) {
+    /* helpers -------------------------------------------------------- */
+    /** Devuelve stock / desc. de la sucursal (o bodega) elegida */
+    function dataOrigen (p: ProductoInventario, origen: string) {
         if (origen === 'Sucursal') {
-            return {
-                stock: producto.stock_sucursal,
-                descuento: producto.descuento_sucursal,
-            };
+            return { stock: p.stock_sucursal, descuento: p.descuento_sucursal }
         }
-
-        const bodega = producto.bodegas?.find((b) => b.nombre === origen);
-        return {
-            stock: bodega?.stock ?? 0,
-            descuento: bodega?.descuento ?? 0,
-        };
+        const b = p.bodegas?.find(b => b.nombre === origen)
+        return { stock: b?.stock ?? 0, descuento: b?.descuento ?? 0 }
     }
 
+    /** Cambia cantidad manteniendo límites */
+    function setQty (sku: string, nueva: number, max: number) {
+        const qty = Math.min(Math.max(nueva, 1), max)
+        setSelQty(q => ({ ...q, [sku]: qty }))
+    }
+
+    /** Añade el producto al contexto y descuenta stock en tabla */
+    function handleAdd (p: ProductoInventario) {
+        const origenNombre      = selOrigen[p.sku] ?? 'Sucursal'
+        const { stock }         = dataOrigen(p, origenNombre)
+        const qty               = selQty[p.sku] ?? 1
+        if (qty > stock) return                               // safety
+
+        /* 1. construimos DraftProducto con mapper -------------------- */
+        const draft             = toDraft(p, origenNombre, Number(sucursalId))
+        draft.cantidad          = qty
+        draft.total             = draft.netoUnit * qty
+
+        dispatch({ type: 'ADD_PRODUCT', payload: draft })
+
+        /* 2. descontamos stock en la tabla visual -------------------- */
+        setRows(rs =>
+            rs.map(r => {
+                if (r.sku !== p.sku) return r
+                if (origenNombre === 'Sucursal') {
+                    return { ...r, stock_sucursal: r.stock_sucursal - qty }
+                }
+                return {
+                    ...r,
+                    bodegas: r.bodegas?.map(b =>
+                        b.nombre === origenNombre ? { ...b, stock: b.stock - qty } : b,
+                    ) ?? null,
+                }
+            }),
+        )
+
+        /* 3. reseteamos qty de ese SKU ------------------------------- */
+        setSelQty(q => ({ ...q, [p.sku]: 1 }))
+    }
+
+    /* render -------------------------------------------------------- */
     return (
-        <Modal isOpen={isOpen} onClose={handleClose}>
-            <ModalHeader title="Productos" onClose={handleClose} />
+        <Modal isOpen={isOpen} onClose={onClose}>
+            <ModalHeader title="Agregar productos" onClose={onClose} />
 
             <ModalBody>
-                <table className="table table-striped min-w-[1200px] w-full text-sm rounded-[10px] border-b-[2px] border-gray-200 shadow-[0_0_2px_rgba(0,0,0,0.25)]">
-                    <thead>
-                    <tr className="text-left font-semibold text-gray-700 border-b border-gray-200 bg-gray-100">
-                        <th className="text-center text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">SKU</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Nombre</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Descripción</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Origen</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Stock</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Coste</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Descuento</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Cantidad</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Total</th>
-                        <th className="text-left text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] font-semibold">Agregar</th>
+                {!sucursalId && (
+                    <p className="text-gray-500 text-center">
+                        Selecciona una sucursal para cargar inventario.
+                    </p>
+                )}
 
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {productos.map((producto) => {
-                        const origen = origenSeleccionado[producto.sku] ?? 'Sucursal';
-                        const {stock, descuento} = obtenerDatosPorOrigen(producto, origen);
-                        const total = producto.precio * (1 - descuento / 100);
-
-                        return (
-                            <tr key={producto.sku}>
-                                <td className="text-center">{producto.sku}</td>
-                                <td className="text-xs ...">{producto.nombre}</td>
-                                <td className=" text-xs ...">{producto.descripcion}</td>
-
-                                <td className="text-left py-[4px] ...">
-                                    <select
-                                        className="border-none rounded p-[5px]"
-                                        value={origen}
-                                        onChange={(e) =>
-                                            setOrigenSeleccionado((prev) => ({
-                                                ...prev,
-                                                [producto.sku]: e.target.value,
-                                            }))
-                                        }
-                                    >
-                                        <option value="Sucursal">Sucursal</option>
-                                        {producto.bodegas?.map((bodega, idx) => (
-                                            <option key={idx} value={bodega.nombre}>
-                                                {bodega.nombre}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </td>
-
-                                <td className="text-center ...">{stock}</td>
-                                <td className="text-center ...">${producto.precio.toLocaleString()}</td>
-                                <td className="text-center ...">{descuento}%</td>
-                                <td className="text-center ...">
-
-                                </td>
-                                <td className="text-left ...">
-                                    ${total.toLocaleString()}
-                                </td>
-
-                                <td className="text-left flex justify-center items-center py-[5px]">
-                                    <button className="bg-green-500 hover:bg-green-600 text-white px-4 py-1 rounded">
-                                        +
-                                    </button>
-                                </td>
+                {sucursalId && (
+                    <div className="overflow-x-auto">
+                        <table className="min-w-[1100px] w-full text-sm rounded-lg border border-gray-200">
+                            <thead className="bg-gray-100 text-gray-700">
+                            <tr>
+                                <th className="px-2 py-2 text-center">SKU</th>
+                                <th className="px-2 py-2">Nombre</th>
+                                <th className="px-2 py-2">Origen</th>
+                                <th className="px-2 py-2 text-center">Stock</th>
+                                <th className="px-2 py-2 text-center">Coste</th>
+                                <th className="px-2 py-2 text-center">Desc.%</th>
+                                <th className="px-2 py-2 text-center">Cant.</th>
+                                <th className="px-2 py-2 text-right">Total</th>
+                                <th className="px-2 py-2 text-center" />
                             </tr>
-                        );
-                    })}
-                    </tbody>
+                            </thead>
 
-                </table>
+                            <tbody>
+                            {rows.map(p => {
+                                const origen   = selOrigen[p.sku] ?? 'Sucursal'
+                                const { stock, descuento } = dataOrigen(p, origen)
+                                const qty      = selQty[p.sku] ?? 1
+                                const netoUnit = p.precio * (1 - descuento / 100)
+
+                                return (
+                                    <tr key={p.sku} className="hover:bg-gray-50">
+                                        <td className="px-2 py-1 text-center">{p.sku}</td>
+                                        <td className="px-2 py-1">{p.nombre}</td>
+
+                                        {/* Select de origen */}
+                                        <td className="px-2 py-1">
+                                            <select
+                                                className="border rounded px-1"
+                                                value={origen}
+                                                onChange={e =>
+                                                    setSelOrigen(o => ({ ...o, [p.sku]: e.target.value }))
+                                                }
+                                            >
+                                                <option value="Sucursal">Sucursal #{sucursalId}</option>
+                                                {p.bodegas?.map(b => (
+                                                    <option key={b.sucursal_id} value={b.nombre}>
+                                                        {b.nombre}
+                                                    </option>
+                                                ))}
+                                            </select>
+                                        </td>
+
+                                        <td className="px-2 py-1 text-center">{stock}</td>
+                                        <td className="px-2 py-1 text-center">
+                                            ${p.precio.toLocaleString('es-CL')}
+                                        </td>
+                                        <td className="px-2 py-1 text-center">{descuento}%</td>
+
+                                        {/* Cantidad con ± */}
+                                        <td className="px-2 py-1">
+                                            <div className="flex items-center gap-1 justify-center">
+                                                <button
+                                                    className="px-[6px] border rounded"
+                                                    onClick={() => setQty(p.sku, qty - 1, stock)}
+                                                >
+                                                    −
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    min={1}
+                                                    max={stock}
+                                                    value={qty}
+                                                    className="w-12 border rounded text-center"
+                                                    onChange={e =>
+                                                        setQty(p.sku, Number(e.target.value), stock)
+                                                    }
+                                                />
+                                                <button
+                                                    className="px-[6px] border rounded"
+                                                    onClick={() => setQty(p.sku, qty + 1, stock)}
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </td>
+
+                                        <td className="px-2 py-1 text-right">
+                                            ${(netoUnit * qty).toLocaleString('es-CL')}
+                                        </td>
+
+                                        {/* botón añadir */}
+                                        <td className="px-2 py-1 text-center">
+                                            <button
+                                                className="bg-green-600 hover:bg-green-700 text-white px-3 py-[2px] rounded cursor-pointer"
+                                                disabled={stock === 0}
+                                                onClick={() => handleAdd(p)}
+                                            >
+                                                +
+                                            </button>
+                                        </td>
+                                    </tr>
+                                )
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
             </ModalBody>
 
             <ModalFooter>
-
-            <Button onClick={handleClose}
-                        className={"px-6 py-3 border-2 border-gray-400  bg-transparent rounded-lg hover:bg-gray-100 transition-colors font-semibold cursor-pointer"}
-                        label="Cancelar"
+                <Button
+                    label="Cerrar"
+                    className="bg-gray-200"
+                    onClick={onClose}
                 />
-
-                <Button onClick={() => {
-                    console.log(productos)
-                }}
-                        className={"px-6 py-3 text-white bg-[#1b5be7] hover:bg-[#1e4fbb] rounded-lg transition-colors font-semibold cursor-pointer"}
-                        label="Guardar"
-                />
-
             </ModalFooter>
         </Modal>
-    );
+    )
 }

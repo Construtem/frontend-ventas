@@ -10,6 +10,7 @@ import { quotations } from '@/mocks/mocksDatos'
 import Bienvenida from "@/components/Bienvenida";
 import CotizacionesCreadas from "@/components/CotizacionesCreadas";
 import PanelTotals from "@/components/PanelTotals";
+import PanelTotalsContainer from "@/components/PanelTotalsContainer";
 
 
 
@@ -36,11 +37,7 @@ const Home: NextPage = () => {
                 <div className="flex flex-col gap-[20px] px-[40px] sm:px-0">
                     <div className="flex w-full lg:flex-row flex-col gap-[20px]">
                         <ProductTable />
-                        <PanelTotals
-                        quotation={quotation}
-                        onGuardar={() => console.log('Guardar cotización')}
-                        onPagar={() => console.log('Proceder a pagar')}
-                        />
+                        <PanelTotalsContainer/>
                     </div>
                         <CotizacionesCreadas/>
                 </div>
