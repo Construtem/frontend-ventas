@@ -3,9 +3,8 @@ import Modal from '@/components/Modal/Modal';
 import { ModalBody, ModalFooter, ModalHeader } from '@/components/Modal/ModalsParts';
 import Button from '@/components/Button';
 import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
-import {obtenerProductosInventario, ProductoInventario} from "@/services/apiServices";
+import {obtenerProductosInventario, } from "@/services/apiServices";
 import {useEffect, useState} from "react";
-import {toDraft} from "@/app/productMapper";
 
 interface ProductoModalProps {
     isOpen: boolean;

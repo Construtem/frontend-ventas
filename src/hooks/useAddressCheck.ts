@@ -1,7 +1,30 @@
+// src/hooks/useAddressCheck.ts
+'use client'
+
 import { useCallback, useState } from 'react'
 
+/* ---------- Tipos mínimos de la respuesta de Geocoding ---------- */
+type AddressComponent = {
+    long_name:  string
+    short_name: string
+    types:      string[]
+}
+
+interface GeocodeResult {
+    types:              string[]
+    address_components: AddressComponent[]
+    place_id:           string
+    formatted_address:  string
+}
+
+interface GeocodeResponse {
+    status:  string
+    results: GeocodeResult[]
+}
+
+/* -------------------------- Retorno del hook -------------------- */
 type CheckResult =
-    | { ok: true; placeId: string; formatted: string }
+    | { ok: true;  placeId: string; formatted: string }
     | { ok: false; reason: string }
 
 const API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY!
@@ -10,12 +33,15 @@ export function useAddressCheck() {
     const [loading, setLoading] = useState(false)
     const [error,   setError]   = useState<string | null>(null)
 
+    /* ----------------------------------------------------------------
+     *  check(): valida una dirección en Chile
+     * ----------------------------------------------------------------*/
     const check = useCallback(
         async (street: string, comuna: string, ciudad: string): Promise<CheckResult> => {
             setLoading(true)
             setError(null)
 
-            // ❶ Build full query
+            /* ① Query completo */
             const query = `${street}, ${comuna}, ${ciudad}, Chile`
 
             try {
@@ -24,25 +50,25 @@ export function useAddressCheck() {
                         query,
                     )}&region=cl&key=${API_KEY}`,
                 )
-                const data = await res.json()
 
-                if (data.status !== 'OK' || !data.results.length) {
+                const data = (await res.json()) as GeocodeResponse
+
+                if (data.status !== 'OK' || data.results.length === 0) {
                     return { ok: false, reason: 'Sin coincidencias' }
                 }
 
-                // ❷ Elegimos el primer resultado “preciso”
-                const match = data.results.find((r: any) => {
-                    const types = r.types as string[]
-                    if (types.includes('country')) return false // demasiado genérico
+                /* ② Elegimos el primer resultado suficientemente “preciso” */
+                const match = data.results.find((r) => {
+                    /* descartamos resultados demasiado genéricos */
+                    if (r.types.includes('country')) return false
 
-                    // comprobamos que tenga los components requeridos
-                    const comp = (t: string) =>
-                        r.address_components.some((c: any) => c.types.includes(t))
+                    const has = (t: string) =>
+                        r.address_components.some((c) => c.types.includes(t))
 
                     return (
-                        comp('route') &&
-                        comp('locality') &&                // comuna o ciudad
-                        comp('administrative_area_level_2') // provincia Reg. Metropolitana
+                        has('route') &&                          // calle
+                        has('locality') &&                       // comuna / ciudad
+                        has('administrative_area_level_2')       // provincia / RM
                     )
                 })
 
@@ -55,8 +81,9 @@ export function useAddressCheck() {
                     placeId:   match.place_id,
                     formatted: match.formatted_address,
                 }
-            } catch (e: any) {
-                setError(e.message)
+            } catch (e: unknown) {
+                const err = e as Error
+                setError(err.message)
                 return { ok: false, reason: 'Error de red' }
             } finally {
                 setLoading(false)

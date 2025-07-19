@@ -37,7 +37,7 @@ export function CotizacionForm ({
                                     onSave,
                                     onCancel,
                                 }: Props) {
-    const { check, loading, error } = useAddressCheck()
+    const { check } = useAddressCheck()
     const { state } = useCotizacionFlow();
     const [direccion, setDireccion] = useState<DireccionCliente[]>([]);
     const [err, setError] = useState<string | null>(null);
@@ -85,7 +85,6 @@ export function CotizacionForm ({
     }
     const {
         mutate:  guardarDireccion,
-        isSuccess,
     } = useMutation({
         mutationFn: clienteService.crearDireccion,
         onSuccess:  (data) => {
