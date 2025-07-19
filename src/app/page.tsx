@@ -33,7 +33,11 @@ const Home: NextPage = () => {
                     </div>
                 <div className="flex flex-col">
                     <div className="flex w-full h-full bg-red-600">
+                        {
+                            /* Aquí podrías agregar un componente de bienvenida o información adicional
                         <ProductTable />
+                            * */
+                        }
                         {/******** AQUÍ IRÁ LA CARD DEL COSTO DE LA COTIZACIÓN *********/}
                     </div>
                 </div>

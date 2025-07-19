@@ -11,6 +11,9 @@ export interface DBCliente {
     email:        string | null;
     razon_social: string | null;
     rut:          string;
+    direccion:    string | null;
+    comuna:       string | null;
+    ciudad:       string | null;
     /** 1 = Persona | 2 = Empresa (según tu BD) */
     tipo_id:      number;
 }
@@ -37,16 +40,28 @@ export interface DBSucursal {
 }
 
 /* Ítem de la cotización */
+/* Ítem de la cotización (versión ampliada) */
 export interface CotizacionItem {
-    cotizacion_id: number;
-    producto_id:   string;
-    sucursal_id:   number;
-    cantidad:      number;
+    /* ——— claves mínimas ——— */
+    sku: string;
+    cotizacion_id: number
+    producto_id:   string
+    sucursal_id:   number
+    cantidad:      number
 
-    producto: DBProducto;
-    sucursal: DBSucursal;
+    /* ——— objetos anidados que trae la API ——— */
+    producto?:  DBProducto      // original
+    producto2?: DBProducto      // algunas rutas lo llaman “producto2”
+
+    sucursal?:  DBSucursal      // original
+    sucursal2?: DBSucursal      // algunas rutas lo llaman “sucursal2”
+
+    /* ——— campos calculados / planos que también puede traer ——— */
+    nombre?:          string        // nombre de producto en respuestas simplificadas
+    precio_unitario?: number        // precio en algunas rutas
+    precio?:          number        // precio en items de checkout
+    descuento?:       number        // % ó $ de descuento que aplique
 }
-
 /* Respuesta principal: una cotización */
 export interface DBCotizacion {
     id:            number;
@@ -88,6 +103,20 @@ export const clienteService = {
         /** Type assert: forzamos a que el JSON cumpla DBCotizacion[] */
         return (await res.json()) as DBCotizacion[];
     },
+
+    async obtenerDireccionDelCliente(rut: string): Promise<DBCliente> {
+        const res = await fetch(`${API_BASE_URL}/api/clientes/${rut}/direcciones`, {
+            next: { revalidate: 60 } // ej. ISR en Next – ajústalo o bórralo si no usas Next 13+
+        });
+
+        if (!res.ok) {
+            throw new Error(`Error ${res.status} al obtener dirección del cliente`);
+        }
+
+        /** Type assert: forzamos a que el JSON cumpla DBCliente */
+        return (await res.json()) as DBCliente;
+
+    }
 
     /* (mantén aquí otros métodos: obtenerClientes(), crearCliente(), etc.) */
 };
