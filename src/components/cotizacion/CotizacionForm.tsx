@@ -1,7 +1,10 @@
 'use client'
-import { ChangeEvent }     from 'react'
+import {ChangeEvent, useEffect, useState} from 'react'
 import Button              from '@/components/Button'
-import { DBCotizacion }    from '@/services/apiServices'
+import {clienteService, DBCotizacion, DireccionCliente} from '@/services/apiServices'
+import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
+import {useAddressCheck} from "@/hooks/useAddressCheck";
+import {useMutation} from "@tanstack/react-query";
 
 type Draft = Partial<DBCotizacion>
 interface Props {
@@ -18,9 +21,11 @@ const DetalleLinea = ({
     label: string
     children: React.ReactNode
 }) => (
-    <div className="py-3 grid grid-cols-[140px_1fr] gap-4">
-        <dt className="text-gray-600">{label}:</dt>
-        <dd>{children}</dd>
+    <div className="flex w-full">
+        <div className="w-fit min-w-[200px]">
+        <dt className="text-gray-600">{label}</dt>
+        </div>
+        <dd className={'w-full'}>{children}</dd>
     </div>
 )
 
@@ -30,13 +35,72 @@ export function CotizacionForm ({
                                     onSave,
                                     onCancel,
                                 }: Props) {
-    // obtén el rut del cliente seleccionado del contexto y hace un fetch a obtenerDireccionDelCliente
+    const { check, loading, error } = useAddressCheck()
+    const { state } = useCotizacionFlow();
+    const [direccion, setDireccion] = useState<DireccionCliente[]>([]);
+    const [err, setError] = useState<string | null>(null);
 
+    useEffect(() => {
+        if (!state.clienteRut) return;
 
+        async function cargarDireccion() {
+            try {
+                const data = await clienteService.obtenerDireccionDelCliente(state.clienteRut);
+                setDireccion(data);
+            } catch (err: unknown) {
+                console.error("Error al obtener dirección del cliente:", err);
+                setError("No se pudo cargar la dirección del cliente");
+            }
+                console.log(err);
+        }
 
+        cargarDireccion();
+    }, [state.clienteRut]);
+
+/*
+* */
     /* handlers pequeños para mantener el código limpio */
     const handle = (field: keyof Draft) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         onChange({ [field]: e.target.type === 'number' ? Number(e.target.value) : e.target.value })
+
+    const [mostrarInputsNewDireccion, setMostrarInputsNewDireccion] = useState(false);
+    const [nuevaDireccion, setNuevaDireccion] = useState('');
+    const [nuevaComuna, setNuevaComuna] = useState('');
+    const [nuevaCiudad] = useState('Santiago');
+    const [esValida, setEsValida] = useState(false);
+
+
+    async function handleValidarDireccion() {
+        const res = await check(nuevaDireccion, nuevaComuna, nuevaCiudad)
+
+        if (!res.ok) {
+            console.log('error')
+            setEsValida(false)
+            return
+        }
+        console.log('Dirección OK', res.formatted, res.placeId)
+        setEsValida(true)
+
+    }
+    const {
+        mutate:  guardarDireccion,
+        isSuccess,
+    } = useMutation({
+        mutationFn: clienteService.crearDireccion,
+        onSuccess:  (data) => {
+            console.log('Dirección creada →', data)
+            // aquí podrías despachar al contexto o mostrar toast
+        },
+    })
+    function handleGuardarDireccion() {
+        if(!state.clienteRut) return;
+        guardarDireccion({
+            rut_cliente: state.clienteRut,
+            direccion:   nuevaDireccion,
+            comuna:      nuevaComuna,
+            ciudad:      nuevaCiudad,
+        });
+    }
 
     return (
         <article className="bg-white rounded shadow px-8 py-6 space-y-4">
@@ -46,7 +110,7 @@ export function CotizacionForm ({
                 </h2>
             </header>
 
-            <div className="space-y-4">
+            <div className="space-y-4  w-full">
                 <DetalleLinea label="Descripción">
           <textarea
               className="w-full border rounded px-3 py-1"
@@ -67,12 +131,56 @@ export function CotizacionForm ({
                 </DetalleLinea>
 
                 <DetalleLinea label="Dirección de despacho">
-                    <select className="border rounded px-2 py-1">
+                    <div className={'flex gap-[5px] flex-wrap gap-4 flex-col max-w-fit'}>
+                        <select className="border rounded px-2 py-1 max-w-fit">
                         {/* Aquí se deberían listar las direcciones del cliente */}
-                        <option value="direccion1">Dirección 1</option>
-                        <option value="direccion2">Dirección 2</option>
+                        {direccion.map((dir) => (
+                            <option key={dir.id} value={dir.id}>
+                                {`${dir.direccion}, ${dir.comuna}, ${dir.ciudad}`}
+                            </option>
+                        ))}
+                        {/* Ejemplo de opciones estáticas, reemplazar con datos reales */}
                     </select>
-                    <Button onClick={()=>{console.log('se hizo click')}} label={'+ Nueva dirección'} className="ml-2 bg-blue-600 text-white" />
+
+                        {mostrarInputsNewDireccion && (
+                            <div className="mt-4 flex flex-col gap-2">
+                                <DetalleLinea label={'Dirección:'}>
+                                <input
+                                    type="text"
+                                    placeholder="Dirección"
+                                    value={nuevaDireccion}
+                                    onChange={(e) => setNuevaDireccion(e.target.value)}
+                                    className="border rounded px-2 py-1"
+                                />
+                                </DetalleLinea>
+                                <DetalleLinea label={'Comuna:'}>
+                                <input
+                                    type="text"
+                                    placeholder="Comuna"
+                                    value={nuevaComuna}
+                                    onChange={(e) => setNuevaComuna(e.target.value)}
+                                    className="border rounded px-2 py-1"
+                                />
+                                </DetalleLinea>
+                            </div>
+                        )}
+                        {mostrarInputsNewDireccion?(
+                            <div className={'flex justify-end'}>
+                                <Button onClick={()=> {
+                                    handleValidarDireccion()
+                                    console.log('es validoo? ', esValida)
+                                }
+                                } label={'Validar dirección'} className="ml-2 bg-blue-600 text-white w-fit" />
+                                <Button onClick={handleGuardarDireccion} label={'Guardar dirección'} className={`ml-2 text-white w-fit ${esValida?'bg-blue-600': 'bg-gray-300'}`}  disabled={esValida?false:true} />
+                            </div>
+                        ):(
+
+                            <div className={'flex justify-center bg-red-50'}>
+                    <Button onClick={()=>setMostrarInputsNewDireccion(true)} label={'+ Nueva dirección'} className="ml-2 bg-blue-600 text-white w-fit" />
+                            </div>
+                        )
+                        }
+                    </div>
                 </DetalleLinea>
             </div>
 

@@ -11,11 +11,18 @@ export interface DBCliente {
     email:        string | null;
     razon_social: string | null;
     rut:          string;
-    direccion:    string | null;
+    direccion:   DireccionCliente[];
     comuna:       string | null;
     ciudad:       string | null;
     /** 1 = Persona | 2 = Empresa (según tu BD) */
     tipo_id:      number;
+}
+export interface DireccionCliente {
+    id:number;
+    direccion:       string;
+    comuna: string;
+    ciudad:      string;
+    rut_cliente?:          string;
 }
 export interface DraftItem {
     sku:        string
@@ -75,6 +82,7 @@ export interface CotizacionItem {
 export interface DBCotizacion {
     id:            number;
     fecha_crea:    string; // ISO 8601
+    direccionId: number | null;
     estado:        'aprobada' | 'rechazada' | 'pendiente';
     costo_envio:   number;
     rut_cliente:   string;
@@ -91,6 +99,22 @@ export interface DBCotizacion {
 
     total_items:  number;
     total_precio: number;
+}
+export interface NuevaDireccionDTO {
+    rut_cliente: string
+    direccion:   string
+    comuna:      string
+    ciudad:      string
+}
+
+export interface DireccionCreada {
+    id:        number
+    direccion: string
+    comuna:    string
+    ciudad:    string
+}
+export interface DireccionCreadaMsg {
+    [k: string]: string
 }
 /**
  * Historial de cotizaciones de un cliente por RUT.
@@ -113,7 +137,7 @@ export const clienteService = {
         return (await res.json()) as DBCotizacion[];
     },
 
-    async obtenerDireccionDelCliente(rut: string): Promise<DBCliente> {
+    async obtenerDireccionDelCliente(rut: string | null): Promise<DireccionCliente[]> {
         const res = await fetch(`${API_BASE_URL}/api/clientes/${rut}/direcciones`, {
             next: { revalidate: 60 } // ej. ISR en Next – ajústalo o bórralo si no usas Next 13+
         });
@@ -123,9 +147,28 @@ export const clienteService = {
         }
 
         /** Type assert: forzamos a que el JSON cumpla DBCliente */
-        return (await res.json()) as DBCliente;
+        return await res.json()
 
+    },
+
+    async  crearDireccion(data: NuevaDireccionDTO): Promise<DireccionCreadaMsg> {
+        const res = await fetch(`${API_BASE_URL}/api/nuevaDireccion`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify(data),
+        })
+
+        if (res.status !== 201) {
+            // Si tu backend enviara más info de error, léela con res.json()
+            throw new Error(`El servidor respondió ${res.status}`)
+        }
+
+        // Si no necesitas el mensaje podrías simplemente:
+        // return { ok: true } as const
+        return res.json()             // => { "direccion creado al rut con rut": "11111111-1" }
     }
+
+
 
     /* (mantén aquí otros métodos: obtenerClientes(), crearCliente(), etc.) */
 };
