@@ -26,7 +26,7 @@ const Home: NextPage = () => {
         <div className="min-h-screen bg-gray-100 px-20px lg:px-0">
             <div className="container mx-auto py-8 pt-[66px] flex flex-col gap-[20px]">
                 <div className='flex justify-center gap-[40px] flex-col lg:flex-row w-full'>
-                        <div className={"flex flex-col gap-4 px-[40px] sm:px-[0px] w-[40%]"}>
+                        <div className={"flex flex-col gap-4 px-[40px] sm:px-[0px] "}>
                             <Bienvenida/>
                             <Cliente/>
                         </div>
