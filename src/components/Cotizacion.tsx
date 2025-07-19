@@ -60,7 +60,8 @@ export default function Cotizacion () {
     /* ─────────── Render ─────────── */
     return (
         <>
-            <div className="max-w-[800px] px-6 sm:px-0 w-full">
+            <div className="px-6 sm:px-0 w-[60%]
+            ">
                 {/* encabezado */}
                 <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full">
                     <h1 className="font-montserrat font-semibold text-2xl">

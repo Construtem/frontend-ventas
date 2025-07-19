@@ -16,7 +16,7 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
     const {
         id, fecha_crea, estado, tipo_despacho,
         costo_envio, descripcion, estado_pago,
-        cliente, usuario, items, total_items, total_precio,
+        cliente, usuario, items, total_items, total_precio
     } = data
 
     /* helpers */
@@ -31,10 +31,15 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                 <section className='grid grid-cols-2 gap-4 text-white'>
                     <div>
                         <p><span className='font-semibold'>Estado:</span> {estado}</p>
-                        <p><span className='font-semibold'>Estado pago:</span> {estado_pago[0].toUpperCase()+estado_pago.slice(1)}</p>
+                        <p><span
+                            className='font-semibold'>Estado pago:</span> {estado_pago[0].toUpperCase() + estado_pago.slice(1)}
+                        </p>
                         <p><span className='font-semibold'>Fecha:</span> {new Date(fecha_crea).toLocaleDateString()}</p>
-                        <p><span className='font-semibold'>Tipo envío:</span> {tipo_despacho}</p>
+                        <p><span
+                            className='font-semibold'>Tipo envío:</span> {tipo_despacho && 2 ? 'A domicilio' : 'Retiro en tienda'}
+                        </p>
                         <p><span className='font-semibold'>Costo envío:</span> {money(costo_envio)}</p>
+                        <p><span className='font-semibold'>Dirección:</span> {`${data.direccion?.direccion}, ${data.direccion?.comuna}, ${data.direccion?.ciudad}`}</p>
                     </div>
 
                     <div>
@@ -96,7 +101,8 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                 <Button
                     label='Cerrar'
                     className='bg-sky-600 hover:bg-sky-700 text-white'
-                    onClick={onClose}
+                    onClick={()=>onClose
+                    }
                 />
             </ModalFooter>
         </Modal>

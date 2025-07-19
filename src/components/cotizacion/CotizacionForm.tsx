@@ -16,13 +16,15 @@ interface Props {
 
 const DetalleLinea = ({
                           label,
-                          children,
+                          children, className, classNameLabel
                       }: {
     label: string
     children: React.ReactNode
+    className?: string
+    classNameLabel?: string
 }) => (
-    <div className="flex w-full">
-        <div className="w-fit min-w-[200px]">
+    <div className={`flex w-full ${className}`}>
+        <div className={`w-fit  sm:min-w-[200px] ${classNameLabel} `}>
         <dt className="text-gray-600">{label}</dt>
         </div>
         <dd className={'w-full'}>{children}</dd>
@@ -62,7 +64,6 @@ export function CotizacionForm ({
     /* handlers pequeños para mantener el código limpio */
     const handle = (field: keyof Draft) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
         onChange({ [field]: e.target.type === 'number' ? Number(e.target.value) : e.target.value })
-
     const [mostrarInputsNewDireccion, setMostrarInputsNewDireccion] = useState(false);
     const [nuevaDireccion, setNuevaDireccion] = useState('');
     const [nuevaComuna, setNuevaComuna] = useState('');
@@ -103,7 +104,8 @@ export function CotizacionForm ({
     }
 
     return (
-        <article className="bg-white rounded shadow px-8 py-6 space-y-4">
+        <article className="bg-white rounded-[10px] shadow px-8 py-6 space-y-4 min-h-[472px]
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
             <header className="flex justify-between">
                 <h2 className="text-2xl font-semibold text-sky-600">
                     {draft.id ? `Editar cotización #${draft.id}` : 'Nueva cotización'}
@@ -130,7 +132,7 @@ export function CotizacionForm ({
                     </select>
                 </DetalleLinea>
 
-                <DetalleLinea label="Dirección de despacho">
+                <DetalleLinea label="Dirección de despacho" className={'flex-wrap xl:flex-nowrap'}>
                     <div className={'flex gap-[5px] flex-wrap gap-4 flex-col max-w-fit'}>
                         <select className="border rounded px-2 py-1 max-w-fit">
                         {/* Aquí se deberían listar las direcciones del cliente */}
@@ -175,7 +177,7 @@ export function CotizacionForm ({
                             </div>
                         ):(
 
-                            <div className={'flex justify-center bg-red-50'}>
+                            <div className={'flex justify-center'}>
                     <Button onClick={()=>setMostrarInputsNewDireccion(true)} label={'+ Nueva dirección'} className="ml-2 bg-blue-600 text-white w-fit" />
                             </div>
                         )

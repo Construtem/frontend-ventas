@@ -90,6 +90,7 @@ export interface DBCotizacion {
     tipo_despacho: string;
     total:         number;
     descripcion:   string;
+    direccion?:      DireccionCliente; // opcional, si no se envía dirección
     /** Vacío = sin registrar | 'pendiente' | 'pagado' (ajusta si tu API envía otros) */
     estado_pago:   '' | 'pendiente' | 'pagado';
 

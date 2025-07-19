@@ -8,6 +8,7 @@ import Cotizacion from '@/components/Cotizacion';
 //import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
 import Bienvenida from "@/components/Bienvenida";
+import CotizacionesCreadas from "@/components/CotizacionesCreadas";
 
 
 
@@ -23,23 +24,23 @@ const Home: NextPage = () => {
 
     return (
         <div className="min-h-screen bg-gray-100 px-20px lg:px-0">
-            <div className="container mx-auto py-8 pt-[66px]">
-                <div className='flex justify-center gap-[40px] flex-col lg:flex-row '>
-                        <div className={"flex flex-col gap-4 px-[40px] sm:px-[0px]"}>
+            <div className="container mx-auto py-8 pt-[66px] flex flex-col gap-[20px]">
+                <div className='flex justify-center gap-[40px] flex-col lg:flex-row w-full'>
+                        <div className={"flex flex-col gap-4 px-[40px] sm:px-[0px] w-[40%]"}>
                             <Bienvenida/>
                             <Cliente/>
                         </div>
                     <Cotizacion/>
                     </div>
                 <div className="flex flex-col">
-                    <div className="flex w-full h-full bg-red-600">
+                    <div className="flex w-full h-full">
                         {
                             /* Aquí podrías agregar un componente de bienvenida o información adicional
                         <ProductTable />
                             * */
                         }
-                        {/******** AQUÍ IRÁ LA CARD DEL COSTO DE LA COTIZACIÓN *********/}
                     </div>
+                        <CotizacionesCreadas/>
                 </div>
                 {/*
 

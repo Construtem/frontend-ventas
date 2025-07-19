@@ -633,7 +633,7 @@ export default function Cliente() {
                                             dispatch({type: 'SET_CLIENT', payload: c.rut})
                                             setSearch('')
                                         }}
-                                        className="px-4 py-2 hover:bg-gray-100
+                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer
                                flex justify-between"
                                     >
                                         <span className="font-medium">{c.nombre}</span>
