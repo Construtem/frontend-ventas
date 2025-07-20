@@ -1,3 +1,4 @@
+/*
 import { useState, useEffect } from 'react'
 import { inventarioService, type ProductoConStock } from '@/services/apiService'
 
@@ -70,3 +71,4 @@ export const useProductos = () => {
     buscarProductosPorSucursal // Nueva función exportada
   }
 }
+*/

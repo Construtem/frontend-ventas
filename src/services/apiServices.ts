@@ -214,6 +214,22 @@ export interface ProductoInventario {
     total_stock_bodegas: number     // suma de stocks de bodegas
 }
 
+
+export interface Sucursal {
+    id: number
+    nombre: string
+    telefono: string
+    direccion: string
+    comuna: string
+    ciudad: string
+    tipo_id: number
+    tipo: {
+        id: number
+        nombre: string
+    }
+}
+
+
 /**
  * Historial de cotizaciones de un cliente por RUT.
  *
@@ -221,6 +237,18 @@ export interface ProductoInventario {
  * const historial = await clienteService.obtenerHistorialCotizaciones('11111111-1');
  */
 export const clienteService = {
+    async obtenerClientes(): Promise<DBCliente[]> {
+        const res = await fetch(`${API_BASE_URL}/api/clientes`, {
+            next: { revalidate: 60 } // ej. ISR en Next – ajústalo o bórralo si no usas Next 13+
+        });
+
+        if (!res.ok) {
+            throw new Error(`Error ${res.status} al obtener clientes`);
+        }
+
+        /** Type assert: forzamos a que el JSON cumpla DBCliente[] */
+        return (await res.json()) as DBCliente[];
+    },
     async obtenerHistorialCotizaciones(rut: string): Promise<DBCotizacion[]> {
         const res = await fetch(`${API_BASE_URL}/api/cotizaciones/cliente/${rut}/historial`, {
             // Si la API requiere HEADERS / Auth añádelos aquí
@@ -283,8 +311,20 @@ export const clienteService = {
     /* (mantén aquí otros métodos: obtenerClientes(), crearCliente(), etc.) */
 };
 
+export const sucursalService = {
+    async obtenerSucursales(): Promise<Sucursal[]> {
+        const res = await fetch(`${API_BASE_URL}/api/sucursales`, {
+            next: { revalidate: 60 } // ej. ISR en Next – ajústalo o bórralo si no usas Next 13+
+        });
 
+        if (!res.ok) {
+            throw new Error(`Error ${res.status} al obtener sucursales`);
+        }
 
+        /** Type assert: forzamos a que el JSON cumpla Sucursal[] */
+        return (await res.json()) as Sucursal[];
+    }
+}
 
 export async function obtenerProductosInventario (
     sucursalId: number,

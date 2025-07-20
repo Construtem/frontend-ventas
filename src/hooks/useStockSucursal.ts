@@ -1,3 +1,4 @@
+/*
 import { useState, useCallback } from 'react'
 import { stockService, StockSucursal } from '@/services/apiService'
 
@@ -100,3 +101,4 @@ export const useStockSucursal = (sucursalId: number): UseStockSucursalReturn => 
     recargarStock
   }
 }
+*/

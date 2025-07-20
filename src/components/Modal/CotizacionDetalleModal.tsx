@@ -77,7 +77,7 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                         </tr>
                         </thead>
                         <tbody>
-                        {items.map(it => (
+                        {items?.map(it => (
                             <tr key={it.producto_id} className='border-b border-white/10'>
                                 <td className='py-1'>{it.producto.sku}</td>
                                 <td className='py-1'>{it.producto.nombre}</td>
