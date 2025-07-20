@@ -302,3 +302,40 @@ export async function obtenerProductosInventario (
     }
     return res.json() as Promise<InventarioResponse>
 }
+
+
+
+export async function crearCotizacion(body: {
+    rut_cliente:   string;
+    user_id:       string;
+    tipo_despacho: string;
+    costo_envio:   number;
+    descripcion?:  string;
+}): Promise<{ id: number }> {
+    const r = await fetch(`${API_BASE_URL}/api/cotizaciones`, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify(body),
+    });
+    if (!r.ok) throw new Error('No se pudo crear la cotización');
+    return r.json();                // { id: <nuevoId>, ... }
+}
+
+export async function crearItemCotizacion(
+    cotizacionId: number,
+    item: {
+        producto_id: string;
+        sucursal_id: number;
+        cantidad:    number;
+    },
+): Promise<void> {
+    const r = await fetch(
+        `${API_BASE_URL}/api/cotizaciones/${cotizacionId}/items`,
+        {
+            method : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body   : JSON.stringify(item),
+        },
+    );
+    if (!r.ok) throw new Error('No se pudo agregar ítem');
+}

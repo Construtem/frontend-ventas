@@ -133,7 +133,7 @@ const ProductTable: React.FC<ProductTableProps> = () => {
                         <table className="w-full text-sm rounded-[10px]  shadow-[0_0_2px_rgba(0,0,0,0.25)] border-b-[2px] border-gray-200 overflow-hidden">
                             <thead>
                                 <tr className="text-left font-semibold text-gray-700 border-b border-gray-200 bg-gray-100" style={{background:'#F4F5F9'}}>
-                                    <th className="border border-gray-300 px-3 py-2 text-left">SKU</th>
+                                    <th className="border border-gray-300 px-3 py-2 text-center">SKU</th>
                                     <th className="border border-gray-300 px-3 py-2 text-left">Nombre</th>
                                     <th className="border border-gray-300 px-3 py-2 text-center">Precio</th>
                                     <th className="border border-gray-300 px-3 py-2 text-center">Descuento</th>
