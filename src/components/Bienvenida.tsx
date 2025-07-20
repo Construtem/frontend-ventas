@@ -1,6 +1,6 @@
 'use client'
 // src/components/Bienvenida.tsx
-import React from 'react'
+import React, {useEffect} from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { sucursalService, Sucursal } from '@/services/apiService'
@@ -15,9 +15,35 @@ export default function Bienvenida() {
         staleTime: 1000 * 60 * 5, // opcional: cache de 5 minutos
     })
 
+// Convertir el string JSON a objeto
+
+    const [datosUsuario, setDatosUsuario] = React.useState({
+        name: '',
+        email: '',
+    })
 
 
-
+    useEffect(() => {
+        if (!state.usuario?.email || !state.usuario?.nombre) {
+            try {
+                const userString = localStorage.user;
+                const usuario = JSON.parse(userString);
+                setDatosUsuario({
+                    name: usuario.name,
+                    email: usuario.email,
+                });
+                dispatch({
+                    type: 'ADD_USER_TO_CONTEXT',
+                    payload: {
+                        nombre: usuario.name,
+                        email: usuario.email,
+                    },
+                });
+            } catch (e) {
+                console.error('Error al parsear usuario:', e);
+            }
+        }
+    }, [dispatch, state.usuario]);
 
     return (
         <div>
@@ -28,11 +54,11 @@ export default function Bienvenida() {
                 Bienvenido
             </h1>
                 <h2 className="font-semibold font-montserrat text-[24px]">
-                    Nicolás Jiménez
+                    {datosUsuario.name}
                 </h2>
 
                 <div className="flex gap-[20px] flex-wrap items-baseline justify-center sm:justify-start">
-                    <p className="font-montserrat">20.474.207-3</p>
+                    <p className="font-montserrat">{datosUsuario.email}</p>
                     <select
                         className="border rounded px-2 py-1"
                         value={state.sucursalId ?? ''}

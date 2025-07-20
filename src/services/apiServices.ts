@@ -143,6 +143,7 @@ export interface DBCotizacion {
     descripcion:   string
     direccion?:    DireccionCliente      | undefined
 
+
     /** '' = sin registrar | 'pendiente' | 'pagado' */
     estado_pago:   '' | 'pendiente' | 'pagado'
 

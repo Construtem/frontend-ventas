@@ -60,7 +60,7 @@ export function CotizacionView ({
                             : 'Retiro en tienda'
                     }
                 />
-                <DetalleLinea label="Costo envío"    value={money(quote.costo_envio)} />
+                <DetalleLinea label="Costo envío"    value={money(Number(quote.costo_envio))} />
                 {
                     /*
                     *

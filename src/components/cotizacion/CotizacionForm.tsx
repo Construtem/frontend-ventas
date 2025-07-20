@@ -10,6 +10,8 @@ import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { useAddressCheck } from '@/hooks/useAddressCheck'
 import { useMutation, useQuery } from '@tanstack/react-query'
 
+
+
 /* ---------- pequeño sub-componente para alinear filas ---------- */
 const DetalleLinea = ({
                           label,
@@ -86,7 +88,7 @@ export const CotizacionForm: React.FC<Props> = ({
         setEsValida(res.ok)
     }, [check, nuevaDireccion, nuevaComuna, nuevaCiudad])
 
-    const { mutate: guardarDireccion, isLoading: guardandoDir } = useMutation({
+    const { mutate: guardarDireccion, isPending: guardandoDir } = useMutation({
         mutationFn: clienteService.crearDireccion,
         onSuccess: () => {
             setMostrarNuevaDir(false)

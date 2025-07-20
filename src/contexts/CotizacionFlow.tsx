@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 
 import {
-    DBCotizacion,
+    DBCotizacion, DBUsuario,
     DraftProducto,
 } from '@/services/apiServices'
 
@@ -18,7 +18,7 @@ import {
 export type CotizacionState = {
     /* Paso 1 – Sucursal */
     sucursalId: number | null
-
+    usuario: Partial<DBUsuario> | null
     /* Tabla de productos elegidos */
     productos: DraftProducto[]
 
@@ -66,6 +66,7 @@ export type CotizacionAction =
 
     | { type:'OPEN_MODAL' }
     | { type:'CLOSE_MODAL' }
+    | {type: 'ADD_USER_TO_CONTEXT'; payload:Partial<DBUsuario> }
 
     | { type:'OPEN_CREATE_CLIENT_MODAL' }
     | { type:'CLOSE_CREATE_CLIENT_MODAL' }
@@ -80,6 +81,7 @@ export type CotizacionAction =
  * ───────────────────────────────── */
 const initialState: CotizacionState = {
     sucursalId:           null,
+    usuario: null,
     productos:            [],
     clienteRut:           null,
     cotizacionId:         null,
@@ -147,6 +149,7 @@ function cotizacionReducer (
                 cotizacionSeleccionada: action.payload,
                 isCreating:false,
                 draftQuote:null,
+                usuario:{}
             }
 
         /* Tabla de productos */
@@ -182,6 +185,12 @@ function cotizacionReducer (
             const fuente = [...state.localQuotes, ...(action.historial ?? [])]
             const seleccionada = fuente.find(c => c.id === id) ?? null
             return { ...state, cotizacionId:id, cotizacionSeleccionada:seleccionada }
+        }
+        case "ADD_USER_TO_CONTEXT":{
+            return {
+                ...state,
+                usuario: action.payload,
+            }
         }
 
         /* Otros casos (modales, edición)… */
