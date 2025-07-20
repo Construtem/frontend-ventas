@@ -3,7 +3,7 @@
 import React, {useEffect} from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
-import { sucursalService, Sucursal } from '@/services/apiService'
+import { sucursalService, Sucursal } from '@/services/apiServices'
 
 export default function Bienvenida() {
     const { state, dispatch } = useCotizacionFlow()

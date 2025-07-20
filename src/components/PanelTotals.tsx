@@ -70,7 +70,7 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                 </button>
                 <a
                     unselectable="on"
-                    href={cotizacionId ? `${BASE_URL_FACTURACION_FRONTEND}/${cotizacionId}` : undefined}
+                    href={cotizacionId ? `${BASE_URL_FACTURACION_FRONTEND}/checkout/${cotizacionId}` : undefined}
                     onClick={e => {
                         if (!cotizacionId) e.preventDefault();   // impide navegar sin ID
                     }}

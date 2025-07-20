@@ -1,6 +1,7 @@
+
 'use client'
 import { useState, useEffect } from 'react'
-import { sucursalService, type Sucursal } from '@/services/apiService'
+import { sucursalService, type Sucursal } from '@/services/apiServices'
 
 export const useSucursales = () => {
   const [sucursales, setSucursales] = useState<Sucursal[]>([])

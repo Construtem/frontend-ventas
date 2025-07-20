@@ -103,12 +103,6 @@ const ProductTable: React.FC<ProductTableProps> = () => {
         <>
             <div className="bg-white  p-4 rounded-[10px] w-full
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
-                {/* Mostrar errores */}
-                {errorSucursales && (
-                    <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
-                        <strong>Error:</strong> {errorSucursales}
-                    </div>
-                )}
 
                 {/* Header */}
                 <div className="mb-9 flex flex-col gap-[20px] sm:items-baseline items-center ">
