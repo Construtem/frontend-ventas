@@ -97,9 +97,9 @@ export default function CotizacionesCreadas() {
                       w-full gap-[20px]">
             <h2 className={'font-semibold font-montserrat text-[24px]'}>Cotizaciones Creadas</h2>
 
+
             {loading && <div className="text-gray-500">Cargando...</div>}
             {error && <div className="text-red-500">{error}</div>}
-
             {!loading && !error && (
                 <table className="w-full text-sm rounded-[10px] overflow-hidden border-b-[2px] border-gray-200 shadow-[0_0_2px_rgba(0,0,0,0.25)]">
                     <thead>
@@ -113,7 +113,8 @@ export default function CotizacionesCreadas() {
                     </tr>
                     </thead>
                     <tbody>
-                    {historial.map(c => (
+
+                    {historial && historial.map(c => (
                         <tr key={c.id} className={'transition-all duration-400 hover:scale-[1.005] ease-in-out hover:bg-gray-50 cursor-pointer'}>
                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] '}>{c.id}</td>
                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] '}>{c.cliente.nombre}</td>
