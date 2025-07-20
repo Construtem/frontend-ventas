@@ -134,6 +134,16 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                 </tr>
                                 </thead>
 
+                                {!rows?(
+                                    <tbody>
+                                        <tr>
+                                            <td colSpan={9} className="px-2 py-4 text-center text-gray-500">
+                                                No existen productos en inventario.
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                ):(
+
                                 <tbody>
                                 {rows.map(p => {
                                     const origen   = selOrigen[p.sku] ?? 'Sucursal'
@@ -247,6 +257,7 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                     )
                                 })}
                                 </tbody>
+                                )}
                             </table>
                         </div>
                     )}
