@@ -76,6 +76,7 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
 
     const onChangeRut = (v: string) => {
         const clean = cleanRut(v)
+        if (clean.length > 9) return
         setForm(f => ({ ...f, rut: formatRut(clean) }))
     }
 

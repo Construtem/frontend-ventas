@@ -553,6 +553,7 @@ import { clienteService, Cliente as ClienteType } from '@/services/apiService'
 import {useMemo, useState} from "react";
 import {ClienteModal} from "@/components/Modal/ClienteModal";
 import Button from "@/components/Button";
+import { useRutValidation } from "@/components/ValidadorRut";
 
 export default function Cliente() {
     const { state, dispatch } = useCotizacionFlow()
@@ -567,19 +568,37 @@ export default function Cliente() {
         enabled:    !!sucursalId,
     })
 
-    const [search, setSearch] = useState('')
+    // Usar hook de validación de RUT
+    const {
+        rut: search,
+        isValid,
+        showError,
+        handleRutChange,
+        formatRut,
+        setShowError,
+        setRut
+    } = useRutValidation('');
+
+    // Detectar si es búsqueda por nombre o RUT
+    const isRutMode = search.length > 0 && /^\d/.test(search[0]);
+
+    // Filtro inteligente
     const clientesFiltrados = useMemo(() => {
-        const termino = search.trim().toLowerCase()
-        if (!termino) return []
+        const termino = search.trim().toLowerCase();
+        if (!termino) return [];
+        if (isRutMode) {
+            return clientes.filter(c =>
+                c.rut.toLowerCase().includes(termino)
+            );
+        }
         return clientes.filter(c =>
-            c.nombre.toLowerCase().includes(termino) ||
-            c.rut.toLowerCase().includes(termino)
-        )
-    }, [search, clientes])
+            c.nombre.toLowerCase().includes(termino)
+        );
+    }, [search, clientes, isRutMode]);
 
     const clienteSeleccionado = clientes.find(
         c => c.rut === state.clienteRut
-    )
+    );
 
     return (
         <div className="bg-white px-[40px] py-[10px] rounded-[10px]
@@ -612,11 +631,46 @@ export default function Cliente() {
                     {/* Input de búsqueda */}
                     <input
                         type="text"
-                        placeholder="Nombre o RUT"
+                        placeholder="Ingresa RUT o nombre del cliente"
                         value={search}
-                        onChange={state.sucursalId?(e) => setSearch(e.target.value):()=>{return null}}
-                        className="outline-none w-full placeholder-gray-500 text-gray-800"
+                        onChange={e => {
+                            const value = e.target.value;
+                            if (value === "") {
+                                handleRutChange("");
+                                setShowError(false);
+                                return;
+                            }
+                            // Si primer caracter es letra, solo letras y espacios
+                            if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ]/.test(value[0])) {
+                                if (/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(value)) {
+                                    // Actualiza el valor directamente (sin validación de RUT)
+                                    setRut(value);
+                                    setShowError(false);
+                                }
+                            } else {
+                                // Si primer caracter es número, solo formato RUT
+                                const rutSinFormato = value.replace(/[\.\-]/g, "");
+                                if (rutSinFormato.length <= 9) {
+                                    handleRutChange(value);
+                                }
+                            }
+                        }}
+                        onBlur={formatRut}
+                        disabled={!state.sucursalId}
+                        className={`outline-none w-full placeholder-gray-500 text-gray-800 
+                            ${!state.sucursalId ? 'bg-gray-100 cursor-not-allowed' : ''}
+                            ${showError ? 'text-red-600' : ''}`}
                     />
+
+                    {/* Badge de modo */}
+                    {search && (
+                        <span className={`text-xs px-2 py-1 rounded ml-2 flex-shrink-0 
+                            ${isRutMode 
+                                ? 'bg-blue-100 text-blue-700' 
+                                : 'bg-green-100 text-green-700'}`}>
+                            {isRutMode ? 'RUT' : 'Nombre'}
+                        </span>
+                    )}
 
                     {/* Desplegable de sugerencias */}
                     {search.trim() !== '' && (
@@ -631,7 +685,7 @@ export default function Cliente() {
                                         key={c.rut}
                                         onClick={() => {
                                             dispatch({type: 'SET_CLIENT', payload: c.rut})
-                                            setSearch('')
+                                            handleRutChange('')
                                         }}
                                         className="px-4 py-2 hover:bg-gray-100 cursor-pointer
                                flex justify-between"
@@ -650,7 +704,16 @@ export default function Cliente() {
                         </ul>
                     )}
                 </div>
-                    <span className={`text-red-400 font-light ${state.sucursalId?'hidden':'inline'}`}>Seleccionar una sucursal primero *</span>
+                {/* Mensajes de error */}
+                {showError && isRutMode && (
+                    <span className="text-red-400 font-light text-sm mt-1">RUT inválido</span>
+                )}
+                {!state.sucursalId && (
+                    <span className="text-red-400 font-light">Seleccionar una sucursal primero *</span>
+                )}
+                {isRutMode && isValid && (
+                    <span className="text-green-600 font-light text-sm mt-1">✓ RUT válido</span>
+                )}
             </div>
             </div>
             {clienteSeleccionado ? (
