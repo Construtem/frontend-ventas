@@ -35,7 +35,7 @@ interface Product {
 const ProductTable: React.FC<ProductTableProps> = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     // Cargar sucursales
-    const { sucursales, error: errorSucursales } = useSucursales()
+    const { sucursales } = useSucursales()
 
     // Función para formatear moneda
     const formatCurrency = (amount: number): string => {
