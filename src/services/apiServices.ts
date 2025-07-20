@@ -339,3 +339,8 @@ export async function crearItemCotizacion(
     );
     if (!r.ok) throw new Error('No se pudo agregar ítem');
 }
+export async function obtenerTodasLasCotizaciones(): Promise<DBCotizacion[]> {
+    const res = await fetch(`${API_BASE_URL}/api/cotizaciones`);
+    if (!res.ok) throw new Error(`Error ${res.status} al obtener cotizaciones`);
+    return (await res.json()) as DBCotizacion[];
+}
