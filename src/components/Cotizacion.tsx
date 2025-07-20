@@ -1,60 +1,160 @@
 'use client'
-
+import { useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import Button from '@/components/Button'
+import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
+import { clienteService, DBCotizacion } from '@/services/apiServices'
+import { CotizacionView } from '@/components/cotizacion/CotizacionView'
+import { CotizacionForm } from '@/components/cotizacion/CotizacionForm'
+import CotizacionDetalleModal from '@/components/Modal/CotizacionDetalleModal'
 
 export default function Cotizacion() {
+    /* ----- contexto global ----- */
+    const { state, dispatch } = useCotizacionFlow()
+    const {
+        clienteRut,
+        cotizacionId,
+        draftQuote,
+        direccionId,
+        isEditing,
+        isCreating,
+        showModal,
+    } = state
 
+    /* ----- historial remoto ----- */
+    const {
+        data: historial = [],
+        isLoading,
+        isError,
+        error,
+    } = useQuery<DBCotizacion[]>({
+        queryKey: ['historial', clienteRut],
+        queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
+        enabled: !!clienteRut,
+    })
+
+    /* ----- combinar locales + remotas ----- */
+    const allQuotes = [...state.localQuotes, ...historial]
+
+    const cotizacionActual = useMemo(
+        () => allQuotes.find((c) => c.id === cotizacionId) ?? null,
+        [allQuotes, cotizacionId],
+    )
+
+    /* ----- callbacks ----- */
+    const handleDraftChange = (patch: Partial<DBCotizacion>) =>
+        dispatch({ type: 'UPDATE_DRAFT', payload: patch })
+
+    /** seleccionar cabecera existente */
+    const handleSelectQuote = (val: string) => {
+        const id = Number(val) || 0
+        dispatch({ type: 'SET_QUOTE', payload: id })
+    }
+
+    /** guardar cabecera local sin items */
+    const handleSaveDraft = () => {
+        if (!draftQuote) return
+        const provisional: DBCotizacion = {
+            ...draftQuote,
+            id: Date.now() * -1,
+            fecha_crea: new Date().toISOString(),
+            estado: 'pendiente',
+            estado_pago: 'pendiente',
+            direccionId: direccionId ?? null,
+            cliente: {} as any,
+            usuario: {} as any,
+            items: [],
+            total_items: 0,
+            total_precio: 0,
+        }
+        dispatch({ type: 'SAVE_DRAFT_OK', payload: provisional })
+    }
+
+    const handleCancel = () =>
+        dispatch(
+            isCreating
+                ? { type: 'CANCEL_NEW_QUOTE' }
+                : { type: 'CANCEL_EDIT_QUOTE' },
+        )
+
+    /* ----- render ----- */
     return (
-        <div className="mb-4 ml-7 bg-white border border-gray-300 rounded-lg w-[770]">
+        <>
+            <div className="px-[40px] sm:px-0 w-full">
+                {/* cabecera */}
+                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full">
+                    <h1 className="font-montserrat font-semibold text-[32px]">
+                        Detalle cotización
+                    </h1>
 
-            <div className="ml-8 mr-8">
-            
-                <div className="flex mt-3">
+                    <div className="flex gap-[10px]">
+                        {allQuotes.length > 0 && (
+                            <select
+                                disabled={isLoading}
+                                className="border rounded px-2 py-1 min-w-[240px]"
+                                value={cotizacionId ?? ''}
+                                onChange={(e) => handleSelectQuote(e.target.value)}
+                            >
+                                <option value="">Seleccionar cotización</option>
+                                {allQuotes.map((q) => (
+                                    <option key={q.id} value={q.id}>
+                                        #{q.id} — {new Date(q.fecha_crea).toLocaleDateString()}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
 
-                    <div className="mb-2 text-lg text-[#5B83C5] font-bold flex gap-2">
-                        Cotización #123456
+                        <Button
+                            label="+ Nueva"
+                            className="bg-[#F59243] hover:bg-[#d98543] text-white"
+                            onClick={() => dispatch({ type: 'START_NEW_QUOTE' })}
+                        />
                     </div>
+                </header>
 
-                    {/*Boton Estado*/}
-                    <div className="ml-107">
-                    <button className="px-3 py-1 mr-2 font-bold text-black rounded bg-[#F1F6EF]">
-                        Aprobada
-                    </button>
-                    </div>
+                {/* mensajes / loaders */}
+                {isLoading && (
+                    <p className="text-center text-gray-500 py-10">Cargando…</p>
+                )}
+                {isError && (
+                    <p className="text-center text-rose-600 py-10">
+                        {(error as Error).message}
+                    </p>
+                )}
 
-                </div>        
+                {/* vista “readonly” */}
+                {!isCreating && !isEditing && cotizacionActual && (
+                    <CotizacionView
+                        quote={cotizacionActual}
+                        onSeeDetail={() => dispatch({ type: 'OPEN_MODAL' })}
+                    />
+                )}
 
-                <table className="w-full text-left">
-                    <thead>
-                        <tr className="">
-                            <th className="border-t border-[#D1D5DC] p-2">Nombre</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Nombre cotización</td>
-                        </tr>
-                    </thead>
-                    <tbody> 
-                        <tr>
-                            <th className="border-t border-[#D1D5DC] p-2">Descripción</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Lorem ipsum dolor sit amet consectetur, adipisicing elit. Et optio adipisci, a fugiat nam eum quo minima iusto facilis, nobis maiores quas, aliquid hic dolorum accusamus laudantium quasi nemo ipsum!</td>                                                      
-                        </tr>
-                        <tr>
-                            <th className="border-t border-[#D1D5DC] p-2">Tipo de Envío</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Retiro tienda</td>
-                        </tr>
-                        <tr>
-                            <th className="border-t border-[#D1D5DC] p-2">Dirección</th>
-                            <td className="border-t border-[#D1D5DC] p-2">Dirección de ejemplo</td>
-                        </tr>
-                    </tbody>
-                </table>
-                
-                <div className="my-7 flex justify-end ">
-                <button className="font-bold px-3 py-1 text-white rounded bg-[#2563B6] hover:bg-[#1F5399] cursor-pointer"
-                        onClick={() => {}}>
-                        Editar información
-                </button>
-                </div>
+                {!isLoading && clienteRut && allQuotes.length === 0 && (
+                    <p className="text-center text-gray-500">
+                        No hay cotizaciones disponibles. Crea una nueva.
+                    </p>
+                )}
 
+                {/* formulario edición / alta */}
+                {(isCreating || isEditing) && draftQuote && (
+                    <CotizacionForm
+                        draft={draftQuote}
+                        onChange={handleDraftChange}
+                        onSave={handleSaveDraft}
+                        onCancel={handleCancel}
+                    />
+                )}
             </div>
 
-        </div>
-    );
+            {/* modal detalle */}
+            {cotizacionActual && (
+                <CotizacionDetalleModal
+                    open={showModal}
+                    onClose={() => dispatch({ type: 'CLOSE_MODAL' })}
+                    data={cotizacionActual}
+                />
+            )}
+        </>
+    )
 }

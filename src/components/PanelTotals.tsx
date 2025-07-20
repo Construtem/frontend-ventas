@@ -4,20 +4,24 @@ import React from 'react'
 interface PanelTotalsProps {
     quotation: {
         totalProductosNeto: number
-        totalDespacho: number
-        totalDescuento: number
+        totalDespacho:     number
+        totalDescuento:    number
         totalProductosIVA: number
-        totalCotizacion: number
+        totalCotizacion:   number
     }
+    cotizacionId?: number        // ← NUEVO (opcional)
     onGuardar?: () => void
-    onPagar?: () => void
+    onPagar?:   () => void
 }
 
-const PanelTotals: React.FC<PanelTotalsProps> = ({ 
-    quotation, 
-    onGuardar, 
-    onPagar 
+const PanelTotals: React.FC<PanelTotalsProps> = ({
+    quotation,
+    onGuardar,
+    onPagar,
+    cotizacionId,
 }) => {
+    const BASE_URL_FACTURACION_FRONTEND = process.env.NEXT_PUBLIC_FRONT_FACTURACION || ' https://facturacion.tssw.cl'
+
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
             minimumFractionDigits: 0,
@@ -26,7 +30,8 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
     }
 
     return (
-        <div className="bg-white p-2 w-[280px]">
+        <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
             {/* Panel de totales */}
             <div className="space-y-3 mb-4">
                 <div className="flex justify-between items-center">
@@ -45,9 +50,9 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                     <span className="text-sm">Iva 19%</span>
                     <span className="text-sm font-bold">{formatCurrency(quotation.totalProductosIVA - quotation.totalProductosNeto)}</span>
                 </div>
-                
+
                 <hr className="my-3 border-gray-300" />
-                
+
                 <div className="flex justify-between items-center">
                     <span className="text-lg font-bold">Total</span>
                     <span className="text-lg font-bold">{formatCurrency(quotation.totalCotizacion)}</span>
@@ -56,20 +61,32 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
 
             {/* Botones lado a lado */}
             <div className="flex gap-2">
-                <button 
+                <button
                     onClick={onGuardar}
-                    className="flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors hover:bg-blue-700" 
-                    style={{background:'#2563B6'}}
+                    className="flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors hover:bg-blue-700"
+                    style={{background: '#2563B6'}}
                 >
                     Guardar
                 </button>
-                <button 
-                    onClick={onPagar}
-                    className="flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer hover:bg-orange-600" 
-                    style={{background:'#F59243'}}
+                <a
+                    unselectable="on"
+                    href={cotizacionId ? `${BASE_URL_FACTURACION_FRONTEND}/${cotizacionId}` : undefined}
+                    onClick={e => {
+                        if (!cotizacionId) e.preventDefault();   // impide navegar sin ID
+                    }}
                 >
-                    Pagar
-                </button>
+                    <button
+                        disabled={!cotizacionId}                 // bloquea el click en el botón
+                        className={`flex-1 text-white py-2 px-4 text-sm font-bold rounded
+                        
+      ${!cotizacionId
+                            ? 'bg-gray-200 cursor-not-allowed'
+                            : 'bg-[#F59243] hover:bg-orange-600 cursor-pointer'}`}
+                        onClick={onPagar}
+                    >
+                        Pagar
+                    </button>
+                </a>
             </div>
         </div>
     )

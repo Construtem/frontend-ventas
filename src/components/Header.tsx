@@ -1,6 +1,7 @@
 'use client';
 import Image from 'next/image';
 import logo from '@/styles/images/contrutem.png';
+import Link from 'next/link';
 
 interface HeaderProps {
   onToggleSidebar?: () => void;
@@ -29,7 +30,9 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
               </button>
           )}
           <div className="flex items-center w-[140px] ml-4">
+              <Link href={'/'}>
           <Image src={logo} alt="ConstrUTEM Logo" className="max-h-20 pl-4 object-contain" />
+              </Link>
           </div>
         </div>
       </header>
