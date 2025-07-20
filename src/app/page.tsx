@@ -30,7 +30,7 @@ const Home: NextPage = () => {
                             </div>
                             </div>
                 
-                        <div className='flex'>
+                        <div className='flex flex-col md:flex-row w-full max-w-screen-lg'>
                         <div>
                             <Vendedor />
                             <Cliente  />
