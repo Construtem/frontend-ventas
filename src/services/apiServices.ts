@@ -301,3 +301,9 @@ export async function obtenerProductosInventario (
     }
     return res.json() as Promise<InventarioResponse>
 }
+
+export async function obtenerTodasLasCotizaciones(): Promise<DBCotizacion[]> {
+    const res = await fetch(`${API_BASE_URL}/api/cotizaciones`);
+    if (!res.ok) throw new Error(`Error ${res.status} al obtener cotizaciones`);
+    return (await res.json()) as DBCotizacion[];
+}
