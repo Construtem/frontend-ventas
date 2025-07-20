@@ -135,10 +135,10 @@ export interface DBCotizacion {
     fecha_crea:    string                // ISO 8601
     direccionId:   number | null
     estado:        'aprobada' | 'rechazada' | 'pendiente'
-    costo_envio:   number
-    rut_cliente:   string
-    user_id:       string
-    tipo_despacho: string
+    costo_envio?:   number
+    rut_cliente?:   string
+    user_id?:       string
+    tipo_despacho?: string
     total:         number
     descripcion:   string
     direccion?:    DireccionCliente      | undefined
@@ -183,6 +183,35 @@ export interface CreateClientePayload {
     tipo_id:      1 | 2
 }
 
+export interface InventarioResponse {
+    page:             number
+    limit:            number
+    total_items:      number
+    total_pages:      number
+    sucursal_id:      number
+    productos:        ProductoInventario[]
+}
+export interface ProductoInventario {
+    sku:         string
+    nombre:      string
+    descripcion: string
+    precio:      number
+
+    // stock / descuento de la sucursal elegida
+    stock_sucursal:      number
+    descuento_sucursal:  number
+
+    /* Bodegas adicionales que tienen stock de este SKU          */
+    bodegas: {
+        sucursal_id: number
+        nombre:      string
+        tipo_id:     number           // 1 = Bodega, 2 = Tienda  (según tu BD)
+        stock:       number
+        descuento:   number
+    }[] | null
+
+    total_stock_bodegas: number     // suma de stocks de bodegas
+}
 
 /**
  * Historial de cotizaciones de un cliente por RUT.
@@ -254,35 +283,6 @@ export const clienteService = {
 };
 
 
-export interface InventarioResponse {
-    page:             number
-    limit:            number
-    total_items:      number
-    total_pages:      number
-    sucursal_id:      number
-    productos:        ProductoInventario[]
-}
-export interface ProductoInventario {
-    sku:         string
-    nombre:      string
-    descripcion: string
-    precio:      number
-
-    // stock / descuento de la sucursal elegida
-    stock_sucursal:      number
-    descuento_sucursal:  number
-
-    /* Bodegas adicionales que tienen stock de este SKU          */
-    bodegas: {
-        sucursal_id: number
-        nombre:      string
-        tipo_id:     number           // 1 = Bodega, 2 = Tienda  (según tu BD)
-        stock:       number
-        descuento:   number
-    }[] | null
-
-    total_stock_bodegas: number     // suma de stocks de bodegas
-}
 
 
 export async function obtenerProductosInventario (

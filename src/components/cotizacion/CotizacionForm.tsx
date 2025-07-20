@@ -1,197 +1,268 @@
 'use client'
-import {ChangeEvent, useEffect, useState} from 'react'
-import Button              from '@/components/Button'
-import {clienteService, DBCotizacion, DireccionCliente} from '@/services/apiServices'
-import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
-import {useAddressCheck} from "@/hooks/useAddressCheck";
-import {useMutation} from "@tanstack/react-query";
+import { ChangeEvent, useCallback, useEffect, useState } from 'react'
+import Button from '@/components/Button'
+import {
+    clienteService,
+    DBCotizacion,
+    DireccionCliente,
+} from '@/services/apiServices'
+import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
+import { useAddressCheck } from '@/hooks/useAddressCheck'
+import { useMutation, useQuery } from '@tanstack/react-query'
 
-type Draft = Partial<DBCotizacion>
-interface Props {
-    draft: Draft
-    onChange: (patch: Draft) => void
-    onSave:   () => void
-    onCancel: () => void
-}
-
+/* ---------- pequeño sub-componente para alinear filas ---------- */
 const DetalleLinea = ({
                           label,
-                          children, className, classNameLabel
+                          children,
+                          className,
+                          classNameLabel,
                       }: {
     label: string
     children: React.ReactNode
     className?: string
     classNameLabel?: string
 }) => (
-    <div className={`flex w-full ${className}`}>
-        <div className={`w-fit  sm:min-w-[200px] ${classNameLabel} `}>
-        <span className="text-gray-600">{label}</span>
+    <div className={`flex w-full ${className ?? ''}`}>
+        <div
+            className={`w-fit sm:min-w-[200px] ${classNameLabel ?? ''}`}
+        >
+            <span className="text-gray-600">{label}</span>
         </div>
-        <div className={'w-full'}>{children}</div>
+        <div className="w-full">{children}</div>
     </div>
 )
 
-export function CotizacionForm ({
-                                    draft,
-                                    onChange,
-                                    onSave,
-                                    onCancel,
-                                }: Props) {
-    const { check } = useAddressCheck()
-    const { state } = useCotizacionFlow();
-    const [direccion, setDireccion] = useState<DireccionCliente[]>([]);
-    const [err, setError] = useState<string | null>(null);
+/* ---------- tipos internos ---------- */
+type Draft = Partial<DBCotizacion> & {
+    tipo_despacho?: 'a domicilio' | 'retiro tienda'
+    direccion_id?: number | null
+}
+interface Props {
+    draft: Draft
+    onChange: (patch: Partial<Draft>) => void
+    onSave: () => void
+    onCancel: () => void
+}
 
-    useEffect(() => {
-        if (!state.clienteRut) return;
+/* ===================================================================== */
+export const CotizacionForm: React.FC<Props> = ({
+                                                    draft,
+                                                    onChange,
+                                                    onSave,
+                                                    onCancel,
+                                                }) => {
+    const { state } = useCotizacionFlow()
 
-        async function cargarDireccion() {
-            try {
-                const data = await clienteService.obtenerDireccionDelCliente(state.clienteRut);
-                setDireccion(data);
-            } catch (err: unknown) {
-                console.error("Error al obtener dirección del cliente:", err);
-                setError("No se pudo cargar la dirección del cliente");
-            }
-                console.log(err);
-        }
-
-        cargarDireccion();
-    }, [state.clienteRut]);
-
-/*
-* */
-    /* handlers pequeños para mantener el código limpio */
-    const handle = (field: keyof Draft) => (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
-        onChange({ [field]: e.target.type === 'number' ? Number(e.target.value) : e.target.value })
-    const [mostrarInputsNewDireccion, setMostrarInputsNewDireccion] = useState(false);
-    const [nuevaDireccion, setNuevaDireccion] = useState('');
-    const [nuevaComuna, setNuevaComuna] = useState('');
-    const [nuevaCiudad] = useState('Santiago');
-    const [esValida, setEsValida] = useState(false);
-
-
-    async function handleValidarDireccion() {
-        const res = await check(nuevaDireccion, nuevaComuna, nuevaCiudad)
-
-        if (!res.ok) {
-            console.log('error')
-            setEsValida(false)
-            return
-        }
-        console.log('Dirección OK', res.formatted, res.placeId)
-        setEsValida(true)
-
-    }
+    /* ───────── Direcciones existentes del cliente ───────── */
     const {
-        mutate:  guardarDireccion,
-    } = useMutation({
+        data: direccion = [],
+        isLoading: dirLoading,
+        error: dirError,
+        refetch: refetchDir,
+    } = useQuery<DireccionCliente[]>({
+        queryKey: ['direcciones', state.clienteRut],
+        queryFn: () =>
+            clienteService.obtenerDireccionDelCliente(state.clienteRut!),
+        enabled: !!state.clienteRut,
+    })
+
+    /* si nunca se ha elegido una dirección, fijamos la primera */
+    useEffect(() => {
+        if (direccion.length && !draft.direccion_id) {
+            onChange({ direccion_id: direccion[0].id })
+        }
+    }, [direccion, draft.direccion_id, onChange])
+
+    /* ───────── Lógica de “nueva dirección” ───────── */
+    const { check } = useAddressCheck()
+    const [mostrarNuevaDir, setMostrarNuevaDir] = useState(false)
+    const [nuevaDireccion, setNuevaDireccion] = useState('')
+    const [nuevaComuna, setNuevaComuna] = useState('')
+    const nuevaCiudad = 'Santiago'
+    const [esValida, setEsValida] = useState(false)
+
+    const validarDireccion = useCallback(async () => {
+        const res = await check(nuevaDireccion, nuevaComuna, nuevaCiudad)
+        setEsValida(res.ok)
+    }, [check, nuevaDireccion, nuevaComuna, nuevaCiudad])
+
+    const { mutate: guardarDireccion, isLoading: guardandoDir } = useMutation({
         mutationFn: clienteService.crearDireccion,
-        onSuccess:  (data) => {
-            console.log('Dirección creada →', data)
-            // aquí podrías despachar al contexto o mostrar toast
+        onSuccess: () => {
+            setMostrarNuevaDir(false)
+            setNuevaDireccion('')
+            setNuevaComuna('')
+            setEsValida(false)
+            refetchDir()
         },
     })
-    function handleGuardarDireccion() {
-        if(!state.clienteRut) return;
+    const handleGuardarDireccion = () => {
+        if (!state.clienteRut || !esValida) return
         guardarDireccion({
             rut_cliente: state.clienteRut,
-            direccion:   nuevaDireccion,
-            comuna:      nuevaComuna,
-            ciudad:      nuevaCiudad,
-        });
+            direccion: nuevaDireccion,
+            comuna: nuevaComuna,
+            ciudad: nuevaCiudad,
+        })
     }
 
+    /* ───────── handler genérico para inputs controlados ───────── */
+    const patch =
+        (field: keyof Draft) =>
+            (
+                e: ChangeEvent<
+                    HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+                >,
+            ) => {
+                const value =
+                    e.target.type === 'number'
+                        ? Number(e.target.value)
+                        : (e.target.value as unknown)
+                onChange({ [field]: value } as Partial<Draft>)
+            }
+
+    /* ───────── util de formato ───────── */
+    const formateaDir = (d: DireccionCliente) =>
+        `${d.direccion}, ${d.comuna}, ${d.ciudad}`
+
+    /* ───────── Render ───────── */
     return (
-        <article className="bg-white rounded-[10px] shadow px-8 py-6 space-y-4 lg:min-h-[550px]
-                      shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
+        <article className="bg-white rounded-[10px] shadow px-8 py-6 space-y-4 shadow-[0_0_2px_rgba(0,0,0,0.25)] lg:min-h-[550px]">
+            {/* --- Título --- */}
             <header className="flex justify-between">
                 <h2 className="text-2xl font-semibold text-sky-600">
                     {draft.id ? `Editar cotización #${draft.id}` : 'Nueva cotización'}
                 </h2>
             </header>
 
-            <div className="space-y-4  w-full">
+            <div className="space-y-4 w-full">
+                {/* --- Descripción --- */}
                 <DetalleLinea label="Descripción">
           <textarea
               className="w-full border rounded px-3 py-1"
               value={draft.descripcion ?? ''}
-              onChange={handle('descripcion')}
+              onChange={patch('descripcion')}
           />
                 </DetalleLinea>
 
+                {/* --- Tipo de envío --- */}
                 <DetalleLinea label="Tipo de envío">
                     <select
                         className="border rounded px-2 py-1"
                         value={draft.tipo_despacho ?? 'a domicilio'}
-                        onChange={handle('tipo_despacho')}
+                        onChange={(e) => {
+                            const tipo = e.target.value as Draft['tipo_despacho']
+                            onChange({
+                                tipo_despacho: tipo,
+                                direccion_id:
+                                    tipo === 'retiro tienda' ? null : draft.direccion_id,
+                            })
+                        }}
                     >
                         <option value="a domicilio">A domicilio</option>
                         <option value="retiro tienda">Retiro en tienda</option>
                     </select>
                 </DetalleLinea>
 
-                <DetalleLinea label="Dirección de despacho" className={'flex-wrap xl:flex-nowrap flex items-baseline'}>
-                    <div className={'flex gap-[5px] flex-wrap gap-4 flex-col max-w-fit'}>
-                        {/* Select de direcciones */}
-                        {direccion.length > 0 && (
-                            <select
-                                className="border rounded px-2 py-1 max-w-fit"
-                                defaultValue={direccion[0].id}  /* opcional: selección inicial */
-                            >
-                                {direccion.map(dir => (
-                                    <option key={dir.id} value={dir.id}>
-                                        {`${dir.direccion}, ${dir.comuna}, ${dir.ciudad}`}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                        {mostrarInputsNewDireccion && (
-                            <div className="mt-4 flex flex-col gap-2">
-                                <DetalleLinea label={'Dirección:'}>
-                                <input
-                                    type="text"
-                                    placeholder="Dirección"
-                                    value={nuevaDireccion}
-                                    onChange={(e) => setNuevaDireccion(e.target.value)}
-                                    className="border rounded px-2 py-1"
-                                />
-                                </DetalleLinea>
-                                <DetalleLinea label={'Comuna:'}>
-                                <input
-                                    type="text"
-                                    placeholder="Comuna"
-                                    value={nuevaComuna}
-                                    onChange={(e) => setNuevaComuna(e.target.value)}
-                                    className="border rounded px-2 py-1"
-                                />
-                                </DetalleLinea>
-                            </div>
-                        )}
-                        {mostrarInputsNewDireccion?(
-                            <div className={'flex justify-end'}>
-                                <Button onClick={()=> {
-                                    handleValidarDireccion()
-                                    console.log('es validoo? ', esValida)
-                                }
-                                } label={'Validar dirección'} className="ml-2 bg-blue-600 text-white w-fit" />
-                                <Button onClick={handleGuardarDireccion} label={'Guardar dirección'} className={`ml-2 text-white w-fit ${esValida?'bg-blue-600': 'bg-gray-300'}`}  disabled={esValida?false:true} />
-                            </div>
-                        ):(
+                {/* --- Dirección (si corresponde) --- */}
+                {draft.tipo_despacho !== 'retiro tienda' && (
+                    <DetalleLinea
+                        label="Dirección de despacho"
+                        className="flex-wrap xl:flex-nowrap items-baseline"
+                    >
+                        <div className="flex flex-col gap-4 max-w-fit">
+                            {/* selector existente */}
+                            {direccion.length > 0 && (
+                                <select
+                                    disabled={dirLoading}
+                                    className="border rounded px-2 py-1 max-w-fit"
+                                    value={draft.direccion_id ?? undefined}
+                                    onChange={(e) =>
+                                        onChange({ direccion_id: Number(e.target.value) })
+                                    }
+                                >
+                                    {direccion.map((dir) => (
+                                        <option key={dir.id} value={dir.id}>
+                                            {formateaDir(dir)}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
 
-                            <div className={'flex justify-center'}>
-                    <Button onClick={()=>setMostrarInputsNewDireccion(true)} label={'+ Nueva dirección'} className="ml-2 bg-blue-600 text-white w-fit" />
-                            </div>
-                        )
-                        }
-                    </div>
-                </DetalleLinea>
+                            {/* botón nueva dir */}
+                            <Button
+                                label={
+                                    mostrarNuevaDir
+                                        ? 'Cancelar nueva dirección'
+                                        : '+ Nueva dirección'
+                                }
+                                className="w-fit bg-gray-200"
+                                onClick={() => setMostrarNuevaDir((v) => !v)}
+                            />
+
+                            {/* formulario nueva dir */}
+                            {mostrarNuevaDir && (
+                                <div className="flex flex-col gap-2">
+                                    <DetalleLinea label="Dirección:">
+                                        <input
+                                            type="text"
+                                            className="border rounded px-2 py-1"
+                                            placeholder="Dirección"
+                                            value={nuevaDireccion}
+                                            onChange={(e) => setNuevaDireccion(e.target.value)}
+                                        />
+                                    </DetalleLinea>
+
+                                    <DetalleLinea label="Comuna:">
+                                        <input
+                                            type="text"
+                                            className="border rounded px-2 py-1"
+                                            placeholder="Comuna"
+                                            value={nuevaComuna}
+                                            onChange={(e) => setNuevaComuna(e.target.value)}
+                                        />
+                                    </DetalleLinea>
+
+                                    <div className="flex gap-2 justify-end">
+                                        <Button
+                                            onClick={validarDireccion}
+                                            label="Validar dirección"
+                                            className="bg-blue-600 text-white w-fit"
+                                        />
+                                        <Button
+                                            onClick={handleGuardarDireccion}
+                                            label="Guardar dirección"
+                                            disabled={!esValida || guardandoDir}
+                                            className={`w-fit text-white ${
+                                                esValida ? 'bg-blue-600' : 'bg-gray-300'
+                                            }`}
+                                        />
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    </DetalleLinea>
+                )}
             </div>
 
-            <footer className="flex justify-end gap-3 pt-4">
-                <Button label="Cancelar" className="bg-gray-300" onClick={onCancel} />
-                <Button label="Guardar"  className="bg-green-600 text-white" onClick={onSave} />
+            {/* --- Footer --- */}
+            <footer className="flex gap-4 pt-4">
+                <Button
+                    label="Confirmar"
+                    className="bg-sky-600 hover:bg-sky-700 text-white flex-1"
+                    onClick={onSave}
+                />
+                <Button
+                    label="Cancelar"
+                    className="bg-gray-200 flex-1"
+                    onClick={onCancel}
+                />
             </footer>
+
+            {/* error direcciones */}
+            {dirError && (
+                <p className="text-rose-600 text-sm">{(dirError as Error).message}</p>
+            )}
         </article>
     )
 }

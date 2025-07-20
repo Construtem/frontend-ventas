@@ -1,69 +1,88 @@
 'use client'
 import { useMemo } from 'react'
-import { useQuery }          from '@tanstack/react-query'
-import Button                from '@/components/Button'
+import { useQuery } from '@tanstack/react-query'
+import Button from '@/components/Button'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
-import {
-    clienteService,
-    DBCotizacion,
-}                            from '@/services/apiServices'
-
-import { CotizacionView }    from '@/components/cotizacion/CotizacionView'
-import { CotizacionForm }    from '@/components/cotizacion/CotizacionForm'
+import { clienteService, DBCotizacion } from '@/services/apiServices'
+import { CotizacionView } from '@/components/cotizacion/CotizacionView'
+import { CotizacionForm } from '@/components/cotizacion/CotizacionForm'
 import CotizacionDetalleModal from '@/components/Modal/CotizacionDetalleModal'
 
-export default function Cotizacion () {
-    /* contexto */
-    const { state, dispatch }      = useCotizacionFlow()
-    const { clienteRut, cotizacionId, draftQuote,
-        isEditing, isCreating, showModal } = state
+export default function Cotizacion() {
+    /* ----- contexto global ----- */
+    const { state, dispatch } = useCotizacionFlow()
+    const {
+        clienteRut,
+        cotizacionId,
+        draftQuote,
+        direccionId,
+        isEditing,
+        isCreating,
+        showModal,
+    } = state
 
-    /* fetch historial */
-    const { data: historial = [], isLoading, isError, error } =
-        useQuery<DBCotizacion[]>({
-            queryKey: ['historial', clienteRut],
-            queryFn:   () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
-            enabled:   !!clienteRut,
-        })
+    /* ----- historial remoto ----- */
+    const {
+        data: historial = [],
+        isLoading,
+        isError,
+        error,
+    } = useQuery<DBCotizacion[]>({
+        queryKey: ['historial', clienteRut],
+        queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
+        enabled: !!clienteRut,
+    })
 
-    /* unimos cotizaciones de BDD + las locales todavía no guardadas */
+    /* ----- combinar locales + remotas ----- */
     const allQuotes = [...state.localQuotes, ...historial]
 
     const cotizacionActual = useMemo(
-        () => allQuotes.find(c => c.id === cotizacionId) ?? null,
+        () => allQuotes.find((c) => c.id === cotizacionId) ?? null,
         [allQuotes, cotizacionId],
     )
 
-    /* helpers */
+    /* ----- callbacks ----- */
     const handleDraftChange = (patch: Partial<DBCotizacion>) =>
         dispatch({ type: 'UPDATE_DRAFT', payload: patch })
 
+    /** seleccionar cabecera existente */
+    const handleSelectQuote = (val: string) => {
+        const id = Number(val) || 0
+        dispatch({ type: 'SET_QUOTE', payload: id })
+    }
+
+    /** guardar cabecera local sin items */
     const handleSaveDraft = () => {
         if (!draftQuote) return
-        // simulamos “id” local negativo; cuando la guardes en back
-        // obtendrás un id real y actualizarás de nuevo el contexto.
-        const provisional = {
+        const provisional: DBCotizacion = {
             ...draftQuote,
             id: Date.now() * -1,
-            estado:       'pendiente',
-            estado_pago:  'pendiente',
-            fecha_crea:   new Date().toISOString(),
-        } as DBCotizacion
-
+            fecha_crea: new Date().toISOString(),
+            estado: 'pendiente',
+            estado_pago: 'pendiente',
+            direccionId: direccionId ?? null,
+            cliente: {} as any,
+            usuario: {} as any,
+            items: [],
+            total_items: 0,
+            total_precio: 0,
+        }
         dispatch({ type: 'SAVE_DRAFT_OK', payload: provisional })
     }
 
-    const cancel = () =>
-        dispatch(isCreating ? { type: 'CANCEL_NEW_QUOTE' }
-            : { type: 'CANCEL_EDIT_QUOTE' })
+    const handleCancel = () =>
+        dispatch(
+            isCreating
+                ? { type: 'CANCEL_NEW_QUOTE' }
+                : { type: 'CANCEL_EDIT_QUOTE' },
+        )
 
-    /* ─────────── Render ─────────── */
+    /* ----- render ----- */
     return (
         <>
-            <div className="px-[40px] sm:px-0 w-[100%] sm:w-[100%]
-            ">
-                {/* encabezado */}
-                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full items-center">
+            <div className="px-[40px] sm:px-0 w-full">
+                {/* cabecera */}
+                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full">
                     <h1 className="font-montserrat font-semibold text-[32px]">
                         Detalle cotización
                     </h1>
@@ -74,12 +93,10 @@ export default function Cotizacion () {
                                 disabled={isLoading}
                                 className="border rounded px-2 py-1 min-w-[240px]"
                                 value={cotizacionId ?? ''}
-                                onChange={e =>
-                                    dispatch({ type: 'SET_QUOTE', payload: Number(e.target.value) })
-                                }
+                                onChange={(e) => handleSelectQuote(e.target.value)}
                             >
                                 <option value="">Seleccionar cotización</option>
-                                {allQuotes.map(q => (
+                                {allQuotes.map((q) => (
                                     <option key={q.id} value={q.id}>
                                         #{q.id} — {new Date(q.fecha_crea).toLocaleDateString()}
                                     </option>
@@ -95,30 +112,37 @@ export default function Cotizacion () {
                     </div>
                 </header>
 
-                {/* loaders / mensajes */}
-                {isLoading && <p className="text-center text-gray-500 py-10">Cargando…</p>}
-                {isError && (
-                    <p className="text-center text-rose-600 py-10">{(error as Error).message}</p>
+                {/* mensajes / loaders */}
+                {isLoading && (
+                    <p className="text-center text-gray-500 py-10">Cargando…</p>
                 )}
-                {/* modos */}
-                {(!isCreating && !isEditing && cotizacionActual) && (
+                {isError && (
+                    <p className="text-center text-rose-600 py-10">
+                        {(error as Error).message}
+                    </p>
+                )}
+
+                {/* vista “readonly” */}
+                {!isCreating && !isEditing && cotizacionActual && (
                     <CotizacionView
                         quote={cotizacionActual}
                         onSeeDetail={() => dispatch({ type: 'OPEN_MODAL' })}
                     />
                 )}
-                {!isLoading && clienteRut && allQuotes.length === 0 ?(
+
+                {!isLoading && clienteRut && allQuotes.length === 0 && (
                     <p className="text-center text-gray-500">
                         No hay cotizaciones disponibles. Crea una nueva.
                     </p>
-                ) : null}
+                )}
 
+                {/* formulario edición / alta */}
                 {(isCreating || isEditing) && draftQuote && (
                     <CotizacionForm
                         draft={draftQuote}
                         onChange={handleDraftChange}
                         onSave={handleSaveDraft}
-                        onCancel={cancel}
+                        onCancel={handleCancel}
                     />
                 )}
             </div>
