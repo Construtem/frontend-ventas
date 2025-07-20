@@ -9,7 +9,7 @@ import Cotizacion from '@/components/Cotizacion';
 import { quotations } from '@/mocks/mocksDatos'
 import Bienvenida from "@/components/Bienvenida";
 import CotizacionesCreadas from "@/components/CotizacionesCreadas";
-import PanelTotals from "@/components/PanelTotals";
+//import PanelTotals from "@/components/PanelTotals";
 import PanelTotalsContainer from "@/components/PanelTotalsContainer";
 
 
