@@ -38,7 +38,7 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                         <p><span
                             className='font-semibold'>Tipo envío:</span> {tipo_despacho && 2 ? 'A domicilio' : 'Retiro en tienda'}
                         </p>
-                        <p><span className='font-semibold'>Costo envío:</span> {money(costo_envio)}</p>
+                        <p><span className='font-semibold'>Costo envío:</span> {money(Number(costo_envio))}</p>
                         {data.direccion&&(
                         <p><span className='font-semibold'>Dirección:</span> {`${data.direccion?.direccion}, ${data.direccion?.comuna}, ${data.direccion?.ciudad}`}</p>
                         )}
@@ -94,8 +94,8 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                 <div className='mt-4 grid grid-cols-2 gap-4 '>
                     <p><span className='font-semibold'>Total ítems:</span> {total_items}</p>
                     <p className='text-right'><span className='font-semibold'>Subtotal:</span> {money(total_precio)}</p>
-                    <p><span className='font-semibold'>Costo envío:</span> {money(costo_envio)}</p>
-                    <p className='text-right font-semibold text-lg'>Total: {money(total_precio + costo_envio)}</p>
+                    <p><span className='font-semibold'>Costo envío:</span> {money(Number(costo_envio))}</p>
+                    <p className='text-right font-semibold text-lg'>Total: {money(total_precio + Number(costo_envio))}</p>
                 </div>
             </ModalBody>
 
