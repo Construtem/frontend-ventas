@@ -9,7 +9,7 @@ interface PanelTotalsProps {
         totalProductosNeto: number
         totalDespacho:     number
         totalDescuento:    number
-        totalProductosIVA: number
+        iva: number
         totalCotizacion:   number
     }
     cotizacionId?: number        // ← NUEVO (opcional)
@@ -41,7 +41,7 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
     !quotation.totalProductosNeto &&
     !quotation.totalDespacho &&
     !quotation.totalDescuento &&
-    !quotation.totalProductosIVA &&
+    !quotation.iva &&
     !quotation.totalCotizacion;
 
     const handleGuardar = async () => {
@@ -91,7 +91,7 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-sm">Iva 19%</span>
-                    <span className="text-sm font-bold">{formatCurrency(quotation.totalProductosIVA - quotation.totalProductosNeto)}</span>
+                    <span className="text-sm font-bold">{formatCurrency(quotation.iva)}</span>
                 </div>
 
                 <hr className="my-3 border-gray-300" />

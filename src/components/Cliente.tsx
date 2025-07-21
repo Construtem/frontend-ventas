@@ -731,7 +731,7 @@ export default function Cliente() {
                                 label={'Crear Cliente'}
                                 />
                             <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
-                            <Button onClick={()=>{console.log('se dio clic')}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
+                            <Button onClick={()=>{console.log(state)}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
                         </div>
 
                     </div>
