@@ -42,7 +42,7 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                 setIsSaving(false)
                 setShowCreatedModal(true)
             }, 1200)
-        } catch (e) {
+        } catch {
             setIsSaving(false)
         }
     }

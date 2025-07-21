@@ -34,7 +34,10 @@ export default function Cotizacion() {
     })
 
     /* ----- combinar locales + remotas ----- */
-    const allQuotes = [...state.localQuotes, ...historial]
+    const allQuotes = useMemo(
+        () => [...state.localQuotes, ...historial],
+        [state.localQuotes, historial]
+    );
 
     const cotizacionActual = useMemo(
         () => allQuotes.find((c) => c.id === cotizacionId) ?? null,

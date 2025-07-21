@@ -351,6 +351,7 @@ export async function crearCotizacion(body: {
     tipo_despacho: string;
     costo_envio:   number;
     descripcion?:  string;
+    total: number;
 }): Promise<{ id: number }> {
     const r = await fetch(`${API_BASE_URL}/api/cotizaciones`, {
         method : 'POST',
