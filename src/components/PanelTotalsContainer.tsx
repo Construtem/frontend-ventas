@@ -64,6 +64,7 @@ export default function PanelTotalsContainer () {
                 descripcion  : state.cotizacionSeleccionada?.descripcion
                     ?? state.draftQuote?.descripcion
                     ?? '',
+                total: totals.totalCotizacion,
             }
 
             /* 1️⃣  Crear cabecera */
