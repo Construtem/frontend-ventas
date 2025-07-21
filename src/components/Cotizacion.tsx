@@ -1,7 +1,6 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import Button from '@/components/Button'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { clienteService, DBCotizacion } from '@/services/apiServices'
 import { CotizacionView } from '@/components/cotizacion/CotizacionView'
@@ -15,14 +14,12 @@ type Draft = Partial<DBCotizacion> & {
 
 export default function Cotizacion() {
     /* ----- contexto global ----- */
-    const [showClientMsg, setShowClientMsg] = useState(false);
     const { state, dispatch } = useCotizacionFlow()
     const {
         clienteRut,
         cotizacionId,
         draftQuote,
         direccionId,
-        isEditing,
         isCreating,
         showModal,
     } = state
@@ -30,9 +27,6 @@ export default function Cotizacion() {
     /* ----- historial remoto ----- */
     const {
         data: historial = [],
-        isLoading,
-        isError,
-        error,
     } = useQuery<DBCotizacion[]>({
         queryKey: ['historial', clienteRut],
         queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
@@ -54,11 +48,6 @@ export default function Cotizacion() {
     const handleDraftChange = (patch: Partial<DBCotizacion>) => {
         dispatch({ type: 'UPDATE_DRAFT', payload: patch });
     }
-    /** seleccionar cabecera existente */
-    const handleSelectQuote = (val: string) => {
-        const id = Number(val) || 0
-        dispatch({ type: 'SET_QUOTE', payload: id })
-    }
 
     /** guardar cabecera local sin items */
     const handleSaveDraft = () => {
@@ -78,7 +67,7 @@ export default function Cotizacion() {
         }
         dispatch({ type: 'SAVE_DRAFT_OK', payload: provisional })
     }
-
+    console.log(state.direccionId)
 
     const handleCancel = () =>
         dispatch(
@@ -96,86 +85,28 @@ export default function Cotizacion() {
     };
 
     /* ----- render ----- */
+    /**/
     return (
         <>
             <div className="px-[40px] sm:px-0 w-full">
-                {/* cabecera */}
-                <header className="flex flex-wrap items-baseline justify-center sm:justify-between gap-4 py-4 w-full">
-                    <h1 className="font-montserrat font-semibold text-[32px]">
-                        Detalle cotización
-                    </h1>
-
-                    <div className="flex gap-[10px]">
-                        {allQuotes.length > 0 && (
-                            <select
-                                disabled={isLoading}
-                                className="border rounded px-2 py-1 min-w-[240px]"
-                                value={cotizacionId ?? ''}
-                                onChange={(e) => handleSelectQuote(e.target.value)}
-                            >
-                                <option value="">Seleccionar cotización</option>
-                                {allQuotes.map((q) => (
-                                    <option key={q.id} value={q.id}>
-                                        #{q.id} — {new Date(q.fecha_crea).toLocaleDateString()}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-
-                        <Button
-                            label="+ Nueva"
-                            className={`bg-[#F59243] hover:bg-[#d98543] text-white`}
-                            onClick={() => {
-                                if (!clienteRut) {
-                                    setShowClientMsg(true);
-                                    setTimeout(() => setShowClientMsg(false), 2500);
-                                } else {
-                                    dispatch({ type: 'START_NEW_QUOTE' });
-                                }
-                            }}
-                        />
-                    </div>
-                </header>
-
-                {showClientMsg && (
-                    <div className="text-center text-rose-600 py-2 font-semibold">
-                        Debes seleccionar un cliente antes de crear una cotización.
-                    </div>
-                )}
-
-                {/* mensajes / loaders */}
-                {isLoading && (
-                    <p className="text-center text-gray-500 py-10">Cargando…</p>
-                )}
-                {isError && (
-                    <p className="text-center text-rose-600 py-10">
-                        {(error as Error).message}
-                    </p>
-                )}
-
                 {/* vista “readonly” */}
-                {!isCreating && !isEditing && cotizacionActual && (
+                {state.cotizacionId && cotizacionActual && !state.isCreating &&(
                     <CotizacionView
                         quote={cotizacionActual}
                         onSeeDetail={() => dispatch({ type: 'OPEN_MODAL' })}
                     />
                 )}
 
-                {!isLoading && clienteRut && allQuotes.length === 0 && !isCreating && !isEditing && (
-                    <p className="text-center text-gray-500">
-                        No hay cotizaciones disponibles. Crea una nueva.
-                    </p>
-                )}
-
                 {/* formulario edición / alta */}
-                {(isCreating || isEditing) && draftQuote && (
+                {isCreating && (
                     <CotizacionForm
                         draft={safeDraft}
                         onChange={handleDraftChange}
                         onSave={handleSaveDraft}
                         onCancel={handleCancel}
                     />
-                )}
+                )
+                }
             </div>
 
             {/* modal detalle */}

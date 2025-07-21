@@ -554,6 +554,7 @@ import {useMemo, useState} from "react";
 import {ClienteModal} from "@/components/Modal/ClienteModal";
 import Button from "@/components/Button";
 import { useRutValidation } from "@/components/ValidadorRut";
+import Bienvenida from "@/components/Bienvenida";
 
 export default function Cliente() {
     const { state, dispatch } = useCotizacionFlow()
@@ -608,8 +609,10 @@ export default function Cliente() {
 
     return (
         <div className="bg-white px-[40px] py-[10px] rounded-[10px]
-                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] lg:min-h-[466px] lg:min-w-[504px]">
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] lg:min-h-[466px] lg:min-w-[504px] relative h-full">
             <div className="flex w-full gap-[10px] flex-col">
+
+                <Bienvenida/>
                 <h2 className={"font-semibold font-montserrat text-[24px]"}>
                     Seleccionar cliente
                 </h2>
