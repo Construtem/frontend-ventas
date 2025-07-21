@@ -8,6 +8,12 @@ import {
 }                     from '@/components/Modal/ModalsParts';
 import { clienteService } from '@/services/apiServices'
 
+interface ClienteModalProps {
+    isOpen: boolean
+    onClose: () => void
+    onClienteCreado?: () => void
+}
+
 /* ─────────── Helpers de validación / formato ──────────────────────────────*/
 /** Limpia todo lo que no sea dígito o k/K */
 const cleanRut = (v: string) => v.replace(/[^0-9kK]/g, '').toUpperCase()
@@ -52,7 +58,7 @@ interface ClienteModalProps {
     onClose: () => void
 }
 
-export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
+export function ClienteModal({ isOpen, onClose, onClienteCreado }: ClienteModalProps) {
     const [form, setForm] = useState({
         nombre: '',
         tipo: 'Persona',           // «Persona» | «Empresa»
@@ -127,24 +133,17 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
         setSaving(true)
         try {
             await clienteService.crearCliente({
-                rut:           rutDash(cleanRut),   // almacenamos con puntos y guion
-                nombre:        form.nombre.trim(),
-                telefono:      form.telefono || '',
-                email:         form.email || undefined,
-                razon_social:  form.razon_social || undefined,
-                tipo_id:       tipoId as 1 | 2,
+                rut: rutDash(cleanRut),
+                nombre: form.nombre.trim(),
+                telefono: form.telefono || '',
+                email: form.email || undefined,
+                razon_social: form.razon_social || undefined,
+                tipo_id: tipoId as 1 | 2,
             })
-            onClose()              // éxito → cierra modal
-        } catch (err: unknown) {
-            // Refinar:
-            const message =
-                err instanceof Error
-                    ? err.message            // Error normal
-                    : typeof err === 'string'
-                        ? err                  // por si lanzas strings
-                        : 'Error inesperado'
-
-            alert(message)
+            if (onClienteCreado) onClienteCreado(); // <-- refresca la lista
+            onClose()
+        } catch {
+            // ...error handling...
         } finally {
             setSaving(false)
         }

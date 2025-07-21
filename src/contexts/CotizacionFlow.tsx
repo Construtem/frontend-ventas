@@ -132,7 +132,7 @@ function cotizacionReducer (
                 isCreating:true,
                 draftQuote:{
                     descripcion:   '',
-                    tipo_despacho:'retiro',
+                    tipo_despacho:'a domicilio',
                     costo_envio:   0,
                 },
             }

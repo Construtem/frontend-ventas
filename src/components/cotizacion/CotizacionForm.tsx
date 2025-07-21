@@ -55,6 +55,7 @@ export const CotizacionForm: React.FC<Props> = ({
                                                 }) => {
     const { state } = useCotizacionFlow()
 
+
     /* ───────── Direcciones existentes del cliente ───────── */
     const {
         data: direccion = [],
@@ -107,6 +108,7 @@ export const CotizacionForm: React.FC<Props> = ({
             ciudad: nuevaCiudad,
         })
     }
+    
 
     /* ───────── handler genérico para inputs controlados ───────── */
     const patch =
@@ -135,6 +137,11 @@ export const CotizacionForm: React.FC<Props> = ({
                 <h2 className="text-2xl font-semibold text-sky-600">
                     {draft.id ? `Editar cotización #${draft.id}` : 'Nueva cotización'}
                 </h2>
+                {state.clienteRut && (
+                    <span className="text-gray-500 ml-4">
+                        Cliente: {state.clienteRut}
+                    </span>
+                )}
             </header>
 
             <div className="space-y-4 w-full">
@@ -249,12 +256,19 @@ export const CotizacionForm: React.FC<Props> = ({
 
             {/* --- Footer --- */}
             <footer className="flex gap-4 pt-4">
-                <Button
-                    label="Confirmar"
-                    className="bg-sky-600 hover:bg-sky-700 text-white flex-1"
-                    onClick={onSave}
-                />
-                <Button
+                    <Button
+                        label="Confirmar"
+                        className="bg-sky-600 hover:bg-sky-700 text-white flex-1"
+                        onClick={() => {
+                            console.log('Datos a guardar:', {
+                                ...draft,
+                                rut_cliente: state.clienteRut,
+                                usuario: state.usuario,
+                            });
+                            onSave();
+                        }}
+                    />
+                    <Button
                     label="Cancelar"
                     className="bg-gray-200 flex-1"
                     onClick={onCancel}
