@@ -1,4 +1,5 @@
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_VENTAS || 'https://api-ventas.tssw.cl';
+const API_BASE_URL_INVENTARIO = process.env.NEXT_PUBLIC_API_INVENTARIO || 'https://inventario-ventas.tssw.cl';
 
 // -----------------------------------------------------------------------------
 // 1)  TIPOS ─────────────────────────────────────────────────────────────────────
@@ -133,7 +134,7 @@ export interface CotizacionItem {
 export interface DBCotizacion {
     id:            number
     fecha_crea:    string                // ISO 8601
-    direccionId:   number | null
+    direccion_id:   number | null
     estado:        'aprobada' | 'rechazada' | 'pendiente'
     costo_envio?:   number
     rut_cliente?:   string
@@ -229,6 +230,19 @@ export interface Sucursal {
     }
 }
 
+export interface PreviewDespacho {
+    id:              number;   // siempre 0 en el preview
+    cotizacion_id:   number;
+    camion_id:       number;
+    origen:          number;
+    destino:         number;
+    fecha_despacho:  string;   // ISO-8601
+    valor_despacho:  number;   // CLP
+    cantidad_items:  number;
+    total_kg:        number;
+    distancia_km:    number;
+    tiempo_estimado: number;   // minutos
+}
 
 /**
  * Historial de cotizaciones de un cliente por RUT.
@@ -380,8 +394,67 @@ export async function crearItemCotizacion(
     );
     if (!r.ok) throw new Error('No se pudo agregar ítem');
 }
+
 export async function obtenerTodasLasCotizaciones(): Promise<DBCotizacion[]> {
     const res = await fetch(`${API_BASE_URL}/api/cotizaciones`);
     if (!res.ok) throw new Error(`Error ${res.status} al obtener cotizaciones`);
     return (await res.json()) as DBCotizacion[];
+}
+
+
+export async function calcularDespacho(
+    cotizacionId : number,
+    dirClienteId : number,
+): Promise<PreviewDespacho[]> {
+
+    const r = await fetch(`${API_BASE_URL_INVENTARIO}/api/despachos/calcular`, {
+        method : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({
+            cotizacion_id : cotizacionId,
+            dir_cliente_id: dirClienteId,
+        }),
+    });
+
+    if (!r.ok) {
+        const msg = await r.text();
+        throw new Error(`Calcular despacho · ${r.status}: ${msg}`);
+    }
+    return r.json() as Promise<PreviewDespacho[]>;
+}
+
+
+export async function actualizarCostoEnvioCotizacion (
+    cotizacionId: number,
+    costoEnvio  : number,
+): Promise<void> {
+
+    const r = await fetch(`${API_BASE_URL}/api/cotizaciones/${cotizacionId}`, {
+        method : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify({ costo_envio: costoEnvio }),
+    });
+
+    if (!r.ok) {
+        const msg = await r.text();
+        throw new Error(`PUT cotización · ${r.status}: ${msg}`);
+    }
+}
+export async function actualizarDatosCotizacion (
+    cotizacionId: number,
+    payload: Partial<{
+        costo_envio: number;
+        total:       number;
+    }>,
+): Promise<void> {
+    const r = await fetch(`${API_BASE_URL}/api/cotizaciones/${cotizacionId}`, {
+        method : 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body   : JSON.stringify(payload),
+    });
+
+    if (!r.ok) {
+        const msg = await r.text();
+        throw new Error(`PUT cotización · ${r.status}: ${msg}`);
+    }
 }

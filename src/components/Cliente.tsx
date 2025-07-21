@@ -741,7 +741,7 @@ export default function Cliente() {
                                     onClose={() => setShowCliente(false)}
                                     onClienteCreado={refetch}
                                 />
-                            <Button onClick={()=>{console.log('se dio clic')}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
+                            <Button onClick={()=>{console.log(state)}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
                         </div>
 
                     </div>
