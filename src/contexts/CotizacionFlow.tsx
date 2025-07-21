@@ -152,13 +152,42 @@ function cotizacionReducer (
                 usuario:{}
             }
 
-        /* Tabla de productos */
-        case 'ADD_PRODUCT': {
-            const idx = state.productos.findIndex(p => p.sku === action.payload.sku)
-            const productos = idx >= 0
-                ? state.productos.map(p => p.sku === action.payload.sku ? action.payload : p)
-                : [...state.productos, action.payload]
-            return { ...state, productos }
+        /* Tabla de productos */case 'ADD_PRODUCT': {
+            const existing = state.productos.find(p =>
+                p.sku === action.payload.sku &&
+                p.sucursalId === action.payload.sucursalId &&
+                p.origen === action.payload.origen
+            );
+
+            if (existing) {
+                const nuevosProductos = state.productos.map(p => {
+                    if (
+                        p.sku === action.payload.sku &&
+                        p.sucursalId === action.payload.sucursalId &&
+                        p.origen === action.payload.origen
+                    ) {
+                        const nuevaCantidad = p.cantidad + action.payload.cantidad;
+                        return {
+                            ...p,
+                            cantidad: nuevaCantidad,
+                            total: p.netoUnit * nuevaCantidad
+                        };
+                    }
+                    return p;
+                });
+
+                return {
+                    ...state,
+                    productos: nuevosProductos
+                };
+            }
+            // Si no existe, agregarlo como nuevo
+            return {
+                ...state,
+                productos: [...state.productos, action.payload]
+            };
+
+
         }
 
         case 'UPDATE_DRAFT': {

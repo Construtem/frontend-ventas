@@ -85,6 +85,8 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
         setSelQty(q => ({ ...q, [p.sku]: 0 }))
         setNoti({ nombre: p.nombre, cantidad: Number(qty) });
         setTimeout(() => setNoti(null), 2000);
+        console.log('[ProductoModal] Producto añadido:', p.sku, 'Origen:', origenNombre, 'Cantidad:', qty)
+        console.log(state)
     }
 
     return (
