@@ -131,7 +131,6 @@ export const CotizacionForm: React.FC<Props> = ({
     const formateaDir = (d: DireccionCliente) =>
         `${d.direccion}, ${d.comuna}, ${d.ciudad}`
 
-    console.log(state.clienteRut)
 
 
     /* ───────── Render ───────── */
