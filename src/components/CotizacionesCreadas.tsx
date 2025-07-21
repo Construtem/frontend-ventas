@@ -196,5 +196,5 @@ export default function CotizacionesCreadas() {
                 </table>
             )}
         </div>
-    );
+    )
 }
