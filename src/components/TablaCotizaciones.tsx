@@ -48,11 +48,11 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
     return (
         <div className="w-full">
             {/* Buscador */}
-            <div className="mb-4 flex justify-between items-center flex-wrap gap-2 w-full bg-gray-300">
+            <div className="mb-4 flex justify-between items-center flex-wrap gap-2 w-full rounded-[10px] shadow-md">
                 <input
                     type="text"
                     placeholder="Buscar cliente..."
-                    className="border px-3 py-2 rounded w-full sm:w-64"
+                    className="border px-3 py-2 rounded w-full focus:outline-none"
                     value={busqueda}
                     onChange={(e) => {
                         setBusqueda(e.target.value);

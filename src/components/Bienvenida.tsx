@@ -23,10 +23,10 @@ export default function Bienvenida() {
         email: '',
     })
 
-
     useEffect(() => {
         if (!state.usuario?.email || !state.usuario?.nombre) {
             try {
+    console.log(datosUsuario)
                 const userString = localStorage.user;
                 const usuario = JSON.parse(userString);
                 setDatosUsuario({

@@ -1,17 +1,12 @@
 import Button from "@/components/Button";
-import {useMemo, useState} from "react";
+import {useMemo} from "react";
 import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
 import {useQuery} from "@tanstack/react-query";
 import {clienteService, DBCotizacion} from "@/services/apiServices";
 import NumberIcon from "@/components/NumberIcon";
 
-type Draft = Partial<DBCotizacion> & {
-    tipo_despacho?: 'a domicilio' | 'retiro tienda'
-    direccion_id?: number | null
-}
 export default function CotizacionHeader(){
 
-    const [showClientMsg, setShowClientMsg] = useState(false);
     /* ----- historial remoto ----- */
     const { state, dispatch } = useCotizacionFlow()
     const {
@@ -21,8 +16,6 @@ export default function CotizacionHeader(){
     const {
         data: historial = [],
         isLoading,
-        isError,
-        error,
     } = useQuery<DBCotizacion[]>({
         queryKey: ['historial', clienteRut],
         queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),

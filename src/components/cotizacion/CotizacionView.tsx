@@ -5,7 +5,6 @@ import CotizacionHeader from "@/components/cotizacion/CotizacionHeader";
 import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
 
 /* helpers */
-const money = (v: number) => `$${v.toLocaleString('es-CL')}`
 const capital = (t: string) => t.charAt(0).toUpperCase() + t.slice(1)
 
 /* línea reutilizable */

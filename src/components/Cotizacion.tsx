@@ -1,13 +1,11 @@
 'use client'
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import Button from '@/components/Button'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { clienteService, DBCotizacion } from '@/services/apiServices'
 import { CotizacionView } from '@/components/cotizacion/CotizacionView'
 import { CotizacionForm } from '@/components/cotizacion/CotizacionForm'
 import CotizacionDetalleModal from '@/components/Modal/CotizacionDetalleModal'
-import CotizacionHeader from "@/components/cotizacion/CotizacionHeader";
 
 type Draft = Partial<DBCotizacion> & {
     tipo_despacho?: 'a domicilio' | 'retiro tienda'
@@ -16,14 +14,12 @@ type Draft = Partial<DBCotizacion> & {
 
 export default function Cotizacion() {
     /* ----- contexto global ----- */
-    const [showClientMsg, setShowClientMsg] = useState(false);
     const { state, dispatch } = useCotizacionFlow()
     const {
         clienteRut,
         cotizacionId,
         draftQuote,
         direccionId,
-        isEditing,
         isCreating,
         showModal,
     } = state
@@ -31,9 +27,6 @@ export default function Cotizacion() {
     /* ----- historial remoto ----- */
     const {
         data: historial = [],
-        isLoading,
-        isError,
-        error,
     } = useQuery<DBCotizacion[]>({
         queryKey: ['historial', clienteRut],
         queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
@@ -54,11 +47,6 @@ export default function Cotizacion() {
     /* ----- callbacks ----- */
     const handleDraftChange = (patch: Partial<DBCotizacion>) => {
         dispatch({ type: 'UPDATE_DRAFT', payload: patch });
-    }
-    /** seleccionar cabecera existente */
-    const handleSelectQuote = (val: string) => {
-        const id = Number(val) || 0
-        dispatch({ type: 'SET_QUOTE', payload: id })
     }
 
     /** guardar cabecera local sin items */

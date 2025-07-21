@@ -555,7 +555,6 @@ import {ClienteModal} from "@/components/Modal/ClienteModal";
 import Button from "@/components/Button";
 import { useRutValidation } from "@/components/ValidadorRut";
 import Bienvenida from "@/components/Bienvenida";
-import NumberIcon from "@/components/NumberIcon";
 
 export default function Cliente() {
     const { state, dispatch } = useCotizacionFlow()
