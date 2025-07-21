@@ -5,15 +5,14 @@ import logo from '@/styles/images/contrutem.png';
 import exit from '@/styles/images/logout2.png';
 import { useRouter } from "next/navigation";
 
-
 interface UserData {
     name: string;
     email: string;
-    photoURL?: string; // Es buena práctica marcar como opcional si puede no venir
+    photoURL?: string;
     rol: string;
 }
 
-const Header: React.FC = ({  }) => {
+const Header: React.FC = () => {
     const [user, setUser] = useState<UserData | null>(null);
     const router = useRouter();
     const frontLoginUrl = process.env.NEXT_PUBLIC_FRONT_LOGIN || "https://login.tssw.cl";
@@ -26,7 +25,6 @@ const Header: React.FC = ({  }) => {
                 setUser(parsedUser);
             } catch (err) {
                 console.error("Error al parsear datos de usuario, limpiando localStorage:", err);
-                // Si los datos están corruptos, es mejor limpiarlos.
                 localStorage.removeItem("user");
             }
         }
@@ -35,151 +33,59 @@ const Header: React.FC = ({  }) => {
     const handleLogout = async () => {
         localStorage.removeItem("user");
         console.log("Usuario ha cerrado sesión");
-        // Redirige al usuario a la página raíz
-        window.location.href = `${frontLoginUrl}`; // Redirige a la página principal
+        window.location.href = `${frontLoginUrl}`;
     };
 
     return (
-        <header style={styles.header}>
-            <div style={styles.left}>
+        <header className="w-full h-[58px] bg-[#2d2d2d] text-white flex items-center justify-between px-8 fixed top-0 left-0 z-[100] shadow-md">
+            <div className="flex items-center h-full">
                 <Image
                     src={logo}
                     alt="ConstrUTEM Logo"
-                    style={styles.logoImg as React.CSSProperties}
+                    className="max-h-[58px] w-auto cursor-pointer"
                     onClick={() => router.push("/admin/inicio")}
                 />
             </div>
 
-            <div style={styles.right}>
+            <div className="flex items-center gap-6">
                 {user && (
-                    <div style={styles.userInfo}>
-                        <span style={styles.userRole}>{user.rol}</span>
-                        <span style={styles.userIcon}>
-              {user.photoURL ? (
-                  <Image
-                      src={user.photoURL}
-                      alt="Foto perfil"
-                      width={32}
-                      height={32}
-                      style={{ borderRadius: "50%", objectFit: "cover" }}
-                  />
-              ) : (
-                  "👤"
-              )}
-            </span>
-                        <div style={styles.userText}>
-                            <span style={styles.userName}>{user.name}</span>
-                            <span style={styles.userEmail}>{user.email}</span>
+                    <div className="flex items-center gap-3 px-4 py-1">
+                        <span className="bg-[#ff8000] text-[#222222] font-medium text-sm font-roboto px-4 py-2 rounded-full shadow-md uppercase whitespace-nowrap">
+                            {localStorage.rol?.toLocaleUpperCase()}
+                        </span>
+
+                        <span className="bg-white text-gray-800 rounded-full p-1 text-lg flex items-center justify-center">
+                            {user.photoURL ? (
+                                <Image
+                                    src={user.photoURL}
+                                    alt="Foto perfil"
+                                    width={32}
+                                    height={32}
+                                    className="rounded-full object-cover"
+                                />
+                            ) : (
+                                "👤"
+                            )}
+                        </span>
+
+                        <div className="flex flex-col leading-[1.2]">
+                            <span className="text-white text-base">{user.name}</span>
+                            <span className="text-indigo-300 text-sm">{user.email}</span>
                         </div>
                     </div>
                 )}
+
                 <Image
                     src={exit}
                     alt="Cerrar sesión"
-                    style={styles.logout as React.CSSProperties}
                     width={32}
                     height={32}
-                    onClick={handleLogout} // Llama a la nueva función de logout
+                    className="cursor-pointer select-none"
+                    onClick={handleLogout}
                 />
             </div>
         </header>
     );
-};
-
-// Tus estilos no necesitan cambiar
-const styles: { [key: string]: React.CSSProperties } = {
-    header: {
-        width: "100%",
-        height: "58px",
-        background: "#2d2d2d",
-        color: "white",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        padding: "0 2rem",
-        boxSizing: "border-box",
-        position: "fixed",
-        top: 0,
-        left: 0,
-        zIndex: 100,
-        boxShadow: "0 2px 8px rgba(0,0,0,0.07)",
-    },
-    left: {
-        display: "flex",
-        alignItems: "center",
-        height: "100%",
-    },
-    hamburgerButton: {
-        background: "transparent",
-        border: "none",
-        cursor: "pointer",
-        marginRight: "1rem",
-        padding: 0,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    logoImg: {
-        height: "auto",
-        maxHeight: "58px",
-        objectFit: "contain",
-        width: "auto",
-        cursor: "pointer",
-    },
-    right: {
-        display: "flex",
-        alignItems: "center",
-        gap: "1.5rem",
-    },
-    userInfo: {
-        display: "flex",
-        alignItems: "center",
-        gap: "0.75rem",
-        padding: "0.25rem 1rem",
-    },
-    userRole: {
-        backgroundColor: "#ff8000",
-        borderRadius: "20px",
-        padding: "8px 15px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        boxShadow: "0 4px 8px rgba(0, 0, 0, 0.5)",
-        color: "#222222",
-        fontWeight: "500",
-        fontFamily: "Roboto, sans-serif",
-        fontSize: "0.9375rem",
-        whiteSpace: "nowrap",
-        textTransform: "capitalize",
-    },
-    userIcon: {
-        background: "white",
-        color: "#1f2937",
-        borderRadius: "50%",
-        padding: "0.25rem",
-        fontSize: "1.1rem",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-    },
-    userText: {
-        display: "flex",
-        flexDirection: "column",
-        lineHeight: "1.2",
-    },
-    userName: {
-        fontSize: "1rem",
-        color: "white",
-    },
-    userEmail: {
-        fontSize: "0.85rem",
-        color: "#a5b4fc",
-    },
-    logout: {
-        fontSize: "1.5rem",
-        cursor: "pointer",
-        userSelect: "none",
-    },
 };
 
 export default Header;
