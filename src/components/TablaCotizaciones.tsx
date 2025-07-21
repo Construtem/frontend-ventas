@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import {checkoutCotizacion, DBCotizacion} from "@/services/apiServices";
+import {DBCotizacion} from "@/services/apiServices";
 
 function getEstadoColor(estado: string) {
     switch (estado) {
