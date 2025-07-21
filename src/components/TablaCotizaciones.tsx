@@ -48,7 +48,7 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
     return (
         <div className="w-full">
             {/* Buscador */}
-            <div className="mb-4 flex justify-between items-center flex-wrap gap-2 w-full rounded-[10px] shadow-md">
+            <div className="mb-4 flex justify-between items-center flex-wrap gap-2 w-full rounded-[10px] shadow-md overflow-x-auto">
                 <input
                     type="text"
                     placeholder="Buscar cliente..."
@@ -95,7 +95,7 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
                             <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.total_items}</td>
                             <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.total_precio.toLocaleString('es-CL')}</td>
                             <td
-                                className={`text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px] rounded-full border ${getEstadoColor(
+                                className={`text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px] border ${getEstadoColor(
                                     c.estado
                                 )}`}
                             >
