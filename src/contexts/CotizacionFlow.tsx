@@ -74,7 +74,7 @@ export type CotizacionAction =
     /* tabla productos */
     | { type:'ADD_PRODUCT';    payload:DraftProducto }
     | { type:'UPDATE_PRODUCT'; payload:DraftProducto }
-    | { type:'REMOVE_PRODUCT'; payload:string }
+    | { type: 'REMOVE_PRODUCT'; payload: DraftProducto}
 
 /* ──────────────────────────────────
  * 3.  INITIAL STATE
@@ -152,6 +152,11 @@ function cotizacionReducer (
                 usuario:{}
             }
 
+
+        case 'UPDATE_DRAFT': {
+            const merged = { ...state.draftQuote, ...action.payload }
+            return { ...state, draftQuote: merged, cotizacionSeleccionada: merged }
+        }
         /* Tabla de productos */case 'ADD_PRODUCT': {
             const existing = state.productos.find(p =>
                 p.sku === action.payload.sku &&
@@ -190,11 +195,6 @@ function cotizacionReducer (
 
         }
 
-        case 'UPDATE_DRAFT': {
-            const merged = { ...state.draftQuote, ...action.payload }
-            return { ...state, draftQuote: merged, cotizacionSeleccionada: merged }
-        }
-
         case 'UPDATE_PRODUCT':
             return {
                 ...state,
@@ -203,7 +203,23 @@ function cotizacionReducer (
             }
 
         case 'REMOVE_PRODUCT':
-            return { ...state, productos: state.productos.filter(p => p.sku !== action.payload) }
+            return {
+                ...state,
+                productos: state.productos.filter(p =>
+                    !(
+                        p.sku === action.payload.sku &&
+                        p.origen === action.payload.origen &&
+                        p.sucursalId === action.payload.sucursalId &&
+                        p.cantidad === action.payload.cantidad &&
+                        p.precioUnit === action.payload.precioUnit &&
+                        p.descuento === action.payload.descuento &&
+                        p.netoUnit === action.payload.netoUnit &&
+                        p.total === action.payload.total &&
+                        p.nombre === action.payload.nombre
+                    )
+                )
+            };
+
 
         /* Seleccionar cabecera existente */
         case 'SET_QUOTE': {

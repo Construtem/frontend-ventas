@@ -28,15 +28,42 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
     const [search, setSearch] = useState("");
 
     useEffect(() => {
-        if (!sucursalId) return
+        if (!isOpen || !sucursalId) return;
+
         obtenerProductosInventario(sucursalId, 1, 100)
             .then(r => {
-                setRows(r.productos)
-                setSelOrigen({})
-                setSelQty({})
+                const productosAgregados = state.productos;
+
+                const productosAjustados = r.productos.map(p => {
+                    const copia = { ...p };
+
+                    productosAgregados.forEach(agregado => {
+                        if (
+                            agregado.sku === p.sku &&
+                            agregado.sucursalId === Number(sucursalId)
+                        ) {
+                            if (agregado.origen === `Sucursal #${sucursalId}`) {
+                                copia.stock_sucursal = Math.max(0, copia.stock_sucursal - agregado.cantidad);
+                            } else if (copia.bodegas) {
+                                copia.bodegas = copia.bodegas.map(b =>
+                                    b.nombre === agregado.origen
+                                        ? { ...b, stock: Math.max(0, b.stock - agregado.cantidad) }
+                                        : b
+                                );
+                            }
+                        }
+                    });
+
+                    return copia;
+                });
+
+                setRows(productosAjustados);
+                setSelOrigen({});
+                setSelQty({});
             })
-            .catch(e => console.error('[Inventario]', e))
-    }, [sucursalId])
+            .catch(e => console.error('[Inventario]', e));
+    }, [isOpen, sucursalId, state.productos]);
+
 
     function dataOrigen (p: ProductoInventario, origen: string) {
         if (origen === 'Sucursal') {
