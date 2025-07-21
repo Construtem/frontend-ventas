@@ -39,7 +39,7 @@ export default function CotizacionHeader(){
     }
     return (
         <div className={'flex flex-col justify-between items-baseline mb-6 lg:flex-row lg:gap-0 gap-[20px] items-center'}>
-            <div className={'flex items-center gap-2'}>
+            <div className={'flex items-center gap-[20px]'}>
             <NumberIcon number={2}/>
         <h1 className="font-montserrat font-semibold text-[32px]">
             Detalle cotización

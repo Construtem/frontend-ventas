@@ -11,6 +11,7 @@ import { useAddressCheck } from '@/hooks/useAddressCheck'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import CotizacionHeader from "@/components/cotizacion/CotizacionHeader";
 import CotizacionBlocked from "@/components/cotizacion/CotizacionBlocked";
+import NumberIcon from "@/components/NumberIcon";
 
 
 
@@ -135,9 +136,14 @@ export const CotizacionForm: React.FC<Props> = ({
 
     /* ───────── Render ───────── */
     return (
-        <article className={`${state.clienteRut?'':'flex flex-col justify-center'} bg-white rounded-[10px] shadow px-8 py-6 space-y-4 shadow-[0_0_2px_rgba(0,0,0,0.25)] lg:min-h-[550px]`}>
+        <article className={`${state.clienteRut?'':'h-full relative flex flex-col'} bg-white rounded-[10px] shadow px-8 py-6 space-y-4 shadow-[0_0_2px_rgba(0,0,0,0.25)] lg:min-h-[550px]`}>
             {!state.clienteRut ? (
-                <CotizacionBlocked/>
+                <>
+                    <div className={`flex relative items-baseline`}>
+                    <NumberIcon number={2} className={'absolute'}/>
+                    </div>
+                    <CotizacionBlocked/>
+                </>
             ) : (
                 <>
             <CotizacionHeader/>
