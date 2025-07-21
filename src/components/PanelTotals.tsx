@@ -1,5 +1,7 @@
 'use client'
-import React from 'react'
+import React, { useState } from 'react'
+import Modal from '@/components/Modal/Modal' // Asegúrate de tener este componente
+import { ModalHeader } from '@/components/Modal/ModalsParts'
 
 interface PanelTotalsProps {
     quotation: {
@@ -21,12 +23,28 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
     cotizacionId,
 }) => {
     const BASE_URL_FACTURACION_FRONTEND = process.env.NEXT_PUBLIC_FRONT_FACTURACION || ' https://facturacion.tssw.cl'
+    const [isSaving, setIsSaving] = useState(false)
+    const [showCreatedModal, setShowCreatedModal] = useState(false)
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
             minimumFractionDigits: 0,
             maximumFractionDigits: 0
         }).format(amount)
+    }
+
+    const handleGuardar = async () => {
+        setIsSaving(true)
+        try {
+            if (onGuardar) await onGuardar()
+            // Simula espera si onGuardar no retorna promesa
+            setTimeout(() => {
+                setIsSaving(false)
+                setShowCreatedModal(true)
+            }, 1200)
+        } catch {
+            setIsSaving(false)
+        }
     }
 
     return (
@@ -62,11 +80,24 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
             {/* Botones lado a lado */}
             <div className="flex gap-2">
                 <button
-                    onClick={onGuardar}
-                    className="flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors hover:bg-blue-700"
+                    onClick={handleGuardar}
+                    disabled={isSaving}
+                    className={`flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors
+                        ${isSaving ? 'bg-blue-300 cursor-not-allowed' : 'hover:bg-blue-700'}
+                    `}
                     style={{background: '#2563B6'}}
                 >
-                    Guardar
+                    {isSaving ? (
+                        <span className="flex items-center justify-center gap-2">
+                            <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none"/>
+                                <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"/>
+                            </svg>
+                            Guardando...
+                        </span>
+                    ) : (
+                        'Guardar'
+                    )}
                 </button>
                 <a
                     unselectable="on"
@@ -88,6 +119,25 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                     </button>
                 </a>
             </div>
+
+            {/* Modal de cotización creada */}
+            {showCreatedModal && (
+                <Modal isOpen={showCreatedModal} onClose={() => setShowCreatedModal(false)}>
+                    <ModalHeader title="Cotización creada" onClose={() => setShowCreatedModal(false)} />
+                    <div className="p-6 text-center">
+                        <svg className="mx-auto mb-4 h-12 w-12 text-green-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        <p className="text-lg font-semibold mb-2">¡Cotización creada exitosamente!</p>
+                        <button
+                            className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                            onClick={() => setShowCreatedModal(false)}
+                        >
+                            Cerrar
+                        </button>
+                    </div>
+                </Modal>
+            )}
         </div>
     )
 }

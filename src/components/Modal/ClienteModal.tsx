@@ -95,11 +95,21 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
             errs.telefono = 'Teléfono demasiado corto'
 
         // e-mail (opcional, pero formato)
-        if (
-            form.email &&
-            !/^[\w-.]+@([\w-]+\.)+[\w-]{2,}$/i.test(form.email)
-        )
-            errs.email = 'Email inválido'
+        if (form.email) {
+            const email = form.email;
+            const [local = '', domain = ''] = email.split('@');
+            if (
+                email.length > 320 ||
+                local.length > 64 ||
+                domain.length > 255 ||
+                !/^([A-Za-z0-9]+(?:[.-][A-Za-z0-9]+)*)@([A-Za-z0-9]+(?:-[A-Za-z0-9]+)*(\.[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*)+)$/.test(email)
+            ) {
+                if (email.length > 320) errs.email = 'Email demasiado largo (máx. 320)';
+                else if (local.length > 64) errs.email = 'La parte antes de @ es demasiado larga (máx. 64)';
+                else if (domain.length > 255) errs.email = 'La parte después de @ es demasiado larga (máx. 255)';
+                else errs.email = 'Email inválido';
+            }
+        }
 
         // RUT
         const { ok: rutOk, clean } = validateRut(form.rut)
@@ -188,7 +198,8 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
                             <label className="font-montserrat font-medium text-[20px]">Teléfono</label>
                             <input
                                 value={form.telefono}
-                                onChange={e => onChangeTelefono(e.target.value)}
+                                onChange={e => onChangeTelefono(e.target.value.slice(0, 15))}
+                                maxLength={15}
                                 className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
                             />
                             {errores.telefono && <p className="text-red-600 text-sm">{errores.telefono}</p>}
@@ -198,8 +209,10 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
                         <div className="flex flex-col w-[300px] gap-[5px]">
                             <label className="font-montserrat font-medium text-[20px]">Email</label>
                             <input
+                                type="email"
                                 value={form.email}
-                                onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                                onChange={e => setForm(f => ({ ...f, email: e.target.value.slice(0, 320) }))}
+                                maxLength={320}
                                 className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
                             />
                             {errores.email && <p className="text-red-600 text-sm">{errores.email}</p>}
