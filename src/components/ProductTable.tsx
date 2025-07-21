@@ -10,29 +10,6 @@ interface ProductTableProps {
     quotationId?: string
 }
 
-/*
-
-interface Product {
-    sku: string
-    nombre: string
-    descripcion: string
-    precio: number
-    stockDisponible: number
-    peso: number
-    proveedor?: {
-        marca: string
-    }
-    descuento?: number
-    stockPorSucursal?: Array<{
-        sucursalId: number;
-        sucursalNombre: string;
-        cantidad: number;
-        descuento: number;
-    }>
-}
-
- */
-
 const ProductTable: React.FC<ProductTableProps> = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     // Cargar sucursales
@@ -47,58 +24,6 @@ const ProductTable: React.FC<ProductTableProps> = () => {
     }
     const { state } = useCotizacionFlow()
     const productosEnCotizacion = state.productos       // ← vienen del contexto
-
-    // Función para agregar múltiples productos desde el modal
-    /*
-    const handleAgregarProductos = (productos: { producto: Product, cantidad: number, sucursalId: number }[]) => {
-        productos.forEach(({ producto, cantidad, sucursalId }) => {
-            const productoExistente = productosEnCotizacion.find(p =>
-                p.sku === producto.sku && p.sucursalId === sucursalId
-            )
-
-            if (productoExistente) {
-                const nuevaCantidadTotal = productoExistente.cantidad + cantidad
-
-                if (nuevaCantidadTotal > producto.stockDisponible) {
-                    alert(`No puedes agregar más productos. Stock disponible: ${producto.stockDisponible}, ya tienes: ${productoExistente.cantidad}`)
-                    return
-                }
-
-                setProductosEnCotizacion(prev =>
-                    prev.map(p =>
-                        p.sku === producto.sku && p.sucursalId === sucursalId
-                            ? { ...p, cantidad: nuevaCantidadTotal }
-                            : p
-                    )
-                )
-            } else {
-                if (cantidad > producto.stockDisponible) {
-                    alert(`No puedes agregar ${cantidad} productos. Stock disponible: ${producto.stockDisponible}`)
-                    return
-                }
-
-                const nuevoProducto: ProductoEnCotizacion = {
-                    sku: producto.sku,
-                    nombre: producto.nombre,
-                    descripcion: producto.descripcion,
-                    precio: producto.precio,
-                    cantidad: cantidad,
-                    descuento: producto.descuento || 0,
-                    stockDisponible: producto.stockDisponible,
-                    peso: producto.peso,
-                    proveedor: producto.proveedor,
-                    sucursalId: sucursalId
-                }
-                setProductosEnCotizacion(prev => [...prev, nuevoProducto])
-            }
-        })
-    }*/
-    // Función para eliminar producto de la cotización
-    // const handleEliminarProducto = (sku: string, sucursalId: number): void => {
-    //     setProductosEnCotizacion(prev =>
-    //         prev.filter(p => !(p.sku === sku && p.sucursalId === sucursalId))
-    //     )
-    // }
 
     return (
         <>
