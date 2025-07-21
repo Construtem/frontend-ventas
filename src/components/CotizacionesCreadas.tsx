@@ -99,7 +99,13 @@ export default function CotizacionesCreadas() {
 
 
             {loading && <div className="text-gray-500">Cargando...</div>}
-            {error && <div className="text-red-500">{error}</div>}
+            {error && (
+                <div className="text-red-500">
+                    {error.includes('500')
+                        ? 'Error al cargar cotizaciones, favor de verificar su conexión a internet'
+                        : error}
+                </div>
+            )}
             {!loading && !error && (
                 <table className="w-full text-sm rounded-[10px] overflow-hidden border-b-[2px] border-gray-200 shadow-[0_0_2px_rgba(0,0,0,0.25)]">
                     <thead>
