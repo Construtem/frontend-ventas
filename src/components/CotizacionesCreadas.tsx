@@ -80,6 +80,9 @@ export default function CotizacionesCreadas() {
     const [historial, setHistorial] = useState<DBCotizacion[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [DetalleCotizacion, setDetalleCotizacion] = useState(false);
+    const [cotizacionSeleccionada, setCotizacionSeleccionada] = useState<DBCotizacion | null>(null);
+
 
     useEffect(() => {
         obtenerTodasLasCotizaciones()
@@ -95,6 +98,63 @@ export default function CotizacionesCreadas() {
         <div className="bg-white px-[40px] py-[40px] rounded-[10px] overflow-auto
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[10px] items-center sm:items-start
                       w-full gap-[20px]">
+
+                {/* Detalle de cotización modal */}
+                {DetalleCotizacion && cotizacionSeleccionada && (
+                    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-lg shadow-lg max-w-md w-full max-h-[80vh]">
+
+                            {/* Header del modal */}
+                            <div className="bg-[#091127] w-[calc(100%)] rounded-t-lg justify-center">
+                            <div className=" px-5 py-4 flex justify-between items-center-mx-6 ">
+                                <h2 className="text-white text-3xl font-bold">Detalle Cotización</h2>
+                                <button
+                                onClick={() => setDetalleCotizacion(false)}
+                                className="text-white text-xl font-bold hover:text-gray-300 cursor-pointer"
+                                >
+                                &times;
+                                </button>
+                            </div>
+                            </div>
+
+                            <div className="p-6 max-h-[70vh] overflow-y-auto">
+                            <p className="border-b border-black mt-3 mb-3"><strong>ID:</strong> {cotizacionSeleccionada.id}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Cliente:</strong> {cotizacionSeleccionada.cliente.nombre}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Fecha:</strong> {new Date(cotizacionSeleccionada.fecha_crea).toLocaleDateString('es-CL')}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Cantidad de Productos:</strong> {cotizacionSeleccionada.total_items}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Total:</strong> {cotizacionSeleccionada.total_precio.toLocaleString('es-CL')}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Estado:</strong> {cotizacionSeleccionada.estado}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Costo Envio:</strong> {cotizacionSeleccionada.costo_envio}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Tipo de despacho:</strong> {cotizacionSeleccionada.tipo_despacho}</p>
+                            <p className="border-b border-black mt-4 mb-3"><strong>Productos:</strong></p>
+                            <ul className="list-disc pl-5">
+                                {(cotizacionSeleccionada.items?.length ?? 0) === 0 ? (
+                                    <li className="mt-2 text-gray-00">No hay productos en esta cotización.</li>
+                                ) : (
+                                cotizacionSeleccionada.items.map((producto, index) => (
+                                    <li key={index} className="mt-2">
+                                        <strong>{producto.cantidad}</strong>: {producto.nombre} ({producto.sku})
+                                    </li>
+                                )) 
+                                )}
+                            </ul>
+
+                            <div className="flex mb-4 mx-6 justify-end">
+                            <button
+                                className="mt-4 bg-[#E5E7EB] text-black font-bold px-4 py-2 rounded hover:bg-[#B0B2B5] shadow-md cursor-pointer"
+                                onClick={() => setDetalleCotizacion(false)}
+                            >
+                                Cerrar
+                            </button>
+                            </div>
+    
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+            
+            
             <h2 className={'font-semibold font-montserrat text-[24px]'}>Cotizaciones Creadas</h2>
 
 
@@ -115,7 +175,12 @@ export default function CotizacionesCreadas() {
                     <tbody>
 
                     {historial && historial.map(c => (
-                        <tr key={c.id} className={'transition-all duration-400 hover:scale-[1.005] ease-in-out hover:bg-gray-50 cursor-pointer'}>
+                        <tr key={c.id} className={"transition-all duration-400 hover:scale-[1.005] ease-in-out hover:bg-gray-50 cursor-pointer"}
+                            onClick={() => {
+                                setDetalleCotizacion(true);
+                                setCotizacionSeleccionada(c);
+                            }}
+                        >
                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] '}>{c.id}</td>
                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] '}>{c.cliente.nombre}</td>
                             <td className={'text-center text-[18px] font-montserrat border-b-[1px] border-gray-200 p-[10px] '}>{new Date(c.fecha_crea).toLocaleDateString('es-CL')}</td>
