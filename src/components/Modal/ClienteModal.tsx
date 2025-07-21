@@ -153,90 +153,92 @@ export function ClienteModal({ isOpen, onClose }: ClienteModalProps) {
     /* Render – SE MANTIENE el markup y clases ============================= */
     return (
         <Modal isOpen={isOpen} onClose={onClose}>
-            <ModalHeader title="Cliente" onClose={onClose} />
+            <div className="w-[500px] min-h-[500px] max-h-[700px] flex flex-col justify-between">
+                <ModalHeader title="Cliente" onClose={onClose} />
 
-            <ModalBody>
-                <div className="flex gap-[50px] px-[40px]">
-                    <div className="flex flex-col gap-4">
-                        {/* Nombre --------------------------------------------------- */}
-                        <div className="flex flex-col w-[300px] gap-[5px]">
-                            <label className="font-montserrat font-medium text-[20px]">Nombre</label>
-                            <input
-                                value={form.nombre}
-                                onChange={e => onChangeNombre(e.target.value)}
-                                className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
-                            />
-                            {errores.nombre && <p className="text-red-600 text-sm">{errores.nombre}</p>}
-                        </div>
+                <ModalBody>
+                    <div className="flex gap-[50px] px-[40px]">
+                        <div className="flex flex-col gap-4">
+                            {/* Nombre --------------------------------------------------- */}
+                            <div className="flex flex-col w-[300px] gap-[5px]">
+                                <label className="font-montserrat font-medium text-[20px]">Nombre</label>
+                                <input
+                                    value={form.nombre}
+                                    onChange={e => onChangeNombre(e.target.value)}
+                                    className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
+                                />
+                                {errores.nombre && <p className="text-red-600 text-sm">{errores.nombre}</p>}
+                            </div>
 
-                        {/* Tipo cliente -------------------------------------------- */}
-                        <div className="flex flex-col w-[300px] gap-[5px]">
-                            <label className="font-montserrat font-medium text-[20px]">Tipo de cliente</label>
-                            <select
-                                value={form.tipo}
-                                onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}
-                                className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
-                            >
-                                <option>Persona</option>
-                                <option>Empresa</option>
-                            </select>
-                        </div>
+                            {/* Tipo cliente -------------------------------------------- */}
+                            <div className="flex flex-col w-[300px] gap-[5px]">
+                                <label className="font-montserrat font-medium text-[20px]">Tipo de cliente</label>
+                                <select
+                                    value={form.tipo}
+                                    onChange={e => setForm(f => ({ ...f, tipo: e.target.value }))}
+                                    className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
+                                >
+                                    <option>Persona</option>
+                                    <option>Empresa</option>
+                                </select>
+                            </div>
 
-                        {/* RUT ------------------------------------------------------ */}
-                        <div className="flex flex-col w-[300px] gap-[5px]">
-                            <label className="font-montserrat font-medium text-[20px]">Rut</label>
-                            <input
-                                value={form.rut}
-                                onChange={e => onChangeRut(e.target.value)}
-                                className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
-                            />
-                            {errores.rut && <p className="text-red-600 text-sm">{errores.rut}</p>}
-                        </div>
+                            {/* RUT ------------------------------------------------------ */}
+                            <div className="flex flex-col w-[300px] gap-[5px]">
+                                <label className="font-montserrat font-medium text-[20px]">Rut</label>
+                                <input
+                                    value={form.rut}
+                                    onChange={e => onChangeRut(e.target.value)}
+                                    className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
+                                />
+                                {errores.rut && <p className="text-red-600 text-sm">{errores.rut}</p>}
+                            </div>
 
-                        {/* Teléfono ------------------------------------------------ */}
-                        <div className="flex flex-col w-[300px] gap-[5px]">
-                            <label className="font-montserrat font-medium text-[20px]">Teléfono</label>
-                            <input
-                                value={form.telefono}
-                                onChange={e => onChangeTelefono(e.target.value.slice(0, 15))}
-                                maxLength={15}
-                                className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
-                            />
-                            {errores.telefono && <p className="text-red-600 text-sm">{errores.telefono}</p>}
-                        </div>
+                            {/* Teléfono ------------------------------------------------ */}
+                            <div className="flex flex-col w-[300px] gap-[5px]">
+                                <label className="font-montserrat font-medium text-[20px]">Teléfono</label>
+                                <input
+                                    value={form.telefono}
+                                    onChange={e => onChangeTelefono(e.target.value.slice(0, 15))}
+                                    maxLength={15}
+                                    className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
+                                />
+                                {errores.telefono && <p className="text-red-600 text-sm">{errores.telefono}</p>}
+                            </div>
 
-                        {/* Email ---------------------------------------------------- */}
-                        <div className="flex flex-col w-[300px] gap-[5px]">
-                            <label className="font-montserrat font-medium text-[20px]">Email</label>
-                            <input
-                                type="email"
-                                value={form.email}
-                                onChange={e => setForm(f => ({ ...f, email: e.target.value.slice(0, 320) }))}
-                                maxLength={320}
-                                className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
-                            />
-                            {errores.email && <p className="text-red-600 text-sm">{errores.email}</p>}
+                            {/* Email ---------------------------------------------------- */}
+                            <div className="flex flex-col w-[300px] gap-[5px]">
+                                <label className="font-montserrat font-medium text-[20px]">Email</label>
+                                <input
+                                    type="email"
+                                    value={form.email}
+                                    onChange={e => setForm(f => ({ ...f, email: e.target.value.slice(0, 320) }))}
+                                    maxLength={320}
+                                    className="w-full rounded px-2 py-[10px] focus:outline-none border-black border-[1px] "
+                                />
+                                {errores.email && <p className="text-red-600 text-sm">{errores.email}</p>}
+                            </div>
                         </div>
                     </div>
-                </div>
-            </ModalBody>
+                </ModalBody>
 
-            <ModalFooter>
-                <button
-                    onClick={onClose}
-                    className="px-4 py-2 border rounded font-medium font-montserrat cursor-pointer hover:bg-gray-100"
-                >
-                    Cancelar
-                </button>
+                <ModalFooter>
+                    <button
+                        onClick={onClose}
+                        className="px-4 py-2 border rounded font-medium font-montserrat cursor-pointer hover:bg-gray-100"
+                    >
+                        Cancelar
+                    </button>
 
-                <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="px-4 py-2 text-white rounded bg-[#1b5be7] hover:bg-[#1e4fbb] font-medium font-montserrat cursor-pointer disabled:opacity-60"
-                >
-                    {saving ? 'Guardando…' : 'Guardar'}
-                </button>
-            </ModalFooter>
+                    <button
+                        onClick={handleSave}
+                        disabled={saving}
+                        className="px-4 py-2 text-white rounded bg-[#1b5be7] hover:bg-[#1e4fbb] font-medium font-montserrat cursor-pointer disabled:opacity-60"
+                    >
+                        {saving ? 'Guardando…' : 'Guardar'}
+                    </button>
+                </ModalFooter>
+            </div>
         </Modal>
     )
 }

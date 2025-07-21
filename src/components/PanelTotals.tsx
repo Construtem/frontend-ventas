@@ -2,6 +2,7 @@
 import React, { useState } from 'react'
 import Modal from '@/components/Modal/Modal' // Asegúrate de tener este componente
 import { ModalHeader } from '@/components/Modal/ModalsParts'
+import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 
 interface PanelTotalsProps {
     quotation: {
@@ -23,8 +24,11 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
     cotizacionId,
 }) => {
     const BASE_URL_FACTURACION_FRONTEND = process.env.NEXT_PUBLIC_FRONT_FACTURACION || ' https://facturacion.tssw.cl'
+    const { state } = useCotizacionFlow(); // <-- agrega esto para acceder al cliente seleccionado
     const [isSaving, setIsSaving] = useState(false)
     const [showCreatedModal, setShowCreatedModal] = useState(false)
+    const [errorMsg, setErrorMsg] = useState<string | null>(null);
+    const [showEmptyMsg, setShowEmptyMsg] = useState(false);
 
     const formatCurrency = (amount: number) => {
         return new Intl.NumberFormat('es-CL', {
@@ -33,19 +37,40 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
         }).format(amount)
     }
 
+    const cotizacionVacia =
+    !quotation.totalProductosNeto &&
+    !quotation.totalDespacho &&
+    !quotation.totalDescuento &&
+    !quotation.totalProductosIVA &&
+    !quotation.totalCotizacion;
+
     const handleGuardar = async () => {
-        setIsSaving(true)
-        try {
-            if (onGuardar) await onGuardar()
-            // Simula espera si onGuardar no retorna promesa
-            setTimeout(() => {
-                setIsSaving(false)
-                setShowCreatedModal(true)
-            }, 1200)
-        } catch {
-            setIsSaving(false)
+        setShowEmptyMsg(false);
+        setErrorMsg(null);
+
+        // Validación de cliente seleccionado
+        if (!state.clienteRut) {
+            setErrorMsg("Debes seleccionar un cliente antes de guardar la cotización.");
+            return;
         }
-    }
+
+        if (cotizacionVacia) {
+            setShowEmptyMsg(true);
+            return;
+        }
+
+        setIsSaving(true);
+        try {
+            if (onGuardar) await onGuardar();
+            setTimeout(() => {
+                setIsSaving(false);
+                setShowCreatedModal(true);
+            }, 1200);
+        } catch {
+            setIsSaving(false);
+            setErrorMsg("Ocurrió un error al guardar la cotización. Por favor, verifica tu conexión o intenta nuevamente.");
+        }
+    };
 
     return (
         <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
@@ -79,26 +104,28 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
 
             {/* Botones lado a lado */}
             <div className="flex gap-2">
-                <button
-                    onClick={handleGuardar}
-                    disabled={isSaving}
-                    className={`flex-1 text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors
-                        ${isSaving ? 'bg-blue-300 cursor-not-allowed' : 'hover:bg-blue-700'}
-                    `}
-                    style={{background: '#2563B6'}}
-                >
-                    {isSaving ? (
-                        <span className="flex items-center justify-center gap-2">
-                            <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none"/>
-                                <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"/>
-                            </svg>
-                            Guardando...
-                        </span>
-                    ) : (
-                        'Guardar'
-                    )}
-                </button>
+                <div className="flex-1 flex flex-col">
+                    <button
+                        onClick={handleGuardar}
+                        disabled={isSaving}
+                        className={`text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors
+                            ${isSaving ? 'bg-blue-300 cursor-not-allowed' : 'hover:bg-blue-700'}
+                        `}
+                        style={{background: '#2563B6'}}
+                    >
+                        {isSaving ? (
+                            <span className="flex items-center justify-center gap-2">
+                                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
+                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none"/>
+                                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"/>
+                                </svg>
+                                Guardando...
+                            </span>
+                        ) : (
+                            'Guardar'
+                        )}
+                    </button>
+                </div>
                 <a
                     unselectable="on"
                     href={cotizacionId ? `${BASE_URL_FACTURACION_FRONTEND}/checkout/${cotizacionId}` : undefined}
@@ -119,6 +146,18 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                     </button>
                 </a>
             </div>
+                <div className="h-10 flex items-center justify-center">
+                    {showEmptyMsg && (
+                        <span className="text-red-500 text-sm text-center">
+                            Debes agregar productos antes de guardar la cotización.
+                        </span>
+                    )}
+                    {errorMsg && (
+                        <span className="text-red-500 text-sm text-center">
+                            {errorMsg}
+                        </span>
+                    )}
+                </div>
 
             {/* Modal de cotización creada */}
             {showCreatedModal && (

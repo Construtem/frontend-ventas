@@ -46,7 +46,7 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
         return { stock: b?.stock ?? 0, descuento: b?.descuento ?? 0 }
     }
 
-    const productosFiltrados = rows.filter(rows => {
+    const productosFiltrados = rows?.filter(rows => {
         const termino = search.trim().toLowerCase();
         if (!termino) return true;
         return (
@@ -155,11 +155,20 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                     </tr>
                                     </thead>
 
+                                    {!rows? (
+                                        <tbody>
+                                        <tr>
+                                            <td colSpan={9} className="px-2 py-4 text-center text-gray-500">
+                                                No existen productos en inventario.
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    ):(
                                     <tbody>
                                     {productosFiltrados.map(p => {
-                                        const origen   = selOrigen[p.sku] ?? 'Sucursal'
-                                        const { stock, descuento } = dataOrigen(p, origen)
-                                        const qty      = selQty[p.sku] ?? ""
+                                        const origen = selOrigen[p.sku] ?? 'Sucursal'
+                                        const {stock, descuento} = dataOrigen(p, origen)
+                                        const qty = selQty[p.sku] ?? ""
                                         const netoUnit = p.precio * (1 - descuento / 100)
 
                                         return (
@@ -290,6 +299,7 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                         )
                                     })}
                                     </tbody>
+                                    )}
                                 </table>
                             </div>
                         </>
