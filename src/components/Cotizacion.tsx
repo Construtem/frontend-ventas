@@ -67,7 +67,6 @@ export default function Cotizacion() {
         }
         dispatch({ type: 'SAVE_DRAFT_OK', payload: provisional })
     }
-    console.log(state.direccionId)
 
     const handleCancel = () =>
         dispatch(

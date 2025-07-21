@@ -128,6 +128,7 @@ export interface CotizacionItem {
     precio_unitario?: number     | undefined
     precio?:          number     | undefined
     descuento?:       number     | undefined
+    subtotal?:        number     | undefined
 }
 
 /* Respuesta principal: una cotización */
@@ -244,6 +245,40 @@ export interface PreviewDespacho {
     distancia_km:    number;
     tiempo_estimado: number;   // minutos
 }
+
+export type CotizacionCheckout = {
+    id: number
+    fecha_crea: string
+    estado: string
+    estado_pago: string
+    tipo_despacho: string
+    costo_envio: number
+    total: number
+    subtotal: number
+    descripcion?: string
+    cliente: {
+        nombre: string
+        email?: string
+        rut: string
+        telefono?: string
+    }
+    direccion?: {
+        ciudad: string
+        comuna: string
+        direccion: string
+    }
+    items: {
+        nombre: string
+        sku: string
+        cantidad: number
+        precio_unitario: number
+        subtotal: number
+        sucursal: string
+    }[]
+}
+
+
+
 
 /**
  * Historial de cotizaciones de un cliente por RUT.
@@ -468,11 +503,10 @@ export interface CheckoutInfo {
 }
 
 
-export async function checkoutCotizacion (id: number): Promise<CheckoutInfo> {
+export async function checkoutCotizacion (id: number): Promise<CotizacionCheckout> {
     const r = await fetch(`${API_BASE_URL}/api/cotizaciones/checkout/${id}`, {
         method : 'GET',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',        // ← quítalo si no usas cookies/sesión
     })
 
     if (!r.ok) {
@@ -480,5 +514,5 @@ export async function checkoutCotizacion (id: number): Promise<CheckoutInfo> {
         throw new Error(`Checkout falló (${r.status}): ${msg}`)
     }
 
-    return (await r.json()) as CheckoutInfo
+    return (await r.json()) as CotizacionCheckout
 }

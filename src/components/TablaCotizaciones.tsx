@@ -1,5 +1,12 @@
+'use client'
 import { useState } from 'react';
-import {DBCotizacion} from "@/services/apiServices";
+import {
+    DBCotizacion,
+    CotizacionCheckout,
+    checkoutCotizacion
+} from "@/services/apiServices";
+import CotizacionDetalleModal from "@/components/Modal/CotizacionDetalleModal";
+import { useCotizacionFlow } from "@/contexts/CotizacionFlow";
 
 function getEstadoColor(estado: string) {
     switch (estado) {
@@ -14,12 +21,13 @@ function getEstadoColor(estado: string) {
     }
 }
 
-const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
+const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
     const [paginaActual, setPaginaActual] = useState(1);
     const [busqueda, setBusqueda] = useState('');
+    const [cotizacionSeleccionadaDetails, setCotizacionSeleccionadaDetails] = useState<DBCotizacion | CotizacionCheckout | null>(null);
     const porPagina = 10;
+    const { state, dispatch } = useCotizacionFlow();
 
-    // Filtrar por nombre del cliente
     const historialFiltrado = historial.filter(c =>
         c.cliente.nombre.toLowerCase().includes(busqueda.toLowerCase())
     );
@@ -31,20 +39,22 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
         paginaActual * porPagina
     );
 
-    async function handleObtenerInformacionCotizacion (id: number) {
-        id=1
-        console.log(id)
-        /*
-
+    async function handleObtenerInformacionCotizacion(id: number) {
         try {
-            const info = await checkoutCotizacion(id)
-            console.log(info)
+            const info = await checkoutCotizacion(id);
+            setCotizacionSeleccionadaDetails(info);
+            dispatch({ type: 'OPEN_MODAL' });
         } catch (e) {
-            console.error(e)
-            alert('No se pudo iniciar el pago')
+            console.error(e);
+            alert('No se pudo iniciar el pago');
         }
-        * */
     }
+
+    function handleCloseModal() {
+        dispatch({ type: 'CLOSE_MODAL' });
+        setCotizacionSeleccionadaDetails(null);
+    }
+
     return (
         <div className="w-full">
             {/* Buscador */}
@@ -81,11 +91,11 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
                         </td>
                     </tr>
                 ) : (
-                    historial && historialPaginado.map((c) => (
+                    historialPaginado.map((c) => (
                         <tr
                             key={c.id}
                             className="transition-all duration-400 hover:scale-[1.005] ease-in-out hover:bg-gray-50 cursor-pointer"
-                            onClick={()=>handleObtenerInformacionCotizacion(c.id)}
+                            onClick={() => handleObtenerInformacionCotizacion(c.id)}
                         >
                             <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.id}</td>
                             <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.cliente.nombre}</td>
@@ -122,10 +132,9 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
                         <button
                             key={i}
                             onClick={() => setPaginaActual(i + 1)}
-                            className={`px-3 py-1 rounded ${
-                                paginaActual === i + 1
-                                    ? 'bg-blue-600 text-white'
-                                    : 'bg-gray-100 text-gray-800 cursor-pointer hover:bg-gray-300'
+                            className={`px-3 py-1 rounded ${paginaActual === i + 1
+                                ? 'bg-blue-600 text-white'
+                                : 'bg-gray-100 text-gray-800 cursor-pointer hover:bg-gray-300'
                             }`}
                         >
                             {i + 1}
@@ -140,6 +149,15 @@ const TablaCotizaciones = ({historial}:{historial: DBCotizacion[]} ) => {
                         Siguiente
                     </button>
                 </div>
+            )}
+
+            {/* Modal de detalle */}
+            {cotizacionSeleccionadaDetails && (
+                <CotizacionDetalleModal
+                    open={state.showModal}
+                    onClose={handleCloseModal}
+                    data={cotizacionSeleccionadaDetails}
+                />
             )}
         </div>
     );
