@@ -12,39 +12,32 @@ import {
 
 import { toDraft }               from '@/utils/helpers/productMapper'
 
-/* ────────────────────────────────────────────────────────────────── */
 interface ProductoModalProps {
     isOpen : boolean
     onClose: () => void
 }
-/* ────────────────────────────────────────────────────────────────── */
-export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
-    /* contexto global (flujo de cotización) -------------------------- */
-    const { state, dispatch } = useCotizacionFlow()
-    const sucursalId          = state.sucursalId          // tienda principal
 
-    /* estado local (productos, selecciones) -------------------------- */
+export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
+    const { state, dispatch } = useCotizacionFlow()
+    const sucursalId          = state.sucursalId
+
     const [rows,      setRows]      = useState<ProductoInventario[]>([])
     const [selOrigen, setSelOrigen] = useState<Record<string, string>>({})
     const [selQty,    setSelQty]    = useState<Record<string, number | "">>({})
     const [noti, setNoti] = useState<{nombre: string, cantidad: number} | null>(null);
     const [search, setSearch] = useState("");
 
-    /* fetch inventario al cambiar de sucursal ------------------------ */
     useEffect(() => {
         if (!sucursalId) return
         obtenerProductosInventario(sucursalId, 1, 100)
             .then(r => {
                 setRows(r.productos)
-                /* reset de selecciones si cambia tienda */
                 setSelOrigen({})
                 setSelQty({})
             })
             .catch(e => console.error('[Inventario]', e))
     }, [sucursalId])
 
-    /* helpers -------------------------------------------------------- */
-    /** Devuelve stock / desc. de la sucursal (o bodega) elegida */
     function dataOrigen (p: ProductoInventario, origen: string) {
         if (origen === 'Sucursal') {
             return { stock: p.stock_sucursal, descuento: p.descuento_sucursal }
@@ -53,14 +46,6 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
         return { stock: b?.stock ?? 0, descuento: b?.descuento ?? 0 }
     }
 
-    /** Cambia cantidad manteniendo límites 
-    function setQty(sku: string, nueva: number, max: number) {
-        const qty = Math.min(Math.max(nueva, 0), max); // ahora el mínimo es 0
-        setSelQty(q => ({ ...q, [sku]: qty }));
-    }
-    */
-
-    /** Filtra los productos según el término de búsqueda */
     const productosFiltrados = rows.filter(rows => {
         const termino = search.trim().toLowerCase();
         if (!termino) return true;
@@ -70,21 +55,18 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
         );
     });    
 
-    /** Añade el producto al contexto y descuenta stock en tabla */
     function handleAdd (p: ProductoInventario) {
         const origenNombre      = selOrigen[p.sku] ?? 'Sucursal'
         const { stock }         = dataOrigen(p, origenNombre)
         const qty               = selQty[p.sku] ?? ""
-        if (Number(qty) > stock) return                               // safety
+        if (Number(qty) > stock) return
 
-        /* 1. construimos DraftProducto con mapper -------------------- */
         const draft             = toDraft(p, origenNombre, Number(sucursalId))
         draft.cantidad          = Number(qty)
         draft.total             = draft.netoUnit * (Number(qty) || 0)
 
         dispatch({ type: 'ADD_PRODUCT', payload: draft })
 
-        /* 2. descontamos stock en la tabla visual -------------------- */
         setRows(rs =>
             rs.map(r => {
                 if (r.sku !== p.sku) return r
@@ -100,15 +82,11 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
             }),
         )
 
-        /* 3. reseteamos qty de ese SKU ------------------------------- */
         setSelQty(q => ({ ...q, [p.sku]: 0 }))
-
-        /* 4. mostramos notificación de éxito ------------------------- */
         setNoti({ nombre: p.nombre, cantidad: Number(qty) });
         setTimeout(() => setNoti(null), 2000);
     }
 
-    /* render -------------------------------------------------------- */
     return (
         <>
             {noti && (
@@ -130,7 +108,6 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
 
                     {sucursalId && (
                         <>
-
                             {/* Search bar */}
                             <div className="mb-4 flex items-center relative">
                                 <span className="absolute left-3 top-1/2 -translate-y-1/2">
@@ -228,13 +205,13 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                                                 disabled:bg-gray-300 disabled:text-gray-400 disabled:cursor-not-allowed"
                                                             onClick={() => {
                                                                 if (!qty || Number(qty) <= 1) {
-                                                                    setSelQty(q => ({ ...q, [p.sku]: "" })); // Deja vacío si es 0 o 1
+                                                                    setSelQty(q => ({ ...q, [p.sku]: "" }));
                                                                 } else {
                                                                     const newQty = Number(qty) - 1;
                                                                     setSelQty(q => ({ ...q, [p.sku]: newQty }));
                                                                 }
                                                             }}
-                                                            disabled={!qty || Number(qty) <= 0}
+                                                            disabled={!qty || Number(qty) <= 0 || stock === 0}
                                                         >
                                                             −
                                                         </button>
@@ -269,7 +246,7 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                                                 const newQty = Math.min(stock, Number(qty) + 1)
                                                                 setSelQty(q => ({ ...q, [p.sku]: newQty }))
                                                             }}
-                                                            disabled={Number(qty) >= stock}
+                                                            disabled={Number(qty) >= stock || stock === 0}
                                                         >
                                                             +
                                                         </button>
