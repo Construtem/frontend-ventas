@@ -134,15 +134,16 @@ export interface CotizacionItem {
 export interface DBCotizacion {
     id:            number
     fecha_crea:    string                // ISO 8601
-    direccion_id:   number | null
+    direccionId:   number | null
     estado:        'aprobada' | 'rechazada' | 'pendiente'
     costo_envio?:   number
     rut_cliente?:   string
     user_id?:       string
+    total?:         number
     tipo_despacho?: string
-    total:         number
-    descripcion:   string
+    descripcion?:   string
     direccion?:    DireccionCliente      | undefined
+    direccion_id?: number | null
 
 
     /** '' = sin registrar | 'pendiente' | 'pagado' */
@@ -457,4 +458,27 @@ export async function actualizarDatosCotizacion (
         const msg = await r.text();
         throw new Error(`PUT cotización · ${r.status}: ${msg}`);
     }
+}
+export interface CheckoutInfo {
+    /** url o token para pasarela, monto, etc.  Ajusta a tu respuesta real */
+    urlPago:      string
+    totalPagar:   number
+    moneda:       string
+    vencimiento?: string
+}
+
+
+export async function checkoutCotizacion (id: number): Promise<CheckoutInfo> {
+    const r = await fetch(`${API_BASE_URL}/api/cotizaciones/checkout/${id}`, {
+        method : 'GET',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',        // ← quítalo si no usas cookies/sesión
+    })
+
+    if (!r.ok) {
+        const msg = await r.text().catch(() => r.statusText)
+        throw new Error(`Checkout falló (${r.status}): ${msg}`)
+    }
+
+    return (await r.json()) as CheckoutInfo
 }

@@ -88,7 +88,7 @@ const initialState: CotizacionState = {
     direccionId:          null,
 
     isEditing:            false,
-    isCreating:           false,
+    isCreating:           true,
     draftQuote:           null,
     localQuotes:          [],
     showModal:            false,

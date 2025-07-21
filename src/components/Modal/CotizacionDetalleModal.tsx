@@ -36,7 +36,9 @@ export default function CotizacionDetalleModal ({ open, onClose, data }: Props) 
                         </p>
                         <p><span className='font-semibold'>Fecha:</span> {new Date(fecha_crea).toLocaleDateString()}</p>
                         <p><span
-                            className='font-semibold'>Tipo envío:</span> {tipo_despacho && 2 ? 'A domicilio' : 'Retiro en tienda'}
+                            className='font-semibold'>Tipo envío:</span> {tipo_despacho
+                            ? tipo_despacho.charAt(0).toUpperCase() + tipo_despacho.slice(1)
+                            : ''}
                         </p>
                         <p><span className='font-semibold'>Costo envío:</span> {money(Number(costo_envio))}</p>
                         {data.direccion&&(

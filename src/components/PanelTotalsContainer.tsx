@@ -119,7 +119,6 @@ export default function PanelTotalsContainer () {
             }
 
             setLastId(newId)
-            alert(`Cotización #${newId} creada correctamente`)
         } catch (e) {
             console.error(e)
             alert('No se pudo crear la cotización. Revisa consola.')

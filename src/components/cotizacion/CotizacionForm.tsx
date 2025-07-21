@@ -9,6 +9,8 @@ import {
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import { useAddressCheck } from '@/hooks/useAddressCheck'
 import { useMutation, useQuery } from '@tanstack/react-query'
+import CotizacionHeader from "@/components/cotizacion/CotizacionHeader";
+import CotizacionBlocked from "@/components/cotizacion/CotizacionBlocked";
 
 
 
@@ -129,10 +131,17 @@ export const CotizacionForm: React.FC<Props> = ({
     const formateaDir = (d: DireccionCliente) =>
         `${d.direccion}, ${d.comuna}, ${d.ciudad}`
 
+    console.log(state.clienteRut)
+
+
     /* ───────── Render ───────── */
     return (
-        <article className="bg-white rounded-[10px] shadow px-8 py-6 space-y-4 shadow-[0_0_2px_rgba(0,0,0,0.25)] lg:min-h-[550px]">
-            {/* --- Título --- */}
+        <article className={`${state.clienteRut?'':'flex flex-col justify-center'} bg-white rounded-[10px] shadow px-8 py-6 space-y-4 shadow-[0_0_2px_rgba(0,0,0,0.25)] lg:min-h-[550px]`}>
+            {!state.clienteRut ? (
+                <CotizacionBlocked/>
+            ) : (
+                <>
+            <CotizacionHeader/>
             <header className="flex justify-between">
                 <h2 className="text-2xl font-semibold text-sky-600">
                     {draft.id ? `Editar cotización #${draft.id}` : 'Nueva cotización'}
@@ -145,7 +154,6 @@ export const CotizacionForm: React.FC<Props> = ({
             </header>
 
             <div className="space-y-4 w-full">
-                {/* --- Descripción --- */}
                 <DetalleLinea label="Descripción">
           <textarea
               className="w-full border rounded px-3 py-1"
@@ -154,7 +162,6 @@ export const CotizacionForm: React.FC<Props> = ({
           />
                 </DetalleLinea>
 
-                {/* --- Tipo de envío --- */}
                 <DetalleLinea label="Tipo de envío">
                     <select
                         className="border rounded px-2 py-1"
@@ -173,14 +180,12 @@ export const CotizacionForm: React.FC<Props> = ({
                     </select>
                 </DetalleLinea>
 
-                {/* --- Dirección (si corresponde) --- */}
                 {draft.tipo_despacho !== 'retiro tienda' && (
                     <DetalleLinea
                         label="Dirección de despacho"
                         className="flex-wrap xl:flex-nowrap items-baseline"
                     >
                         <div className="flex flex-col gap-4 max-w-fit">
-                            {/* selector existente */}
                             {direccion.length > 0 && (
                                 <select
                                     disabled={dirLoading}
@@ -198,7 +203,6 @@ export const CotizacionForm: React.FC<Props> = ({
                                 </select>
                             )}
 
-                            {/* botón nueva dir */}
                             <Button
                                 label={
                                     mostrarNuevaDir
@@ -209,7 +213,6 @@ export const CotizacionForm: React.FC<Props> = ({
                                 onClick={() => setMostrarNuevaDir((v) => !v)}
                             />
 
-                            {/* formulario nueva dir */}
                             {mostrarNuevaDir && (
                                 <div className="flex flex-col gap-2">
                                     <DetalleLinea label="Dirección:">
@@ -254,7 +257,6 @@ export const CotizacionForm: React.FC<Props> = ({
                 )}
             </div>
 
-            {/* --- Footer --- */}
             <footer className="flex gap-4 pt-4">
                     <Button
                         label="Confirmar"
@@ -262,6 +264,7 @@ export const CotizacionForm: React.FC<Props> = ({
                         onClick={() => {
                             console.log('Datos a guardar:', {
                                 ...draft,
+                                direccion:state.direccionId,
                                 rut_cliente: state.clienteRut,
                                 usuario: state.usuario,
                             });
@@ -275,10 +278,11 @@ export const CotizacionForm: React.FC<Props> = ({
                 />
             </footer>
 
-            {/* error direcciones */}
             {dirError && (
                 <p className="text-rose-600 text-sm">{(dirError as Error).message}</p>
             )}
+                </>
+)}
         </article>
     )
 }

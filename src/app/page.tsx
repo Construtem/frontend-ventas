@@ -7,7 +7,6 @@ import Cotizacion from '@/components/Cotizacion';
 //import HistorialCotizaciones from '@/components/HistorialCotizaciones'
 //import PanelTotals from '@/components/PanelTotals'
 import { quotations } from '@/mocks/mocksDatos'
-import Bienvenida from "@/components/Bienvenida";
 import CotizacionesCreadas from "@/components/CotizacionesCreadas";
 //import PanelTotals from "@/components/PanelTotals";
 import PanelTotalsContainer from "@/components/PanelTotalsContainer";
@@ -29,7 +28,11 @@ const Home: NextPage = () => {
             <div className="container mx-auto py-8 pt-[66px] flex flex-col gap-[20px]">
                 <div className='flex justify-center gap-[40px] flex-col lg:flex-row w-full'>
                         <div className={"flex flex-col gap-4 px-[40px] sm:px-[0px] "}>
+                            {
+                                /*
                             <Bienvenida/>
+                                * */
+                            }
                             <Cliente/>
                         </div>
                     <Cotizacion/>
