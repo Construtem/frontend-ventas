@@ -102,11 +102,17 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                 <ModalBody>
                     {!sucursalId && (
                         <p className="text-gray-500 text-center">
-                            Selecciona una sucursal para cargar inventario.
+                            Selecciona un sucursal para cargar inventario.
                         </p>
                     )}
 
-                    {sucursalId && (
+                    {sucursalId && !state.clienteRut && (
+                        <p className="text-gray-500 text-center">
+                            Selecciona una cliente para cargar inventario.
+                        </p>
+                    )}
+
+                    {sucursalId && state.clienteRut && (
                         <>
                             {/* Search bar */}
                             <div className="mb-4 flex items-center relative">

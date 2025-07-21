@@ -25,6 +25,14 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
 }) => {
     const BASE_URL_FACTURACION_FRONTEND = process.env.NEXT_PUBLIC_FRONT_FACTURACION || ' https://facturacion.tssw.cl'
     const { state } = useCotizacionFlow(); // <-- agrega esto para acceder al cliente seleccionado
+    const tipoDespacho =
+        state.draftQuote?.tipo_despacho ??
+        state.cotizacionSeleccionada?.tipo_despacho;
+
+    const descripcion =
+        state.draftQuote?.descripcion ??
+        state.cotizacionSeleccionada?.descripcion ??
+        '';
     const [isSaving, setIsSaving] = useState(false)
     const [showCreatedModal, setShowCreatedModal] = useState(false)
     const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -60,16 +68,27 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
         }
 
         setIsSaving(true);
-        try {
-            if (onGuardar) await onGuardar();
-            setTimeout(() => {
+            try {
+                // Aquí va el console.log
+                console.log('Datos para crear cotización:', {
+                    rut_cliente: state.clienteRut,
+                    user_id: state.usuario,
+                    tipo_despacho: tipoDespacho,
+                    costo_envio: quotation.totalDespacho,
+                    descripcion: descripcion,
+                    total: quotation.totalCotizacion,
+                });
+
+                if (onGuardar) await onGuardar();
+                setTimeout(() => {
+                    setIsSaving(false);
+                    setShowCreatedModal(true); // Solo aquí, si no hay error
+                }, 1200);
+            } catch {
                 setIsSaving(false);
-                setShowCreatedModal(true);
-            }, 1200);
-        } catch {
-            setIsSaving(false);
-            setErrorMsg("Ocurrió un error al guardar la cotización. Por favor, verifica tu conexión o intenta nuevamente.");
-        }
+                setErrorMsg("Ocurrió un error al guardar la cotización. Por favor, verifica tu conexión o intenta nuevamente.");
+                setShowCreatedModal(false); // Oculta el modal de éxito si hay error
+            }
     };
 
     return (

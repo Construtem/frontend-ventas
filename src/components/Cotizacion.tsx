@@ -1,5 +1,5 @@
 'use client'
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import Button from '@/components/Button'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
@@ -8,8 +8,14 @@ import { CotizacionView } from '@/components/cotizacion/CotizacionView'
 import { CotizacionForm } from '@/components/cotizacion/CotizacionForm'
 import CotizacionDetalleModal from '@/components/Modal/CotizacionDetalleModal'
 
+type Draft = Partial<DBCotizacion> & {
+    tipo_despacho?: 'a domicilio' | 'retiro tienda'
+    direccion_id?: number | null
+}
+
 export default function Cotizacion() {
     /* ----- contexto global ----- */
+    const [showClientMsg, setShowClientMsg] = useState(false);
     const { state, dispatch } = useCotizacionFlow()
     const {
         clienteRut,
@@ -45,9 +51,9 @@ export default function Cotizacion() {
     )
 
     /* ----- callbacks ----- */
-    const handleDraftChange = (patch: Partial<DBCotizacion>) =>
-        dispatch({ type: 'UPDATE_DRAFT', payload: patch })
-
+    const handleDraftChange = (patch: Partial<DBCotizacion>) => {
+        dispatch({ type: 'UPDATE_DRAFT', payload: patch });
+    }
     /** seleccionar cabecera existente */
     const handleSelectQuote = (val: string) => {
         const id = Number(val) || 0
@@ -73,12 +79,21 @@ export default function Cotizacion() {
         dispatch({ type: 'SAVE_DRAFT_OK', payload: provisional })
     }
 
+
     const handleCancel = () =>
         dispatch(
             isCreating
                 ? { type: 'CANCEL_NEW_QUOTE' }
                 : { type: 'CANCEL_EDIT_QUOTE' },
         )
+
+    const safeDraft: Draft = {
+        ...draftQuote,
+        tipo_despacho:
+            draftQuote?.tipo_despacho === 'a domicilio' || draftQuote?.tipo_despacho === 'retiro tienda'
+                ? draftQuote?.tipo_despacho
+                : undefined,
+    };
 
     /* ----- render ----- */
     return (
@@ -109,11 +124,24 @@ export default function Cotizacion() {
 
                         <Button
                             label="+ Nueva"
-                            className="bg-[#F59243] hover:bg-[#d98543] text-white"
-                            onClick={() => dispatch({ type: 'START_NEW_QUOTE' })}
+                            className={`bg-[#F59243] hover:bg-[#d98543] text-white`}
+                            onClick={() => {
+                                if (!clienteRut) {
+                                    setShowClientMsg(true);
+                                    setTimeout(() => setShowClientMsg(false), 2500);
+                                } else {
+                                    dispatch({ type: 'START_NEW_QUOTE' });
+                                }
+                            }}
                         />
                     </div>
                 </header>
+
+                {showClientMsg && (
+                    <div className="text-center text-rose-600 py-2 font-semibold">
+                        Debes seleccionar un cliente antes de crear una cotización.
+                    </div>
+                )}
 
                 {/* mensajes / loaders */}
                 {isLoading && (
@@ -133,7 +161,7 @@ export default function Cotizacion() {
                     />
                 )}
 
-                {!isLoading && clienteRut && allQuotes.length === 0 && (
+                {!isLoading && clienteRut && allQuotes.length === 0 && !isCreating && !isEditing && (
                     <p className="text-center text-gray-500">
                         No hay cotizaciones disponibles. Crea una nueva.
                     </p>
@@ -142,7 +170,7 @@ export default function Cotizacion() {
                 {/* formulario edición / alta */}
                 {(isCreating || isEditing) && draftQuote && (
                     <CotizacionForm
-                        draft={draftQuote}
+                        draft={safeDraft}
                         onChange={handleDraftChange}
                         onSave={handleSaveDraft}
                         onCancel={handleCancel}

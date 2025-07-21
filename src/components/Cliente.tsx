@@ -600,6 +600,12 @@ export default function Cliente() {
         c => c.rut === state.clienteRut
     );
 
+    const { refetch } = useQuery<ClienteType[]>({
+        queryKey: ['clientes'],
+        queryFn: clienteService.obtenerClientes,
+        enabled: !!sucursalId,
+    });
+
     return (
         <div className="bg-white px-[40px] py-[10px] rounded-[10px]
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] flex flex-col gap-[20px] flex flex-col gap-[20px] lg:min-h-[466px] lg:min-w-[504px]">
@@ -730,7 +736,11 @@ export default function Cliente() {
                                 className={'bg-[#2563B6] text-white hover:bg-[#2a74d9]'}
                                 label={'Crear Cliente'}
                                 />
-                            <ClienteModal isOpen={showCliente} onClose={() => setShowCliente(false)} />
+                                <ClienteModal
+                                    isOpen={showCliente}
+                                    onClose={() => setShowCliente(false)}
+                                    onClienteCreado={refetch}
+                                />
                             <Button onClick={()=>{console.log(state)}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
                         </div>
 
