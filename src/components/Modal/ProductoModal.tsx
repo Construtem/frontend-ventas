@@ -293,6 +293,7 @@ export function ProductoModal ({ isOpen, onClose }: ProductoModalProps) {
                                 </table>
                             </div>
                         </>
+
                     )}
                 </ModalBody>
 
