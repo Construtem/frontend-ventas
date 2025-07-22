@@ -1,5 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react'
+import guardarIMG from '../styles/images/guardar.png'
+import pagoIMG from '../styles/images/pago.png'
 
 interface TourStep {
     id: string
@@ -105,7 +107,7 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
             highlightedElement.style.outline = ''
             highlightedElement.style.transition = ''
         }
-        
+
         completeTour()
     }
 
@@ -117,7 +119,7 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
             highlightedElement.style.outline = ''
             highlightedElement.style.transition = ''
         }
-        
+
         setIsActive(false)
         setHighlightedElement(null)
         localStorage.setItem('ftu-tour-completed', 'true')
@@ -190,13 +192,13 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
                 if (modalLeft + modalWidth > viewportWidth + scrollLeft) {
                     // 2. Si no cabe a la derecha, intentar a la izquierda
                     modalLeft = rect.left - modalWidth - spacing
-                    
+
                     if (modalLeft < scrollLeft) {
                         // 3. Si no cabe a ningún lado, posicionar arriba o abajo centrado
-                        modalLeft = Math.max(scrollLeft + 10, 
-                            Math.min(scrollLeft + viewportWidth - modalWidth - 10, 
-                                rect.left + rect.width/2 - modalWidth/2))
-                        
+                        modalLeft = Math.max(scrollLeft + 10,
+                            Math.min(scrollLeft + viewportWidth - modalWidth - 10,
+                                rect.left + rect.width / 2 - modalWidth / 2))
+
                         // Decidir si va arriba o abajo
                         if (rect.top + scrollTop - modalHeight - spacing > scrollTop) {
                             // Colocar arriba
@@ -255,12 +257,12 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
 
                 if (modalLeft + modalWidth > viewportWidth + scrollLeft) {
                     modalLeft = rect.left - modalWidth - spacing
-                    
+
                     if (modalLeft < scrollLeft) {
-                        modalLeft = Math.max(scrollLeft + 10, 
-                            Math.min(scrollLeft + viewportWidth - modalWidth - 10, 
-                                rect.left + rect.width/2 - modalWidth/2))
-                        
+                        modalLeft = Math.max(scrollLeft + 10,
+                            Math.min(scrollLeft + viewportWidth - modalWidth - 10,
+                                rect.left + rect.width / 2 - modalWidth / 2))
+
                         if (rect.top + scrollTop - modalHeight - spacing > scrollTop) {
                             modalTop = rect.top + scrollTop - modalHeight - spacing
                         } else {
@@ -281,7 +283,7 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
                 modal.style.left = `${modalLeft}px`
             }
         })
-        
+
         resizeObserver.observe(highlightedElement)
 
         return () => {
@@ -307,7 +309,7 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
     return (
         <>
             {/* Modal del tour */}
-            <div 
+            <div
                 id="tour-modal"
                 className="fixed z-60 p-4"
                 style={{ width: '400px' }}
@@ -337,6 +339,26 @@ const FTUTour: React.FC<FTUTourProps> = ({ onComplete, autoStart = false }) => {
                         <p className="text-gray-700 mb-4">
                             {currentStepData.description}
                         </p>
+
+                        {/* Imagen para los últimos dos pasos */}
+                        {currentStep === 4 && (
+                            <div className="mb-4">
+                                <img
+                                    src={guardarIMG.src}
+                                    alt="Guardar cotización"
+                                    className="w-full h-32 object-contain rounded-lg bg-gray-50 p-2"
+                                />
+                            </div>
+                        )}
+                        {currentStep === 5 && (
+                            <div className="mb-4">
+                                <img
+                                    src={pagoIMG.src}
+                                    alt="Proceder al pago"
+                                    className="w-full h-32 object-contain rounded-lg bg-gray-50 p-2"
+                                />
+                            </div>
+                        )}
 
                         {/* Progress bar */}
                         <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
