@@ -9,7 +9,7 @@ interface UserData {
     name: string;
     email: string;
     photoURL?: string;
-    rol: string;
+    rol?: string;
 }
 
 const Header: React.FC = () => {
