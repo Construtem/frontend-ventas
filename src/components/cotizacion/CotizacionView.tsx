@@ -67,8 +67,8 @@ export function CotizacionView({
             : null;
 
 
-    console.log(sucursales)
-    console.log('La id de  la tienda del pedido es: ', quote)
+    // console.log(sucursales)
+    // console.log('La id de  la tienda del pedido es: ', quote)
 
     return (
         <article className="bg-white rounded-[10px] shadow px-8 py-6 lg:h-[550px]">

@@ -682,3 +682,22 @@ export async function checkoutTodasCotizaciones(): Promise<CotizacionCheckout[]>
 
     return (await r.json()) as CotizacionCheckout[];
 }
+
+// Eliminar cotización por ID
+export const eliminarCotizacion = async (id: number): Promise<void> => {
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_VENTAS}/api/cotizaciones/${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        });
+        if (!response.ok) {
+            const msg = await response.text().catch(() => response.statusText);
+            throw new Error(`Error al eliminar la cotización (${response.status}): ${msg}`);
+        }
+    } catch (error) {
+        console.error('Error al eliminar la cotización:', error);
+        throw error;
+    }
+}

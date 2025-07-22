@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
     DBCotizacion,
     CotizacionCheckout,
@@ -24,6 +24,8 @@ function getEstadoColor(estado: string) {
 const TablaCotizaciones = ({ historial }: { historial: CotizacionCheckout[] }) => {
     const [paginaActual, setPaginaActual] = useState(1);
     const [busqueda, setBusqueda] = useState('');
+    const [sortColumn, setSortColumn] = useState<'id'|'cliente'|'fecha'|'total'>('id');
+    const [sortDir, setSortDir] = useState<'asc'|'desc'>('asc');
     const [cotizacionSeleccionadaDetails, setCotizacionSeleccionadaDetails] = useState<DBCotizacion | CotizacionCheckout | null>(null);
     const porPagina = 10;
     const { state, dispatch } = useCotizacionFlow();
@@ -35,9 +37,33 @@ const TablaCotizaciones = ({ historial }: { historial: CotizacionCheckout[] }) =
         );
     });
 
-    const totalPaginas = Math.ceil(historialFiltrado.length / porPagina);
+    const handleSort = (col: 'id'|'cliente'|'fecha'|'total') => {
+        if (sortColumn === col) {
+            setSortDir(dir => dir === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortColumn(col);
+            setSortDir('asc');
+        }
+        setPaginaActual(1);
+    };
 
-    const historialPaginado = historialFiltrado.slice(
+    const historialOrdenado = useMemo(() => {
+        return [...historialFiltrado].sort((a, b) => {
+            let aVal: string|number = 0, bVal: string|number = 0;
+            switch (sortColumn) {
+                case 'id': aVal = a.id; bVal = b.id; break;
+                case 'cliente': aVal = a.cliente.nombre.toLowerCase(); bVal = b.cliente.nombre.toLowerCase(); break;
+                case 'fecha': aVal = new Date(a.fecha_crea).getTime(); bVal = new Date(b.fecha_crea).getTime(); break;
+                case 'total': aVal = a.total ?? 0; bVal = b.total ?? 0; break;
+            }
+            if (aVal < bVal) return sortDir === 'asc' ? -1 : 1;
+            if (aVal > bVal) return sortDir === 'asc' ? 1 : -1;
+            return 0;
+        });
+    }, [historialFiltrado, sortColumn, sortDir]);
+
+    const totalPaginas = Math.ceil(historialFiltrado.length / porPagina);
+    const historialPaginado = historialOrdenado.slice(
         (paginaActual - 1) * porPagina,
         paginaActual * porPagina
     );
@@ -95,13 +121,33 @@ const TablaCotizaciones = ({ historial }: { historial: CotizacionCheckout[] }) =
                 className="w-full text-sm rounded-[10px] border-b-[2px] border-gray-200 shadow-[0_0_2px_rgba(0,0,0,0.25)]">
                 <thead className="bg-gray-100">
                 <tr className="text-left font-semibold text-gray-700 border-b border-gray-200">
-                    <th className="text-center text-[16px] font-medium font-montserrat py-[10px] px-[10px]">ID</th>
-                    <th className="text-center text-[16px] font-medium font-montserrat py-[10px]">Cliente</th>
-                    <th className="text-center text-[16px] font-medium font-montserrat py-[10px]">Fecha</th>
-                    <th className="text-center text-[16px] font-medium font-montserrat py-[10px]">Cantidad</th>
-                    <th className="text-center text-[16px] font-medium font-montserrat py-[10px]">Total</th>
-                    <th className="text-center text-[16px] font-medium font-montserrat py-[10px]">Estado</th>
-                </tr>
+                    <th className="text-center py-2 px-4">
+                        <button onClick={() => handleSort('id')} className="w-full flex items-center justify-center gap-1 focus:outline-none">
+                            <span>ID</span>
+                            <span className="inline-block w-3 text-center">{sortColumn==='id' ? (sortDir==='asc' ? '▲' : '▼') : '\u00A0'}</span>
+                        </button>
+                    </th>
+                    <th className="text-center py-2 px-4">
+                        <button onClick={() => handleSort('cliente')} className="w-full flex items-center justify-center gap-1 focus:outline-none">
+                            <span>Cliente</span>
+                            <span className="inline-block w-3 text-center">{sortColumn==='cliente' ? (sortDir==='asc' ? '▲' : '▼') : '\u00A0'}</span>
+                        </button>
+                    </th>
+                    <th className="text-center py-2 px-4">
+                        <button onClick={() => handleSort('fecha')} className="w-full flex items-center justify-center gap-1 focus:outline-none">
+                            <span>Fecha</span>
+                            <span className="inline-block w-3 text-center">{sortColumn==='fecha' ? (sortDir==='asc' ? '▲' : '▼') : '\u00A0'}</span>
+                        </button>
+                    </th>
+                     <th className="text-center py-2">Cantidad</th>
+                    <th className="text-center py-2 px-4">
+                        <button onClick={() => handleSort('total')} className="w-full flex items-center justify-center gap-1 focus:outline-none">
+                            <span>Total</span>
+                            <span className="inline-block w-3 text-center">{sortColumn==='total' ? (sortDir==='asc' ? '▲' : '▼') : '\u00A0'}</span>
+                        </button>
+                    </th>
+                    <th className="text-center py-2">Estado</th>
+                 </tr>
                 </thead>
                 <tbody>
                 {historialPaginado.map((c) => (

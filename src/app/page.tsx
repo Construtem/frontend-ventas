@@ -1,6 +1,6 @@
 'use client'
 import { NextPage } from 'next'
-import React from 'react'
+import React, {useEffect} from 'react'
 import ProductTable from '@/components/ProductTable'
 import Cliente from '@/components/Cliente';
 import Cotizacion from '@/components/Cotizacion';
@@ -16,6 +16,16 @@ import TourRestartButton from "@/components/TourRestartButton";
 
 
 const Home: NextPage = () => {
+    useEffect(() => {
+        if (!document.getElementById('google-maps-script')) {
+            const script = document.createElement('script')
+            script.id = 'google-maps-script'
+            script.src = `https://maps.googleapis.com/maps/api/js?key=${process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}&libraries=places`
+            script.async = true
+            script.defer = true
+            document.body.appendChild(script)
+        }
+    }, [])
     // Ya no necesitamos cargar sucursales aquí porque ProductTable las carga internamente
     
     // Obtener la cotización para el panel de totales
