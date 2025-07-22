@@ -55,7 +55,10 @@ const ProductTable: React.FC = () => {
         <>
             <div className="bg-white p-4 rounded-[10px] w-full shadow-[0_0_2px_rgba(0,0,0,0.25)]">
                 {/* Header */}
-                <div className="mb-9 flex flex-col gap-[20px] sm:items-baseline items-center">
+                <div
+                    className="mb-9 flex flex-col gap-[20px] sm:items-baseline items-center"
+                    data-tour="add-product-button"
+                >
                     <div className="flex items-center gap-2">
                         <NumberIcon number={3} />
                         <h2 className="text-xl font-semibold text-black font-montserrat text-[24px]">

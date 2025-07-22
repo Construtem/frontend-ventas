@@ -133,6 +133,7 @@ export const CotizacionForm: React.FC<Props> = ({
 
     return (
         <article
+            data-tour="quotation-section"
             className={`${
                 state.clienteRut ? '' : 'h-full relative flex flex-col'
             } bg-white rounded-[10px] shadow px-8 py-6 space-y-4 shadow-[0_0_2px_rgba(0,0,0,0.25)] lg:min-h-[550px]`}
