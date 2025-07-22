@@ -11,11 +11,9 @@ export default function CotizacionHeader(){
     const { state, dispatch } = useCotizacionFlow()
     const {
         clienteRut,
-        cotizacionId,
     } = state
     const {
         data: historial = [],
-        isLoading,
     } = useQuery<DBCotizacion[]>({
         queryKey: ['historial', clienteRut],
         queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
