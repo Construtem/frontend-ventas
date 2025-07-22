@@ -107,16 +107,16 @@ export default function PanelTotalsContainer () {
 
                 if (valor_despacho !== undefined) {
                     /* 4 · actualizar BD con costo_envio + total */
-                    const newTotal = totals.totalCotizacion + valor_despacho  // total anterior + despacho
                     await actualizarDatosCotizacion(newId, {
                         costo_envio: valor_despacho,
-                        total:       newTotal,
+                        total:       totals.totalCotizacion,
                     })
 
                     /* 5 · reflejar en UI */
                     setDespacho(valor_despacho)
                 }
             }
+            console.log(totals)
 
             setLastId(newId)
         } catch (e) {
