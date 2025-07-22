@@ -16,7 +16,7 @@ type Props = {
 }
 
 export default function CotizacionDetalleModal({ open, onClose, data, onDelete }: Props) {
-    if (!data) return null
+    // data is always provided; remove conditional to keep hooks at top level
 
     const [confirmingDelete, setConfirmingDelete] = useState(false)
     const [deleted, setDeleted] = useState(false)

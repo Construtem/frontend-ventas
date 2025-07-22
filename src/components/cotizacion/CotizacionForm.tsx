@@ -70,24 +70,6 @@ export const CotizacionForm: React.FC<Props> = ({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
         libraries: ['places'],
     })
-    const onPlaceChanged = () => {
-        if (autocompleteRef.current) {
-            const place = autocompleteRef.current.getPlace()
-            if (place && place.formatted_address) {
-                // Validar que la dirección sea de Santiago, Chile
-                const direccion = place.formatted_address
-                const esSantiago = direccion.toLowerCase().includes('santiago') && direccion.toLowerCase().includes('chile')
-                if (esSantiago) {
-                    onChange({ direccion })
-                    setDireccionValida(true)
-                } else {
-                    setDireccionValida(false)
-                }
-            } else {
-                setDireccionValida(false)
-            }
-        }
-    }
 
     // Estado para mostrar el input de nueva dirección
     const [agregandoDireccion, setAgregandoDireccion] = useState(false)
@@ -136,6 +118,7 @@ export const CotizacionForm: React.FC<Props> = ({
             onChange({ direccionId: nueva.id })
         } catch (e) {
             // Manejo de error (puedes mostrar un mensaje)
+    console.log(e)
         }
         setLoadingDireccion(false)
         setAgregandoDireccion(false)
