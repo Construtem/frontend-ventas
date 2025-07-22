@@ -27,9 +27,6 @@ const Header: React.FC = () => {
                 console.error("Error al parsear datos de usuario, limpiando localStorage:", err);
                 localStorage.removeItem("user");
             }
-        } else {
-            console.log("No se encontró información de usuario en localStorage, redirigiendo a login");
-            window.location.href = `${frontLoginUrl}`;
         }
     }, []);
 
