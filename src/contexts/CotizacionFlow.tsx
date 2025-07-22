@@ -56,6 +56,7 @@ export type CotizacionAction =
     | { type:'SET_ADDRESS'; payload:number }
 
     | { type:'SET_QUOTE'; payload:number; historial?:DBCotizacion[] }  // 👈 añadido `historial`
+    | { type:'NEW_COTIZACION'; payload:null } // para limpiar la selección
     | { type:'START_NEW_QUOTE' }
     | { type:'START_EDIT_QUOTE'; payload:DBCotizacion }
     | { type:'UPDATE_DRAFT';     payload:Partial<DBCotizacion> }
@@ -75,6 +76,11 @@ export type CotizacionAction =
     | { type:'ADD_PRODUCT';    payload:DraftProducto }
     | { type:'UPDATE_PRODUCT'; payload:DraftProducto }
     | { type: 'REMOVE_PRODUCT'; payload: DraftProducto}
+    | { type: "SET_COTIZACION_ID"; payload: number }
+    | { type: "SET_COTIZACION_SELECCIONADA"; payload: DBCotizacion }
+    | { type: "LIMPIAR_COTIZACION" } // opcional para limpiar ambos
+    // puedes añadir más acciones según lo que necesites:
+    | { type: "SET_LOCAL_QUOTES"; payload: DBCotizacion[] };
 
 /* ──────────────────────────────────
  * 3.  INITIAL STATE
@@ -237,7 +243,17 @@ function cotizacionReducer (
                 usuario: action.payload,
             }
         }
+        case "SET_COTIZACION_ID":
+            return { ...state, cotizacionId: action.payload };
 
+        case "SET_COTIZACION_SELECCIONADA":
+            return { ...state, cotizacionSeleccionada: action.payload };
+
+        case "SET_LOCAL_QUOTES":
+            return { ...state, localQuotes: action.payload };
+
+        case "LIMPIAR_COTIZACION":
+            return { ...state, cotizacionId: null, cotizacionSeleccionada: null };
         /* Otros casos (modales, edición)… */
         case 'OPEN_MODAL':               return { ...state, showModal:true  }
         case 'CLOSE_MODAL':              return { ...state, showModal:false }

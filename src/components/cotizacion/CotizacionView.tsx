@@ -55,7 +55,7 @@ export function CotizacionView ({
 
             {/* tabla atributos */}
             <dl className="divide-y divide-gray-200">
-                <DetalleLinea label={quote.cliente.nombre?'Nombre cliente: ': 'Rut cliente'} value={quote.cliente.nombre?quote.cliente.nombre:state.clienteRut}/>
+                <DetalleLinea label={quote.cliente.nombre?'Nombre cliente': 'Rut cliente'} value={quote.cliente.nombre?quote.cliente.nombre:state.clienteRut}/>
                 <DetalleLinea label="Descripción"    value={quote.descripcion ?? '—'} />
                 <DetalleLinea
                     label="Tipo de envío"

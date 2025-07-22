@@ -49,7 +49,7 @@ export default function Cotizacion() {
         dispatch({ type: 'UPDATE_DRAFT', payload: patch });
     }
 
-    /** guardar cabecera local sin items */
+    /** guardar cabecera local sin items, se ejecuta al dar clic a confirmar */
     const handleSaveDraft = () => {
         if (!draftQuote) return
         const provisional: DBCotizacion = {

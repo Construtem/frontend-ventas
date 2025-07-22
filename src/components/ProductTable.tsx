@@ -39,6 +39,8 @@ const ProductTable: React.FC<ProductTableProps> = () => {
                             Productos
                         </h2>
                     </div>
+                    {
+                        state.cotizacionSeleccionada?.fecha_crea &&(
                     <div>
                         <Button
                             label="Agregar Producto"
@@ -46,6 +48,8 @@ const ProductTable: React.FC<ProductTableProps> = () => {
                             onClick={() => setIsModalOpen(true)}
                         />
                     </div>
+                        )
+                    }
                 </div>
 
                 {/* Tabla de productos */}
