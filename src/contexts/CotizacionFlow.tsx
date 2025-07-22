@@ -8,6 +8,8 @@ import React, {
 } from 'react'
 
 import {
+    adaptToDBCotizacion,
+    CotizacionCheckout,
     DBCotizacion, DBUsuario,
     DraftProducto,
 } from '@/services/apiServices'
@@ -40,9 +42,13 @@ export type CotizacionState = {
 
     /* Modal cliente */
     isCreatingClient: boolean
+    modal:{
+        tipo:"detalle"|null
+        data: DBCotizacion | CotizacionCheckout | null
+    }
 
     /* 💡 Cabecera actualmente seleccionada */
-    cotizacionSeleccionada: Partial<DBCotizacion> | null
+    cotizacionSeleccionada: Partial<CotizacionCheckout> | null
 }
 
 /* ──────────────────────────────────
@@ -51,8 +57,10 @@ export type CotizacionState = {
 export type CotizacionAction =
     | { type:'SET_STORE';  payload:number }
     | { type:'RESET_AFTER_STORE' }
+|{ type: 'NUEVA_COTIZACION' }
 
-    | { type:'SET_CLIENT'; payload:string }
+
+| { type:'SET_CLIENT'; payload:string }
     | { type:'SET_ADDRESS'; payload:number }
 
     | { type:'SET_QUOTE'; payload:number; historial?:DBCotizacion[] }  // 👈 añadido `historial`
@@ -60,7 +68,7 @@ export type CotizacionAction =
     | { type:'START_NEW_QUOTE' }
     | { type:'START_EDIT_QUOTE'; payload:DBCotizacion }
     | { type:'UPDATE_DRAFT';     payload:Partial<DBCotizacion> }
-    | { type:'SAVE_DRAFT_OK';    payload:DBCotizacion }
+    | { type:'SAVE_DRAFT_OK';    payload:CotizacionCheckout }
     | { type:'CANCEL_EDIT_QUOTE' }
     | { type:'CANCEL_NEW_QUOTE' }
     | { type:'SAVE_QUOTE_SUCCESS'; payload:number }
@@ -77,9 +85,11 @@ export type CotizacionAction =
     | { type:'UPDATE_PRODUCT'; payload:DraftProducto }
     | { type: 'REMOVE_PRODUCT'; payload: DraftProducto}
     | { type: "SET_COTIZACION_ID"; payload: number }
-    | { type: "SET_COTIZACION_SELECCIONADA"; payload: DBCotizacion }
+    | { type: "SET_COTIZACION_SELECCIONADA"; payload: CotizacionCheckout }
     | { type: "LIMPIAR_COTIZACION" } // opcional para limpiar ambos
     // puedes añadir más acciones según lo que necesites:
+    | { type: "ABRIR_MODAL_DETALLE"; payload: DBCotizacion | CotizacionCheckout }
+    | { type: "CERRAR_MODAL" }
     | { type: "SET_LOCAL_QUOTES"; payload: DBCotizacion[] };
 
 /* ──────────────────────────────────
@@ -92,7 +102,10 @@ const initialState: CotizacionState = {
     clienteRut:           null,
     cotizacionId:         null,
     direccionId:          null,
-
+    modal: {
+        tipo: null,
+        data: null,
+    },
     isEditing:            false,
     isCreating:           true,
     draftQuote:           null,
@@ -145,24 +158,26 @@ function cotizacionReducer (
 
         case 'CANCEL_NEW_QUOTE':
             return { ...state, isCreating:false, draftQuote:null }
+        case 'SAVE_DRAFT_OK': {
+            const checkout = action.payload            // CotizacionCheckout
+            const dbc      = adaptToDBCotizacion(checkout) // ← usa tu helper inverso
 
-        /* Guardar borrador local */
-        case 'SAVE_DRAFT_OK':
             return {
                 ...state,
-                localQuotes:[action.payload, ...state.localQuotes],
-                cotizacionId: action.payload.id,
-                cotizacionSeleccionada: action.payload,
-                isCreating:false,
-                draftQuote:null,
-                usuario:{}
+                localQuotes: [dbc, ...state.localQuotes], // ① ahora es DBCotizacion
+                cotizacionId: dbc.id,
+                cotizacionSeleccionada: checkout,         // ok, la vista de detalle
+                isCreating: false,                        // ② deja de editar
+                draftQuote: null,
             }
-
-
-        case 'UPDATE_DRAFT': {
-            const merged = { ...state.draftQuote, ...action.payload }
-            return { ...state, draftQuote: merged, cotizacionSeleccionada: merged }
         }
+
+        case 'UPDATE_DRAFT':
+            return { ...state, draftQuote: { ...state.draftQuote, ...action.payload } }
+
+
+
+
         /* Tabla de productos */case 'ADD_PRODUCT': {
             const existing = state.productos.find(p =>
                 p.sku === action.payload.sku &&
@@ -227,16 +242,6 @@ function cotizacionReducer (
             };
 
 
-        /* Seleccionar cabecera existente */
-        case 'SET_QUOTE': {
-            const id = action.payload
-            if (!id) {
-                return { ...state, cotizacionId:null, cotizacionSeleccionada:null }
-            }
-            const fuente = [...state.localQuotes, ...(action.historial ?? [])]
-            const seleccionada = fuente.find(c => c.id === id) ?? null
-            return { ...state, cotizacionId:id, cotizacionSeleccionada:seleccionada }
-        }
         case "ADD_USER_TO_CONTEXT":{
             return {
                 ...state,
@@ -251,6 +256,13 @@ function cotizacionReducer (
 
         case "SET_LOCAL_QUOTES":
             return { ...state, localQuotes: action.payload };
+        case 'NUEVA_COTIZACION':
+            return {
+                ...state,
+                isCreating: true,
+                cotizacionSeleccionada: null,
+                draftQuote: {},
+            };
 
         case "LIMPIAR_COTIZACION":
             return { ...state, cotizacionId: null, cotizacionSeleccionada: null };
@@ -259,6 +271,11 @@ function cotizacionReducer (
         case 'CLOSE_MODAL':              return { ...state, showModal:false }
         case 'OPEN_CREATE_CLIENT_MODAL': return { ...state, isCreatingClient:true }
         case 'CLOSE_CREATE_CLIENT_MODAL':return { ...state, isCreatingClient:false }
+        case "ABRIR_MODAL_DETALLE":
+            return { ...state, modal: { tipo: "detalle", data: action.payload } };
+
+        case "CERRAR_MODAL":
+            return { ...state, modal: { tipo: null, data: null } };
 
         /* Default */
         default: return state
