@@ -33,7 +33,7 @@ const ProductTable: React.FC<ProductTableProps> = () => {
 
                 {/* Header */}
                 <div className="mb-9 flex flex-col gap-[20px] sm:items-baseline items-center ">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" data-tour="add-product-button">
                         <NumberIcon number={3}/>
                         <h2 className="text-xl font-semibold text-black font-montserrat text-[24px]">
                             Productos

@@ -87,7 +87,7 @@ export default function Cotizacion() {
     /**/
     return (
         <>
-            <div className="px-[40px] sm:px-0 w-full">
+            <div className="px-[40px] sm:px-0 w-full" data-tour="quotation-section">
                 {/* vista “readonly” */}
                 {state.cotizacionId && cotizacionActual && !state.isCreating &&(
                     <CotizacionView

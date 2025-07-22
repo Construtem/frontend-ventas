@@ -642,6 +642,7 @@ export default function Cliente() {
                         type="text"
                         placeholder="Ingresa RUT o nombre del cliente"
                         value={search}
+                        data-tour="client-search"
                         onChange={e => {
                             const value = e.target.value;
                             if (value === "") {

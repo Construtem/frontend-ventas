@@ -58,6 +58,7 @@ export default function Bienvenida() {
                 onChange={(e) =>
                     dispatch({type: 'SET_STORE', payload: Number(e.target.value)})
                 }
+                data-tour="store-selector"
             >
                 <option value="" disabled>
                     -- Elige tienda --
