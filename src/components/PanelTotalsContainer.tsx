@@ -12,7 +12,7 @@ import {
     actualizarDatosCotizacion,
 } from '@/services/apiServices'
 import Modal from '@/components/Modal/Modal'
-import PanelTotalsNoProducts from "@/components/PanelTotals/PanelTotalsNoProducts";
+//import PanelTotalsNoProducts from "@/components/PanelTotals/PanelTotalsNoProducts";
 
 const BASE_FACTURACION =
     (process.env.NEXT_PUBLIC_FRONT_FACTURACION ?? 'https://facturacion.tssw.cl').trim()
