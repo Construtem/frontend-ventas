@@ -137,12 +137,11 @@ export default function PanelTotalsContainer() {
 
 
 
-    const isNuevaCotizacion = !lastId && !!state.cotizacionSeleccionada
-    const tieneProductos = productos.length > 0
+    // const isNuevaCotizacion = !lastId && !!state.cotizacionSeleccionada
+    // const tieneProductos = productos.length > 0
     return (
             <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
-                {isNuevaCotizacion && tieneProductos ? (
 
                 <PanelTotals
                     quotation={totals}
@@ -150,7 +149,6 @@ export default function PanelTotalsContainer() {
                     onGuardar={handleGuardar}
                     onPagar={handlePagar}
                 />
-                ):(<PanelTotalsNoProducts/>)}
                 {showSavingModal && (
                     <Modal isOpen={true} onClose={() => {
                     }}>
