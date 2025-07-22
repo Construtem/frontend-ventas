@@ -3,125 +3,115 @@
 
 import { useMemo, useState } from 'react'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
-import PanelTotals           from '@/components/PanelTotals'
+import PanelTotals from '@/components/PanelTotals'
 import type { DraftProducto } from '@/services/apiServices'
 import {
     crearCotizacion,
     crearItemCotizacion,
     calcularDespacho,
-    actualizarDatosCotizacion,   // helper genérico PUT
+    actualizarDatosCotizacion,
 } from '@/services/apiServices'
+import Modal from '@/components/Modal/Modal'
+import PanelTotalsNoProducts from "@/components/PanelTotals/PanelTotalsNoProducts";
 
-/** Lee la URL de facturación desde env o usa el host por defecto */
 const BASE_FACTURACION =
     (process.env.NEXT_PUBLIC_FRONT_FACTURACION ?? 'https://facturacion.tssw.cl').trim()
 
-export default function PanelTotalsContainer () {
+export default function PanelTotalsContainer() {
     const { state } = useCotizacionFlow()
     const productos: DraftProducto[] = state.productos
 
-    /* ——— costo de despacho en UI (parte en 0) ——— */
-    const [despacho, setDespacho] = useState<number>(0);
+    const [despacho, setDespacho] = useState<number>(0)
+    const [showSavingModal, setShowSavingModal] = useState(false)
 
-    /* ——— totales (recalcula cuando cambian productos o despacho) ——— */
     const totals = useMemo(() => {
-        /* 1 · Sub-total = precio base sin descuento */
         const subtotal = productos.reduce(
             (s, p) => s + p.precioUnit * p.cantidad,
             0,
-        );
-
-        /* 2 · Descuento acumulado (en pesos) */
+        )
         const descuento = productos.reduce(
             (s, p) => s + (p.precioUnit - p.netoUnit) * p.cantidad,
             0,
-        );
-
-        /* 3 · Despacho: si aún no existe usa 0 */
-        const d = despacho ?? 0;
-
-        /* 4 · Base imponible + IVA + Total */
-        const base     = subtotal + d - descuento;          // (subtotal + despacho − descuento)
-        const iva      = Math.round(base * 0.19);           // IVA 19 %
-        const totalFin = base + iva;                        // (…)*1.19
+        )
+        const d = despacho ?? 0
+        const base = subtotal + d - descuento
+        const iva = Math.round(base * 0.19)
+        const totalFin = base + iva
 
         return {
-            /** Etiquetas que ya consume tu <PanelTotals> */
-            totalProductosNeto : subtotal,    // Sub-total (sin descuento)
-            totalDespacho      : d,           // Despacho
-            totalDescuento     : descuento,   // Descuento
-            iva                : iva,         // IVA 19 %
-            totalCotizacion    : totalFin,    // Total
-        };
-    }, [productos, despacho]);
+            totalProductosNeto: subtotal,
+            totalDespacho: d,
+            totalDescuento: descuento,
+            iva: iva,
+            totalCotizacion: totalFin,
+        }
+    }, [productos, despacho])
 
+    const [saving, setSaving] = useState(false)
+    const [lastId, setLastId] = useState<number | null>(null)
 
-    /* ——— flags y refs ——— */
-    const [saving, setSaving]   = useState(false)
-    const [lastId, setLastId]   = useState<number | null>(null)
-
-    /* ——— guardar cotización + ítems + despacho ——— */
     const handleGuardar = async () => {
         if (saving) return
         try {
             setSaving(true)
+            setShowSavingModal(true)
 
-            /* 1 · cabecera preliminar (sin despacho real) */
             const usuario = typeof window !== 'undefined'
                 ? JSON.parse(localStorage.getItem('user') ?? '{}')
                 : {}
 
+            const tipoDespacho = state.cotizacionSeleccionada?.tipo_despacho
+                ?? state.draftQuote?.tipo_despacho
+                ?? 'Retiro en tienda'
+
             const cabecera = {
-                rut_cliente  : state.clienteRut!,
-                user_id      : usuario.email ?? '',
-                tipo_despacho: state.cotizacionSeleccionada?.tipo_despacho
-                    ?? state.draftQuote?.tipo_despacho
-                    ?? 'a domicilio',
-                costo_envio  : 0,                     // se actualizará luego
-                descripcion  : state.cotizacionSeleccionada?.descripcion
-                    ?? state.draftQuote?.descripcion
-                    ?? '',
-                total        : 0,                     // idem
+                rut_cliente: state.clienteRut!,
+                user_id: usuario.email ?? '',
+                tipo_despacho: tipoDespacho,
+                costo_envio: 0,
+                descripcion: state.draftQuote?.descripcion,
+                total: 0,
+            }
+
+            if (!state.cotizacionSeleccionada?.direccionId) {
+                console.log('No se pudo crear la cotización porque no hay direccionId')
+                setShowSavingModal(false)
+                return
             }
 
             const { id: newId } = await crearCotizacion(cabecera)
 
-            /* 2 · ítems */
             await Promise.all(
                 productos.map(p =>
                     crearItemCotizacion(newId, {
                         producto_id: p.sku,
                         sucursal_id: p.sucursalId,
-                        cantidad   : p.cantidad,
-                    }),
-                ),
+                        cantidad: p.cantidad,
+                    })
+                )
             )
 
-            /* 3 · calcular despacho */
-            const dirClienteId = state.cotizacionSeleccionada?.direccion_id        // <— ajusta si tu contexto usa otro nombre
-            if (!dirClienteId) {
-                alert('Debes seleccionar una dirección antes de calcular el despacho')
-            } else {
+            if (tipoDespacho !== 'retiro tienda') {
+                const dirClienteId = state.cotizacionSeleccionada?.direccionId
                 const previews = await calcularDespacho(newId, dirClienteId)
                 const { valor_despacho } = previews[0] ?? {}
 
                 if (valor_despacho !== undefined) {
-                    /* 4 · actualizar BD con costo_envio + total */
                     setDespacho(valor_despacho)
-                    console.log('El valor del despacho es: ', valor_despacho)
-                    console.log('totals.totalCotizacion: ', totals.totalCotizacion)
-                    console.log('El nuevo total es: ', (totals.totalCotizacion+valor_despacho)*1.19)
-                    console.log('*****************************************************')
-                    console.log(totals)
-                    const newTotal = totals.totalCotizacion + valor_despacho  // total anterior + despacho
+                    const newTotal = totals.totalProductosNeto + valor_despacho - totals.totalDescuento
+                    const iva = Math.round(newTotal * 0.19)
                     await actualizarDatosCotizacion(newId, {
                         costo_envio: valor_despacho,
-                        total:       ((totals.totalProductosNeto+valor_despacho-totals.totalDescuento)*1.19)
+                        total: newTotal + iva,
                     })
-            console.log(newTotal)
-
-                    /* 5 · reflejar en UI */
                 }
+            } else {
+                const newTotal = totals.totalProductosNeto - totals.totalDescuento
+                const iva = Math.round(newTotal * 0.19)
+                await actualizarDatosCotizacion(newId, {
+                    costo_envio: 0,
+                    total: newTotal + iva,
+                })
             }
 
             setLastId(newId)
@@ -130,24 +120,66 @@ export default function PanelTotalsContainer () {
             alert('No se pudo crear la cotización. Revisa consola.')
         } finally {
             setSaving(false)
+            setShowSavingModal(false)
         }
     }
 
-    /* ——— redirige a facturación ——— */
     const handlePagar = () => {
         if (!lastId) {
             alert('Debes confirmar la cotización antes de pagar')
             return
         }
-        window.location.href = `${BASE_FACTURACION.replace(/\/$/, '')}/${lastId}`
+        setShowSavingModal(true)
+        setTimeout(() => {
+            window.location.href = `${BASE_FACTURACION.replace(/\/$/, '')}/${lastId}`
+        }, 1000)
     }
 
+
+
+    const isNuevaCotizacion = !lastId && !!state.cotizacionSeleccionada
+    const tieneProductos = productos.length > 0
     return (
-        <PanelTotals
-            quotation={totals}
-            cotizacionId={lastId ?? undefined}
-            onGuardar={handleGuardar}
-            onPagar={handlePagar}
-        />
-    )
-}
+            <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
+                      shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
+                {isNuevaCotizacion && tieneProductos ? (
+
+                <PanelTotals
+                    quotation={totals}
+                    cotizacionId={lastId ?? undefined}
+                    onGuardar={handleGuardar}
+                    onPagar={handlePagar}
+                />
+                ):(<PanelTotalsNoProducts/>)}
+                {showSavingModal && (
+                    <Modal isOpen={true} onClose={() => {
+                    }}>
+                        <div className="p-6 w-80 text-center flex flex-col items-center justify-center">
+                            <svg
+                                className="animate-spin h-8 w-8 text-blue-600 mb-4"
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                            >
+                                <circle
+                                    className="opacity-25"
+                                    cx="12"
+                                    cy="12"
+                                    r="10"
+                                    stroke="currentColor"
+                                    strokeWidth="4"
+                                />
+                                <path
+                                    className="opacity-75"
+                                    fill="currentColor"
+                                    d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
+                                />
+                            </svg>
+                            <p className="text-gray-700 text-base font-medium">Guardando cotización y preparando
+                                redirección...</p>
+                        </div>
+                    </Modal>
+                )}
+            </div>
+            )
+            }

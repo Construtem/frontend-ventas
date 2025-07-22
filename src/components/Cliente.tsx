@@ -555,6 +555,8 @@ import {ClienteModal} from "@/components/Modal/ClienteModal";
 import Button from "@/components/Button";
 import { useRutValidation } from "@/components/ValidadorRut";
 import Bienvenida from "@/components/Bienvenida";
+import ClienteDetalleModal from '@/components/Modal/ClienteDetalleModal'
+
 
 export default function Cliente() {
     const { state, dispatch } = useCotizacionFlow()
@@ -568,7 +570,20 @@ export default function Cliente() {
         queryFn:    clienteService.obtenerClientes,
         enabled:    !!sucursalId,
     })
+    const [showDetalle, setShowDetalle] = useState(false)
+    const [clienteParaDetalle, setClienteParaDetalle] = useState<ClienteType | null>(null)
 
+    const handleVerDetalle = () => {
+        if (!clienteSeleccionado) return
+        setClienteParaDetalle(clienteSeleccionado)
+        setShowDetalle(true)
+    }
+
+// Cierra y limpia el modal
+    function closeDetalle() {
+        setShowDetalle(false)
+        setClienteParaDetalle(null)
+    }
     // Usar hook de validación de RUT
     const {
         rut: search,
@@ -606,6 +621,7 @@ export default function Cliente() {
         queryFn: clienteService.obtenerClientes,
         enabled: !!sucursalId,
     });
+
 
     return (
         <div className="bg-white px-[40px] py-[10px] rounded-[10px]
@@ -745,7 +761,11 @@ export default function Cliente() {
                                     onClose={() => setShowCliente(false)}
                                     onClienteCreado={refetch}
                                 />
-                            <Button onClick={()=>{console.log(state)}} label={'Ver Detalles'} className={'bg-teal-500 text-white hover:bg-teal-600'}/>
+                            <Button
+                                onClick={handleVerDetalle}
+                                label="Ver Detalles"
+                                className="bg-teal-500 text-white hover:bg-teal-600"
+                            />
                         </div>
 
                     </div>
@@ -769,6 +789,14 @@ export default function Cliente() {
                 )
 
             }
+            {clienteParaDetalle && (
+                <ClienteDetalleModal
+                    isOpen={showDetalle}
+                    onClose={closeDetalle}
+                    data={clienteParaDetalle}
+                />
+            )}
+
         </div>
     )
 }

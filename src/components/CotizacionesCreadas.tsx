@@ -1,15 +1,18 @@
 import { useEffect, useState } from "react";
-import { DBCotizacion, obtenerTodasLasCotizaciones } from "@/services/apiServices";
+import {
+    checkoutTodasCotizaciones,
+    CotizacionCheckout,
+} from "@/services/apiServices";
 import TablaCotizaciones from "@/components/TablaCotizaciones";
 
 export default function CotizacionesCreadas() {
 
-    const [historial, setHistorial] = useState<DBCotizacion[]>([]);
+    const [historial, setHistorial] = useState<CotizacionCheckout[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        obtenerTodasLasCotizaciones()
+        checkoutTodasCotizaciones()
             .then(data => {
                 setHistorial(data);
                 setError(null);

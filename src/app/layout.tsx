@@ -2,6 +2,7 @@
 import './globals.css';
 import Header from "@/components/Header";                    // <--- add this
 import {AppProviders} from "@/app/providers";
+import CotizacionModalManager from "@/components/cotizacion/CotizacionModalManager";
 
 
 export const metadata = {
@@ -18,6 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <AppProviders>
                 <Header />
                 {children}
+          <CotizacionModalManager/>
       </AppProviders>
       </body>
       </html>

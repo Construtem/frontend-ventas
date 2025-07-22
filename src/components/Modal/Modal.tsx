@@ -6,9 +6,10 @@ interface ModalProps {
     isOpen: boolean
     onClose: () => void
     children: ReactNode
+    className?: string
 }
 
-export default function Modal({ isOpen, onClose, children }: ModalProps) {
+export default function Modal({ isOpen, onClose, children, className }: ModalProps) {
     if (!isOpen) return null
     return ReactDOM.createPortal(
         <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -18,7 +19,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
                 onClick={onClose}
             />
             {/* Contenido */}
-            <div className="relative bg-white rounded-lg shadow-lg max-w-[90vw] max-h-[90vh] overflow-hidden">
+            <div className={`relative bg-white rounded-lg shadow-lg max-w-[90vw] max-h-[90vh] overflow-hidden ${className}`}>
                 {children}
             </div>
         </div>,
