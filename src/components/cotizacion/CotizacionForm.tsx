@@ -64,7 +64,7 @@ export const CotizacionForm: React.FC<Props> = ({
     )
 
     // Google Maps Autocomplete
-    const [direccionValida, setDireccionValida] = useState(true)
+    const [direccionValida] = useState(true)
     const autocompleteRef = useRef<google.maps.places.Autocomplete|null>(null)
     const { isLoaded } = useJsApiLoader({
         googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
