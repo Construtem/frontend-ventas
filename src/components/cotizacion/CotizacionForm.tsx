@@ -1,20 +1,20 @@
 'use client'
-import React, { ChangeEvent, useEffect, useCallback } from 'react'
+import React, { ChangeEvent, useEffect, useCallback, useState, useRef } from 'react'
 import Button from '@/components/Button'
-import { useQuery } from '@tanstack/react-query'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 import {
-    clienteService,
     DBCotizacion,
-    DireccionCliente,
+    clienteService,
 } from '@/services/apiServices'
 import NumberIcon from '@/components/NumberIcon'
 import CotizacionBlocked from '@/components/cotizacion/CotizacionBlocked'
 import CotizacionHeader from '@/components/cotizacion/CotizacionHeader'
+import { Autocomplete, useJsApiLoader } from '@react-google-maps/api'
 
 type Draft = Partial<DBCotizacion> & {
     tipo_despacho?: 'a domicilio' | 'retiro tienda'
-    direccionId?: number | null
+    direccion?: string
+    comuna?: string
 }
 
 interface Props {
@@ -39,31 +39,12 @@ const DetalleLinea: React.FC<{
 )
 
 export const CotizacionForm: React.FC<Props> = ({
-                                                    draft,
-                                                    onChange,
-                                                    onSave,
-                                                    onCancel,
-                                                }) => {
+    draft,
+    onChange,
+    onSave,
+    onCancel,
+}) => {
     const { state } = useCotizacionFlow()
-    const { clienteRut } = state
-
-    // Direcciones existentes
-    const {
-        data: direccion = [],
-        isLoading: dirLoading,
-        error: dirError,
-    } = useQuery<DireccionCliente[]>({
-        queryKey: ['direcciones', clienteRut],
-        queryFn: () => clienteService.obtenerDireccionDelCliente(clienteRut!),
-        enabled: !!clienteRut,
-    })
-
-    // Si no hay draft.direccionId, inicializo en el primero
-    useEffect(() => {
-        if (direccion.length > 0 && draft.direccionId == null) {
-            onChange({ direccionId: direccion[0].id })
-        }
-    }, [direccion, draft.direccionId, onChange])
 
     // Handler genérico inputs
     const patch = useCallback(
@@ -76,14 +57,79 @@ export const CotizacionForm: React.FC<Props> = ({
                 const val =
                     e.target.type === 'number'
                         ? Number(e.target.value)
-                        : (e.target.value as any)
+                        : e.target.value
                 onChange({ [field]: val })
             },
         [onChange]
     )
 
-    const formateaDir = (d: DireccionCliente) =>
-        `${d.direccion}, ${d.comuna}, ${d.ciudad}`
+    // Google Maps Autocomplete
+    const [direccionValida] = useState(true)
+    const autocompleteRef = useRef<google.maps.places.Autocomplete|null>(null)
+    const { isLoaded } = useJsApiLoader({
+        googleMapsApiKey: process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || '',
+        libraries: ['places'],
+    })
+
+    // Estado para mostrar el input de nueva dirección
+    const [agregandoDireccion, setAgregandoDireccion] = useState(false)
+    const [nuevaDireccion, setNuevaDireccion] = useState('')
+    const [nuevaDireccionValida, setNuevaDireccionValida] = useState(true)
+    const [loadingDireccion, setLoadingDireccion] = useState(false)
+
+    const [direccionesCliente, setDireccionesCliente] = useState<any[]>([])
+    const [direccionIdSeleccionada, setDireccionIdSeleccionada] = useState<number | null>(null)
+
+    // Obtener direcciones del cliente al montar o cambiar el rut
+    useEffect(() => {
+        async function fetchDirecciones() {
+            if (state.clienteRut) {
+                const dirs = await clienteService.obtenerDireccionDelCliente(state.clienteRut)
+                setDireccionesCliente(dirs)
+                // Si hay direcciones, seleccionar la primera por defecto
+                if (dirs.length > 0) {
+                    setDireccionIdSeleccionada(dirs[0].id)
+                    onChange({ direccionId: dirs[0].id })
+                }
+            } else {
+                setDireccionesCliente([])
+                setDireccionIdSeleccionada(null)
+            }
+        }
+        fetchDirecciones()
+    }, [state.clienteRut])
+
+    // Handler para agregar nueva dirección
+    const handleAgregarDireccion = async () => {
+        if (!nuevaDireccionValida || !nuevaDireccion) return
+        setLoadingDireccion(true)
+        try {
+            if (!state.clienteRut) throw new Error('No hay cliente seleccionado')
+            const nueva = await clienteService.crearDireccion({
+                rut_cliente: state.clienteRut,
+                direccion: nuevaDireccion,
+                comuna: draft.comuna || '',
+                ciudad: 'Santiago',
+            })
+            // Refrescar direcciones y seleccionar la nueva
+            const dirs = await clienteService.obtenerDireccionDelCliente(state.clienteRut)
+            setDireccionesCliente(dirs)
+            setDireccionIdSeleccionada(nueva.id)
+            onChange({ direccionId: nueva.id })
+        } catch (e) {
+            // Manejo de error (puedes mostrar un mensaje)
+    console.log(e)
+        }
+        setLoadingDireccion(false)
+        setAgregandoDireccion(false)
+        setNuevaDireccion('')
+    }
+
+    // Al seleccionar una dirección guardada, actualizar el contexto
+    const handleSeleccionDireccion = (id: number) => {
+        setDireccionIdSeleccionada(id)
+        onChange({ direccionId: id })
+    }
 
     return (
         <article
@@ -108,18 +154,18 @@ export const CotizacionForm: React.FC<Props> = ({
                         </h2>
                         {state.clienteRut && (
                             <span className="text-gray-500 ml-4">
-                Cliente: {state.clienteRut}
-              </span>
+                                Cliente: {state.clienteRut}
+                            </span>
                         )}
                     </header>
 
                     <div className="space-y-4 w-full">
                         <DetalleLinea label="Descripción">
-              <textarea
-                  className="w-full border rounded px-3 py-1"
-                  value={draft.descripcion ?? ''}
-                  onChange={patch('descripcion')}
-              />
+                            <textarea
+                                className="w-full border rounded px-3 py-1"
+                                value={draft.descripcion ?? ''}
+                                onChange={patch('descripcion')}
+                            />
                         </DetalleLinea>
                         <DetalleLinea label="Tipo de envío">
                             <select
@@ -129,8 +175,9 @@ export const CotizacionForm: React.FC<Props> = ({
                                     const t = e.target.value as Draft['tipo_despacho']
                                     onChange({
                                         tipo_despacho: t,
-                                        // si retiro, limpio dirección
-                                        direccionId: t === 'retiro tienda' ? null : draft.direccionId,
+                                        // si retiro, limpiar dirección y comuna
+                                        direccion: t === 'retiro tienda' ? '' : draft.direccion,
+                                        comuna: t === 'retiro tienda' ? '' : draft.comuna,
                                     })
                                 }}
                             >
@@ -140,29 +187,84 @@ export const CotizacionForm: React.FC<Props> = ({
                         </DetalleLinea>
 
                         {draft.tipo_despacho !== 'retiro tienda' && (
-                            <DetalleLinea
-                                label="Dirección de despacho"
-                                className="flex-wrap xl:flex-nowrap items-baseline"
-                            >
-                                <div className="flex flex-col gap-4 max-w-fit">
-                                    {direccion.length > 0 && (
-                                        <select
-                                            disabled={dirLoading}
-                                            className="border rounded px-2 py-1 max-w-fit"
-                                            value={draft.direccionId ?? undefined}
-                                            onChange={(e) =>
-                                                onChange({ direccionId: Number(e.target.value) })
-                                            }
-                                        >
-                                            {direccion.map((dir) => (
-                                                <option key={dir.id} value={dir.id}>
-                                                    {formateaDir(dir)}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    )}
-                                </div>
-                            </DetalleLinea>
+                            <>
+                                <DetalleLinea label="Dirección guardada">
+                                    <div className={'flex gap-[20px] flex-wrap items-end'}>
+
+                                    <select
+                                        className="border rounded px-2 py-1 w-[60%] h-fit"
+                                        value={direccionIdSeleccionada ?? ''}
+                                        onChange={e => handleSeleccionDireccion(Number(e.target.value))}
+                                    >
+                                        <option value="">Selecciona una dirección...</option>
+                                        {direccionesCliente.map((dir: any) => (
+                                            <option key={dir.id} value={dir.id}>{dir.direccion} - {dir.comuna}</option>
+                                        ))}
+                                    </select>
+                                    <Button
+                                        label="Agregar nueva dirección"
+                                        className="bg-green-500 text-white text-[16px] font-montserrat "
+                                        onClick={() => setAgregandoDireccion(true)}
+                                    />
+                                    </div>
+                                </DetalleLinea>
+
+                                {agregandoDireccion && (
+                                    <DetalleLinea label="Nueva dirección">
+                                        <div className={'flex gap-[20px] flex-wrap items-end'}>
+
+                                            {isLoaded ? (
+                                                <Autocomplete
+                                                    className="text-sm font-montserrat w-[60%] h-full "
+                                                    onLoad={ac => (autocompleteRef.current = ac)}
+                                                    onPlaceChanged={() => {
+                                                        if (autocompleteRef.current) {
+                                                            const place = autocompleteRef.current.getPlace()
+                                                            if (place && place.formatted_address) {
+                                                                const direccion = place.formatted_address
+                                                                const esSantiago = direccion.toLowerCase().includes('santiago') && direccion.toLowerCase().includes('chile')
+                                                                if (esSantiago) {
+                                                                    setNuevaDireccion(direccion)
+                                                                    setNuevaDireccionValida(true)
+                                                                } else {
+                                                                    setNuevaDireccionValida(false)
+                                                                }
+                                                            } else {
+                                                                setNuevaDireccionValida(false)
+                                                            }
+                                                        }
+                                                    }}
+                                                >
+                                                    <input
+                                                        type="text"
+                                                        className={`border rounded px-2 py-1 w-full h-fit ${nuevaDireccionValida ? '' : 'border-red-500'}`}
+                                                        value={nuevaDireccion}
+                                                        onChange={e => setNuevaDireccion(e.target.value)}
+                                                        placeholder="Busca y selecciona una dirección válida de Santiago, Chile"
+                                                    />
+                                                </Autocomplete>
+                                            ) : (
+                                                <input
+                                                    type="text"
+                                                    className="border rounded px-2 py-1 w-full"
+                                                    value={nuevaDireccion}
+                                                    onChange={e => setNuevaDireccion(e.target.value)}
+                                                    placeholder="Cargando Autocomplete..."
+                                                />
+                                            )}
+                                            <Button
+                                                label={loadingDireccion ? 'Guardando...' : 'Guardar dirección'}
+                                                className="ml-2 bg-blue-500 text-white"
+                                                onClick={handleAgregarDireccion}
+                                                disabled={!nuevaDireccionValida || !nuevaDireccion || loadingDireccion}
+                                            />
+                                            {!nuevaDireccionValida && (
+                                                <span className="text-red-500 text-sm">Solo se permiten direcciones de Santiago, Chile seleccionadas de la lista.</span>
+                                            )}
+                                        </div>
+                                    </DetalleLinea>
+                                )}
+                            </>
                         )}
                     </div>
 
@@ -171,6 +273,7 @@ export const CotizacionForm: React.FC<Props> = ({
                             label="Confirmar"
                             className="bg-sky-600 hover:bg-sky-700 text-white flex-1"
                             onClick={onSave}
+                            disabled={!direccionValida}
                         />
                         <Button
                             label="Cancelar"
@@ -178,12 +281,6 @@ export const CotizacionForm: React.FC<Props> = ({
                             onClick={onCancel}
                         />
                     </footer>
-
-                    {dirError && (
-                        <p className="text-rose-600 text-sm">
-                            {(dirError as Error).message}
-                        </p>
-                    )}
                 </>
             )}
         </article>

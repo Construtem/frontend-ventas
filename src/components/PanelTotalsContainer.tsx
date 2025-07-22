@@ -12,7 +12,6 @@ import {
     actualizarDatosCotizacion,
 } from '@/services/apiServices'
 import Modal from '@/components/Modal/Modal'
-//import PanelTotalsNoProducts from "@/components/PanelTotals/PanelTotalsNoProducts";
 
 const BASE_FACTURACION =
     (process.env.NEXT_PUBLIC_FRONT_FACTURACION ?? 'https://facturacion.tssw.cl').trim()
@@ -23,6 +22,8 @@ export default function PanelTotalsContainer() {
 
     const [despacho, setDespacho] = useState<number>(0)
     const [showSavingModal, setShowSavingModal] = useState(false)
+    const [saving, setSaving] = useState(false)
+    const [lastId, setLastId] = useState<number | null>(null)
 
     const totals = useMemo(() => {
         const subtotal = productos.reduce(
@@ -47,8 +48,19 @@ export default function PanelTotalsContainer() {
         }
     }, [productos, despacho])
 
-    const [saving, setSaving] = useState(false)
-    const [lastId, setLastId] = useState<number | null>(null)
+    // Determine the quotation data and quoteId for PanelTotals
+    const selected = state.cotizacionSeleccionada
+    const quoteId = selected?.id ?? lastId ?? undefined
+    // Si no hay cotizacion seleccionada o es nueva (id < 0), usar totales calculados
+    const panelQuotation = (!selected || (selected.id !== undefined && selected.id < 0))
+        ? totals
+        : {
+            totalProductosNeto: selected.subtotal_neto ?? 0,
+            totalDespacho: selected.costo_envio ?? 0,
+            totalDescuento: selected.descuento_total ?? 0,
+            iva: selected.iva ?? 0,
+            totalCotizacion: selected.total ?? 0,
+        }
 
     const handleGuardar = async () => {
         if (saving) return
@@ -125,27 +137,28 @@ export default function PanelTotalsContainer() {
     }
 
     const handlePagar = () => {
-        if (!lastId) {
+        // usar lastId (nueva cotización) o si no, el id de la cotización seleccionada
+        const idToPay = lastId ?? selected?.id
+        if (!idToPay) {
             alert('Debes confirmar la cotización antes de pagar')
             return
         }
-        setShowSavingModal(true)
-        setTimeout(() => {
-            window.location.href = `${BASE_FACTURACION.replace(/\/$/, '')}/${lastId}`
-        }, 1000)
+        // redirigir directamente al checkout
+        window.location.href = `${BASE_FACTURACION}/checkout/${idToPay}`
     }
 
 
 
     // const isNuevaCotizacion = !lastId && !!state.cotizacionSeleccionada
     // const tieneProductos = productos.length > 0
-    return (
+    return (<>
+                {(selected || productos.length > 0) && (
             <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
 
-                <PanelTotals
-                    quotation={totals}
-                    cotizacionId={lastId ?? undefined}
+                    <PanelTotals
+                    quotation={panelQuotation}
+                    cotizacionId={quoteId}
                     onGuardar={handleGuardar}
                     onPagar={handlePagar}
                 />
@@ -173,11 +186,12 @@ export default function PanelTotalsContainer() {
                                     d="M4 12a8 8 0 018-8v4l3-3-3-3v4a8 8 0 00-8 8h4z"
                                 />
                             </svg>
-                            <p className="text-gray-700 text-base font-medium">Guardando cotización y preparando
-                                redirección...</p>
+                            <p className="text-gray-700 text-base font-medium">Guardando cotización...</p>
                         </div>
                     </Modal>
                 )}
             </div>
+                )}
+    </>
             )
             }

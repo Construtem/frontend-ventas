@@ -1,6 +1,6 @@
 'use client'
-import React, { useState } from 'react'
-import Modal from '@/components/Modal/Modal' // Asegúrate de tener este componente
+import React, { useState, useEffect } from 'react'
+import Modal from '@/components/Modal/Modal'
 import { ModalHeader } from '@/components/Modal/ModalsParts'
 import { useCotizacionFlow } from '@/contexts/CotizacionFlow'
 
@@ -12,7 +12,7 @@ interface PanelTotalsProps {
         iva: number
         totalCotizacion:   number
     }
-    cotizacionId?: number        // ← NUEVO (opcional)
+    cotizacionId?: number
     onGuardar?: () => void
     onPagar?:   () => void
 }
@@ -23,73 +23,62 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
     onPagar,
     cotizacionId,
 }) => {
-    const BASE_URL_FACTURACION_FRONTEND = process.env.NEXT_PUBLIC_FRONT_FACTURACION || ' https://facturacion.tssw.cl'
-    const { state } = useCotizacionFlow(); // <-- agrega esto para acceder al cliente seleccionado
-    const tipoDespacho =
-        state.draftQuote?.tipo_despacho ??
-        state.cotizacionSeleccionada?.tipo_despacho;
-
-    const descripcion =
-        state.draftQuote?.descripcion ??
-        state.cotizacionSeleccionada?.descripcion ??
-        '';
+    const { state } = useCotizacionFlow()
     const [isSaving, setIsSaving] = useState(false)
     const [showCreatedModal, setShowCreatedModal] = useState(false)
-    const [errorMsg, setErrorMsg] = useState<string | null>(null);
-    const [showEmptyMsg, setShowEmptyMsg] = useState(false);
+    const [errorMsg, setErrorMsg] = useState<string | null>(null)
+    const [showEmptyMsg, setShowEmptyMsg] = useState(false)
 
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('es-CL', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
-        }).format(amount)
-    }
+    const formatCurrency = (amount: number) =>
+        new Intl.NumberFormat('es-CL', { minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(amount)
 
-    const cotizacionVacia =
-    !quotation.totalProductosNeto &&
-    !quotation.totalDespacho &&
-    !quotation.totalDescuento &&
-    !quotation.iva &&
-    !quotation.totalCotizacion;
+    const productosVacios = state.productos.length === 0
+    const isPaid = state.cotizacionSeleccionada?.estado_pago === 'approved' || state.cotizacionSeleccionada?.estado_pago === 'pagado'
+    // Control de estado guardado local para cambiar botón tras guardar
+    const [saved, setSaved] = useState(cotizacionId !== undefined && cotizacionId > 0)
+    useEffect(() => {
+        if (cotizacionId !== undefined && cotizacionId > 0) {
+            setSaved(true)
+        }
+    }, [cotizacionId])
+    const isNueva = !saved
+
+    // Usar siempre los totales recibidos por prop
+    const datosCotizacion = quotation
 
     const handleGuardar = async () => {
-        setShowEmptyMsg(false);
-        setErrorMsg(null);
-
+        setShowEmptyMsg(false)
+        setErrorMsg(null)
         // Validación de cliente seleccionado
         if (!state.clienteRut) {
             setErrorMsg("Debes seleccionar un cliente antes de guardar la cotización.");
             return;
         }
-
-        if (cotizacionVacia) {
+        if (productosVacios) {
             setShowEmptyMsg(true);
             return;
         }
-
         setIsSaving(true);
-            try {
-                // Aquí va el console.log
-                console.log('Datos para crear cotización:', {
-                    rut_cliente: state.clienteRut,
-                    user_id: state.usuario,
-                    tipo_despacho: tipoDespacho,
-                    costo_envio: quotation.totalDespacho,
-                    descripcion: descripcion,
-                    total: quotation.totalCotizacion,
-                });
-
-                if (onGuardar) await onGuardar();
-                setTimeout(() => {
-                    setIsSaving(false);
-                    setShowCreatedModal(true); // Solo aquí, si no hay error
-                }, 1200);
-            } catch {
-                setIsSaving(false);
-                setErrorMsg("Ocurrió un error al guardar la cotización. Por favor, verifica tu conexión o intenta nuevamente.");
-                setShowCreatedModal(false); // Oculta el modal de éxito si hay error
+        try {
+            if (onGuardar) {
+                await onGuardar()
+                setSaved(true)
             }
+            setShowCreatedModal(true)
+        } catch {
+            setErrorMsg("Ocurrió un error al guardar la cotización. Por favor, verifica tu conexión o intenta nuevamente.");
+        } finally {
+            setIsSaving(false);
+        }
     };
+
+    // Autocerrar modal de éxito para que aparezca botón Pagar
+    useEffect(() => {
+        if (showCreatedModal) {
+            const timer = setTimeout(() => setShowCreatedModal(false), 1500)
+            return () => clearTimeout(timer)
+        }
+    }, [showCreatedModal])
 
     return (
         <>
@@ -97,87 +86,52 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
             <div className="space-y-3 mb-4">
                 <div className="flex justify-between items-center">
                     <span className="text-sm">Subtotal</span>
-                    <span className="text-sm font-bold">{formatCurrency(quotation.totalProductosNeto)}</span>
+                    <span className="font-semibold">{formatCurrency(datosCotizacion.totalProductosNeto)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-sm">Despacho</span>
-                    <span className="text-sm font-bold">{formatCurrency(quotation.totalDespacho)}</span>
+                    <span className="font-semibold">{formatCurrency(datosCotizacion.totalDespacho)}</span>
                 </div>
                 <div className="flex justify-between items-center">
                     <span className="text-sm">Descuento</span>
-                    <span className="text-sm font-bold">{formatCurrency(quotation.totalDescuento)}</span>
+                    <span className="font-semibold">{formatCurrency(datosCotizacion.totalDescuento)}</span>
                 </div>
                 <div className="flex justify-between items-center">
-                    <span className="text-sm">Iva 19%</span>
-                    <span className="text-sm font-bold">{formatCurrency(quotation.iva)}</span>
+                    <span className="text-sm">IVA</span>
+                    <span className="font-semibold">{formatCurrency(datosCotizacion.iva)}</span>
                 </div>
-
-                <hr className="my-3 border-gray-300" />
-
                 <div className="flex justify-between items-center">
-                    <span className="text-lg font-bold">Total</span>
-                    <span className="text-lg font-bold">{formatCurrency(quotation.totalCotizacion)}</span>
+                    <span className="text-sm">Total</span>
+                    <span className="font-bold text-lg">{formatCurrency(datosCotizacion.totalCotizacion)}</span>
                 </div>
             </div>
 
-            {/* Botones lado a lado */}
-            <div className="flex gap-2">
-                <div className="flex-1 flex flex-col">
-                    <button
-                        onClick={handleGuardar}
-                        disabled={isSaving}
-                        className={`text-white py-2 px-4 text-sm font-bold rounded cursor-pointer transition-colors
-                            ${isSaving ? 'bg-blue-300 cursor-not-allowed' : 'hover:bg-blue-700'}
-                        `}
-                        style={{background: '#2563B6'}}
-                        data-tour="save-button"
-                    >
-                        {isSaving ? (
-                            <span className="flex items-center justify-center gap-2">
-                                <svg className="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="white" strokeWidth="4" fill="none"/>
-                                    <path className="opacity-75" fill="white" d="M4 12a8 8 0 018-8v8z"/>
-                                </svg>
-                                Guardando...
-                            </span>
-                        ) : (
-                            'Guardar'
-                        )}
-                    </button>
+            {/* Botón de acción único: Guardar o Pagar */}
+            {!isPaid && (
+                <div className="flex gap-2">
+                    <div className="flex-1">
+                        <button
+                            className={`w-full py-2 rounded-lg text-white cursor-pointer ${isNueva ? 'bg-blue-600 hover:bg-blue-700' : 'bg-green-600 hover:bg-green-700'}`}
+                            onClick={isNueva ? handleGuardar : onPagar}
+                            disabled={isNueva ? (isSaving || productosVacios) : false}
+                        >
+                            {isNueva ? (isSaving ? 'Guardando...' : 'Guardar') : 'Pagar'}
+                        </button>
+                    </div>
                 </div>
-                <a
-                    unselectable="on"
-                    href={cotizacionId ? `${BASE_URL_FACTURACION_FRONTEND}/checkout/${cotizacionId}` : undefined}
-                    onClick={e => {
-                        if (!cotizacionId) e.preventDefault();   // impide navegar sin ID
-                    }}
-                >
-                    <button
-                        disabled={!cotizacionId}                 // bloquea el click en el botón
-                        className={`flex-1 text-white py-2 px-4 text-sm font-bold rounded
-                        
-      ${!cotizacionId
-                            ? 'bg-gray-200 cursor-not-allowed'
-                            : 'bg-[#F59243] hover:bg-orange-600 cursor-pointer'}`}
-                        onClick={onPagar}
-                        data-tour="payment-button"
-                    >
-                        Pagar
-                    </button>
-                </a>
+            )}
+            <div className="h-10 flex items-center justify-center">
+                {showEmptyMsg && (
+                    <span className="text-red-500 text-sm text-center">
+                        Debes agregar productos antes de guardar la cotización.
+                    </span>
+                )}
+                {errorMsg && (
+                    <span className="text-red-500 text-sm text-center">
+                        {errorMsg}
+                    </span>
+                )}
             </div>
-                <div className="h-10 flex items-center justify-center">
-                    {showEmptyMsg && (
-                        <span className="text-red-500 text-sm text-center">
-                            Debes agregar productos antes de guardar la cotización.
-                        </span>
-                    )}
-                    {errorMsg && (
-                        <span className="text-red-500 text-sm text-center">
-                            {errorMsg}
-                        </span>
-                    )}
-                </div>
 
             {/* Modal de cotización creada */}
             {showCreatedModal && (
