@@ -6,8 +6,8 @@ import {
     checkoutCotizacion
 } from "@/services/apiServices";
 import CotizacionDetalleModal from "@/components/Modal/CotizacionDetalleModal";
-import { useCotizacionFlow } from "@/contexts/CotizacionFlow";
-
+import {useCotizacionFlow} from "@/contexts/CotizacionFlow";
+import Loader from "@/components/Loader";
 function getEstadoColor(estado: string) {
     switch (estado) {
         case "aprobada":
@@ -21,13 +21,12 @@ function getEstadoColor(estado: string) {
     }
 }
 
-const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
+const TablaCotizaciones = ({ historial }: { historial: CotizacionCheckout[] }) => {
     const [paginaActual, setPaginaActual] = useState(1);
     const [busqueda, setBusqueda] = useState('');
     const [cotizacionSeleccionadaDetails, setCotizacionSeleccionadaDetails] = useState<DBCotizacion | CotizacionCheckout | null>(null);
     const porPagina = 10;
     const { state, dispatch } = useCotizacionFlow();
-
     const historialFiltrado = historial.filter(c => {
         const textoBusqueda = busqueda.toLowerCase();
         return (
@@ -35,7 +34,6 @@ const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
             c.id.toString().includes(textoBusqueda)
         );
     });
-
 
     const totalPaginas = Math.ceil(historialFiltrado.length / porPagina);
 
@@ -51,7 +49,6 @@ const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
             dispatch({ type: 'OPEN_MODAL' });
         } catch (e) {
             console.error(e);
-            alert('No se pudo iniciar el pago');
         }
     }
 
@@ -93,7 +90,7 @@ const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
                 />
             </div>
 
-            {/* Tabla */}
+            {historialPaginado.length > 0 ? (
             <table
                 className="w-full text-sm rounded-[10px] border-b-[2px] border-gray-200 shadow-[0_0_2px_rgba(0,0,0,0.25)]">
                 <thead className="bg-gray-100">
@@ -107,14 +104,7 @@ const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
                 </tr>
                 </thead>
                 <tbody>
-                {historialPaginado.length === 0 ? (
-                    <tr>
-                        <td colSpan={6} className="text-center py-4 text-gray-500">
-                            No se encontraron resultados.
-                        </td>
-                    </tr>
-                ) : (
-                    historialPaginado.map((c) => (
+                {historialPaginado.map((c) => (
                         <tr
                             key={c.id}
                             className="transition-all duration-400 hover:scale-[1.005] ease-in-out hover:bg-gray-50 cursor-pointer"
@@ -125,8 +115,8 @@ const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
                             <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">
                                 {new Date(c.fecha_crea).toLocaleDateString('es-CL')}
                             </td>
-                            <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.total_items}</td>
-                            <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.total_precio.toLocaleString('es-CL')}</td>
+                            <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{c.items.length}</td>
+                            <td className="text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px]">{Math.round(c.total)}</td>
                             <td
                                 className={`text-center text-[18px] font-montserrat border-b border-gray-200 p-[10px] border ${getEstadoColor(
                                     c.estado
@@ -134,45 +124,38 @@ const TablaCotizaciones = ({ historial }: { historial: DBCotizacion[] }) => {
                             >
                                 {c.estado}
                             </td>
-                        </tr>
-                    ))
-                )}
+                        </tr>))}
+
                 </tbody>
-            </table>
+            </table>):(
+                <Loader label={'Cotizaciones'}/>
+            )}
 
             {/* Paginación */}
-            {totalPaginas > 1 && (
-                <div className="flex justify-center items-center gap-2 mt-4 flex-wrap">
+            {totalPaginas > 0 && (
+                <div className="flex justify-center items-center gap-2 mt-4 flex-wrap font-montserrat">
                     <button
                         onClick={() => setPaginaActual((p) => Math.max(1, p - 1))}
                         disabled={paginaActual === 1}
-                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded disabled:opacity-50 cursor-pointer hover:bg-gray-300"
+                        className="px-4 py-2 bg-gray-200 text-gray-400 rounded disabled:opacity-50 cursor-pointer hover:bg-gray-300"
                     >
                         Anterior
                     </button>
 
-                    {[...Array(totalPaginas)].map((_, i) => (
-                        <button
-                            key={i}
-                            onClick={() => setPaginaActual(i + 1)}
-                            className={`px-3 py-1 rounded ${paginaActual === i + 1
-                                ? 'bg-blue-600 text-white'
-                                : 'bg-gray-100 text-gray-800 cursor-pointer hover:bg-gray-300'
-                            }`}
-                        >
-                            {i + 1}
-                        </button>
-                    ))}
+                    <div className="px-4 py-2 bg-gray-600 text-white rounded">
+                        {paginaActual} de {totalPaginas} página(s)
+                    </div>
 
                     <button
                         onClick={() => setPaginaActual((p) => Math.min(totalPaginas, p + 1))}
                         disabled={paginaActual === totalPaginas}
-                        className="px-3 py-1 bg-gray-200 text-gray-700 rounded disabled:opacity-50 cursor-pointer hover:bg-gray-300"
+                        className="px-4 py-2 bg-gray-200 text-gray-400 rounded disabled:opacity-50 cursor-pointer hover:bg-gray-300"
                     >
                         Siguiente
                     </button>
                 </div>
             )}
+
 
             {/* Modal de detalle */}
             {cotizacionSeleccionadaDetails && (

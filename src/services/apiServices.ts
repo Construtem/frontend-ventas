@@ -4,6 +4,126 @@ const API_BASE_URL_INVENTARIO = process.env.NEXT_PUBLIC_API_INVENTARIO || 'https
 // -----------------------------------------------------------------------------
 // 1)  TIPOS ─────────────────────────────────────────────────────────────────────
 // -----------------------------------------------------------------------------
+export function adaptToDBCotizacion(data: CotizacionCheckout): DBCotizacion {
+    return {
+        /* ─── campos raíz ─────────────────── */
+        id: data.id,
+        fecha_crea: data.fecha_crea,
+        estado: data.estado as 'aprobada' | 'rechazada' | 'pendiente',
+        estado_pago: data.estado_pago as '' | 'pendiente' | 'pagado',
+
+        tipo_despacho: data.tipo_despacho,
+        costo_envio: data.costo_envio ?? 0,
+
+        subtotal_neto: data.subtotal_neto ?? 0,
+        subtotal: data.subtotal ?? 0,
+        total: data.total ?? 0,
+        iva: data.iva ?? 0,
+        descuento_total: data.descuento_total ?? 0,
+
+        descripcion: data.descripcion ?? '',
+        /* si guardas estos campos en BD ponlos, si no déjalos en null */
+        direccionId: null,
+        rut_cliente: data.cliente.rut,
+        user_id: data.usuario.email,
+
+        /* ─── cliente ─────────────────────── */
+        cliente: {
+            rut: data.cliente.rut,
+            nombre: data.cliente.nombre,
+            telefono: data.cliente.telefono ?? null,
+            email: data.cliente.email ?? null,
+            razon_social: data.cliente.razon_social ?? null,
+            /* estos dos no vienen, los dejamos vacíos */
+            comuna: null,
+            ciudad: null,
+            tipo_id: 2,
+            direccion: [],
+        },
+
+        /* ─── dirección (puede ser opcional) ─ */
+        direccion: data.direccion
+            ? {
+                id: 0, // id ficticio si aún no existe en BD
+                direccion: data.direccion.direccion,
+                comuna: data.direccion.comuna,
+                ciudad: data.direccion.ciudad,
+            }
+            : undefined,
+        direccion_id: undefined,
+
+        /* ─── usuario ─────────────────────── */
+        usuario: {
+            nombre: data.usuario.nombre,
+            email: data.usuario.email,
+            rol_id: data.usuario.rol_id ?? 0,
+        },
+
+        /* ─── ítems ───────────────────────── */
+        items: data.items.map((it) => ({
+            /* claves mínimas */
+            sku: it.sku,
+            cotizacion_id: data.id,
+            producto_id: it.sku,
+            sucursal_id: 0,
+
+            cantidad: it.cantidad,
+
+            /* anidados vacíos si no los tienes aún */
+            producto: {
+                sku: it.sku,
+                nombre: it.nombre,
+                descripcion: '',
+                precio: it.precio_unitario,
+            },
+            sucursal: {
+                id: 0,
+                nombre: it.sucursal,
+            },
+
+            /* campos planos */
+            nombre: it.nombre,
+            precio_unitario: it.precio_unitario,
+            descuento: it.descuento,
+            subtotal: it.subtotal,
+        })),
+
+        total_items: data.items.reduce((s, i) => s + i.cantidad, 0),
+        total_precio: data.subtotal ?? 0,
+    }
+}
+
+export function adaptToCotizacionCheckout(data: DBCotizacion): CotizacionCheckout {
+    return {
+        ...data,
+        cliente: {
+            ...data.cliente,
+            email: data.cliente.email ?? '',
+            telefono: data.cliente.telefono ?? '',
+            razon_social: data.cliente.razon_social ?? '',
+        },
+        direccion: data.direccion ?? { direccion: '', comuna: '', ciudad: '' },
+        usuario: {
+            ...data.usuario,
+            email: data.usuario.email ?? '',
+            nombre: data.usuario.nombre ?? '',
+        },
+        items: (data.items ?? []).map(item => ({
+            nombre: item.nombre ?? '',
+            descuento: item.descuento ?? 0,
+            sku: item.sku ?? '',
+            cantidad: item.cantidad ?? 0,
+            precio_unitario: item.precio_unitario ?? 0,
+            subtotal: item.subtotal ?? 0,
+            sucursal: item.sucursal?.nombre ?? '',
+        })),
+        subtotal_neto: data.subtotal_neto ?? 0,
+        descuento_total: data.descuento_total ?? 0,
+        iva: data.iva ?? 0,
+        total: data.total ?? 0,
+    }
+}
+
 
 /* Cliente devuelto por la API */
 export interface DBCliente {
@@ -132,30 +252,51 @@ export interface CotizacionItem {
 }
 
 /* Respuesta principal: una cotización */
-export interface DBCotizacion {
-    id:            number
-    fecha_crea:    string                // ISO 8601
-    direccionId:   number | null
-    estado:        'aprobada' | 'rechazada' | 'pendiente'
-    costo_envio?:   number
-    rut_cliente?:   string
-    user_id?:       string
-    total?:         number
+export type DBCotizacion = {
+    id: number
+    fecha_crea: string
+    estado: 'aprobada' | 'rechazada' | 'pendiente'
+    estado_pago: '' | 'pendiente' | 'pagado'
+    direccionId?: number | null   // 👈  nuevo / ya usado
+    total_items?: number
+    rut_cliente?: string | null
+    user_id?: string | null         // 👈  nuevo / ya usado
+    total_precio?: number           // 👈  nuevo / ya usado
     tipo_despacho?: string
-    descripcion?:   string
-    direccion?:    DireccionCliente      | undefined
-    direccion_id?: number | null
+    costo_envio?: number
+    subtotal_neto?: number            // 👈  nuevo / ya usado
+    subtotal?: number                 // 👈  nuevo / ya usado
+    total?: number
+    iva?: number                      // 👈  nuevo / ya usado
+    descuento_total?: number          // 👈  nuevo / ya usado
+    descripcion?: string
+    direccion_id?: number | null // 👈  nuevo / ya usado
+    cliente: {
+        rut: string
+        nombre: string
+        telefono?: string | null
+        email?: string | null
+        razon_social?: string | null
+        comuna?: string | null
+        ciudad?: string | null
+        tipo_id?: number | null              // 1 = Persona | 2 = Empresa
+        direccion?: DireccionCliente[] // si no tienes direcciones, déjalo como []
+    }
 
+    direccion?: {
+        id?: number
+        direccion: string
+        comuna: string
+        ciudad: string
+    }
 
-    /** '' = sin registrar | 'pendiente' | 'pagado' */
-    estado_pago:   '' | 'pendiente' | 'pagado'
+    usuario: {
+        nombre?: string
+        email?: string
+        rol_id: number
+    }
 
-    cliente:       DBCliente
-    usuario:       DBUsuario
-    items:         CotizacionItem[]
-
-    total_items:   number
-    total_precio:  number
+    items: CotizacionItem[]
 }
 
 /* DTO nuevos/ya existentes --------------------------------------------------*/
@@ -251,24 +392,35 @@ export type CotizacionCheckout = {
     fecha_crea: string
     estado: string
     estado_pago: string
-    tipo_despacho: string
-    costo_envio: number
+    tipo_despacho?: string
+    costo_envio?: number
+    subtotal_neto: number
     total: number
-    subtotal: number
+    subtotal?: number
     descripcion?: string
+    iva?: number
+    descuento_total?: number
+    direccionId?: number | null
     cliente: {
         nombre: string
         email?: string
         rut: string
         telefono?: string
+        razon_social?: string
     }
     direccion?: {
         ciudad: string
         comuna: string
         direccion: string
     }
+    usuario: {
+        nombre: string
+        email: string
+        rol_id?: number
+            }
     items: {
         nombre: string
+        descuento: number
         sku: string
         cantidad: number
         precio_unitario: number
@@ -515,4 +667,18 @@ export async function checkoutCotizacion (id: number): Promise<CotizacionCheckou
     }
 
     return (await r.json()) as CotizacionCheckout
+}
+
+export async function checkoutTodasCotizaciones(): Promise<CotizacionCheckout[]> {
+    const r = await fetch(`${API_BASE_URL}/api/cotizaciones/checkout`, {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+    });
+
+    if (!r.ok) {
+        const msg = await r.text().catch(() => r.statusText);
+        throw new Error(`Checkout global falló (${r.status}): ${msg}`);
+    }
+
+    return (await r.json()) as CotizacionCheckout[];
 }
