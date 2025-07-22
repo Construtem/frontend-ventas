@@ -10,6 +10,8 @@ import { quotations } from '@/mocks/mocksDatos'
 import CotizacionesCreadas from "@/components/CotizacionesCreadas";
 //import PanelTotals from "@/components/PanelTotals";
 import PanelTotalsContainer from "@/components/PanelTotalsContainer";
+import FTUTour from "@/components/FTUTour";
+import TourRestartButton from "@/components/TourRestartButton";
 
 
 
@@ -18,6 +20,11 @@ const Home: NextPage = () => {
     
     // Obtener la cotización para el panel de totales
     const quotation = quotations.find(q => q.id === 'q1')
+
+    const handleRestartTour = () => {
+        // Recargar la página para reiniciar el tour
+        window.location.reload()
+    }
 
     if (!quotation) {
         return <div>Error: Cotización no encontrada</div>
@@ -67,6 +74,12 @@ const Home: NextPage = () => {
                 </div>
                 */}
             </div>
+            
+            {/* Tour de ayuda paso a paso */}
+            <FTUTour autoStart={true} />
+            
+            {/* Botón para reiniciar tour */}
+            <TourRestartButton onRestart={handleRestartTour} />
         </div>
     )
 }

@@ -130,6 +130,7 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                             ${isSaving ? 'bg-blue-300 cursor-not-allowed' : 'hover:bg-blue-700'}
                         `}
                         style={{background: '#2563B6'}}
+                        data-tour="save-button"
                     >
                         {isSaving ? (
                             <span className="flex items-center justify-center gap-2">
@@ -159,6 +160,7 @@ const PanelTotals: React.FC<PanelTotalsProps> = ({
                             ? 'bg-gray-200 cursor-not-allowed'
                             : 'bg-[#F59243] hover:bg-orange-600 cursor-pointer'}`}
                         onClick={onPagar}
+                        data-tour="payment-button"
                     >
                         Pagar
                     </button>
