@@ -78,7 +78,7 @@ export interface DraftProducto {
     /** Nombre visible                  */ nombre: string
     /** Id de la sucursal elegida       */ sucursalId: number
     /** Nombre “origen” mostrado        */ origen: string
-    /** Stock real en ese origen        */ stock: number
+    /** Stock real en ese origen        */ stock?: number
     /** Descuento % aplicado en origen  */ descuento: number           // 0-100
     /** Precio unitario base            */ precioUnit: number
     /** Cantidad elegida                */ cantidad: number
