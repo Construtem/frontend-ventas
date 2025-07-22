@@ -29,14 +29,6 @@ export default function Cotizacion() {
     } = state
 
     const [cotizacionCheckout, setCotizacionCheckout] = useState<CotizacionCheckout | null>(null)
-    const [setError] = useState<string | null>(null)
-
-    // 1) Historial de cotizaciones remoto (si aplica)
-    const { data: historial = [] } = useQuery<DBCotizacion[]>({
-        queryKey: ['historial', clienteRut],
-        queryFn: () => clienteService.obtenerHistorialCotizaciones(clienteRut!),
-        enabled: !!clienteRut,
-    })
 
     // 2) Lista de clientes para obtener datos de cliente al confirmar
     const { data: clientes = [] } = useQuery<DBCliente[]>({

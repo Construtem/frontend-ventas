@@ -129,13 +129,5 @@ export function CotizacionView({
             </footer>
         </article>
     )
-}
-function normalizarTexto(texto: string): string {
-    return texto
-        .normalize('NFD')                     // separa acentos
-        .replace(/[\u0300-\u036f]/g, '')      // elimina acentos
-        .replace(/\s+/g, ' ')                 // reduce espacios múltiples
-        .replace(/[\u00A0]/g, ' ')            // reemplaza espacios no rompibles
-        .trim()
-        .toLowerCase()
+
 }

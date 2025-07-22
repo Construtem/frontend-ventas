@@ -139,7 +139,6 @@ export default function PanelTotalsContainer() {
 
     const isNuevaCotizacion = !lastId && !!state.cotizacionSeleccionada
     const tieneProductos = productos.length > 0
-    const disableGuardar = !(isNuevaCotizacion && tieneProductos)
     return (
             <div className="bg-white py-[20px] px-[40px] min-w-[280px] rounded-[10px]
                       shadow-[0_0_2px_rgba(0,0,0,0.25)] ">
